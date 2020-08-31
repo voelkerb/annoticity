@@ -4,6 +4,8 @@
 
 **/tmp_*
 
+data/*
+
 **/.DS_Store
 
 # Eagle temporary board and schematic file
