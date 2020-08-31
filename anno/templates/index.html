@@ -1,0 +1,80 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"> 
+    <title>Annoticity</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Annotation tool for electricity data">
+    <meta name="author" content="Benjamin Voelker">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified CSS of bootstrap and bootsrap javascript-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    {% block head %}
+    {% endblock %}
+
+    
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top" style="margin-bottom: 10px;">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <svg class="svg-icon" width="35px" height="35px" viewBox="0 0 724 789" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <path d="M552.921875,0.125 L366,357.289062 L559.539062,357.289062 L135.476563,788.367188 C135.476563,788.367188 193.588542,675.661458 309.8125,450.25 L101.070313,450.25 L552.921875,0.125 Z M540.40625,81.5078125 C574.257812,101.039062 814.03125,271.523438 685.695313,546.492188 C557.359375,821.460938 271.390625,761.320312 228.382812,730.070312 L271.390625,677.859375 C315.640625,704.3125 531.695313,721.617188 624.171875,512.46875 C716.648438,303.320312 551.734375,156.507812 512.585937,136.375 C531.132813,99.796875 540.40625,81.5078125 540.40625,81.5078125 Z M471.65625,49.0625 L420.9375,98.9140625 C289.046875,82.2734375 155.49546,124.542081 90.078125,268.695312 C24.6607903,412.848544 80.640625,559.140625 184.492187,631.585937 L153.273437,692.179687 C3.9140625,591.414062 -32.478792,391.909286 29.0078125,244.914062 C90.494417,97.9188387 242.979682,-5.5 471.65625,49.0625 Z" id="Combined-Shape"></path>
+                </svg>
+                <a class="navbar-brand" href="#">Annoticity Labeling Tool</a>
+            </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="#">Label Events</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Label States</a>
+            </li> -->
+        </ul>
+        <!-- Navbar text-->
+        <!-- <span class="navbar-text">
+          Add sth to right of navbar ->
+        </span> -->
+    </nav>
+  
+    <div class="container-flex ml-3 mr-3">
+
+        {% block content %}
+        <!-- Content goes here! -->
+        {% endblock %}
+        
+    </div>
+                    
+    
+
+    <!-- Footer -->
+    <footer class="page-footer font-small">
+
+        <!-- Copyright -->
+        <div class="footer-copyright text-center py-3">© 2020 Copyright:
+            <a href="mailto:voelkerb@informatik.uni-freiburg.de"> Benjamin Voelker</a>
+        </div>
+        <!-- Copyright -->
+
+    </footer>
+  <!-- Footer -->
+    
+    
+    
+    
+    
+
+
+
+  </body>
+</html>

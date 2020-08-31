@@ -1,0 +1,1928 @@
+{% extends "index.html" %}
+
+
+{% block head %}
+
+    <!--Font Awesome (added because you use icons in your prepend/append)-->
+    <link rel="stylesheet" href="https://formden.com/static/cdn/font-awesome/4.4.0/css/font-awesome.min.css" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- For bootstrap toggle -->
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+
+    <!-- We need highchart stockchart -->
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+
+    <!-- For datepicker -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+{% endblock %}
+
+{% block content %}
+
+
+        
+    <!-- <style>
+        .progress.active .progress-bar {
+            -webkit-transition: none !important;
+            transition: none !important;
+        }
+    </style> -->
+    <div class="d-flex flex-start">
+
+        <div class="p-0">
+            <!-- <h2>Annoticity Labeling Tool</h2> -->
+            <p>Load a dataset from the server or upload your own file to label it.</p>  
+
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+
+                <li class="nav-item">
+                    <a class="nav-link {% if navbar == 'FIRED' %}active{% endif %}" href="#FIRED" onclick="return false;">FIRED</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if navbar == 'REDD' %}active{% endif %}" href="#REDD" onclick="return false;">REDD</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if navbar == 'Custom' %}active{% endif %}" href="#Custom" onclick="return false;">Custom Upload</a>
+                </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content border mb-3">
+                <div id="FIRED" class="container tab-pane {% if navbar == 'FIRED' %}active{% endif %}"><br>
+                    <!-- FIRED Selection Form -->
+                    <div class="form-inline mb-3">
+                        <div class="form-group">
+                            <label class="mr-1">Device: </label><br>  
+                            <select class="form-control custom-control-inline" id="selDev">
+                                {% for dev in FIREDDevices%}
+                                    <option>{{dev}}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="input-group custom-control-inline">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Date:</span>
+                                </div>
+                                <input class="form-control" id="dateInpFIRED" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                            </div>
+                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
+                        </div>
+                    </div>     
+                </div>
+                <div id="REDD" class="container tab-pane {% if navbar == 'REDD' %}active{% endif %}"><br>
+                    <!-- FIRED Selection Form -->
+                    <div class="form-inline mb-3">
+                        <div class="form-group">
+                            <label class="mr-1">House: </label><br>  
+                            <select class="form-control custom-control-inline" id="selREDDHouse">
+                            </select>
+                            <label class="mr-1">Channel: </label><br>  
+                            <select class="form-control custom-control-inline" id="selREDDChannel">
+                            </select>
+                            <div class="input-group custom-control-inline">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Date:</span>
+                                </div>
+                                <input class="form-control" id="dateInpREDD" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                            </div>
+                            <button type="submit" id="applyREDD" class="btn btn-dark">Apply</button>
+                        </div>
+                    </div>     
+                </div>
+                <div id="Custom" class="container tab-pane {% if navbar == 'Custom' %}active{% endif %}"><br>
+                    <!-- Custom upload form -->
+                    <div class="d-flex flex-row mb-3">
+                        <form id="customUploadForm" method="post" enctype="multipart/form-data">
+                            <div class="input-group">
+                                <div class="custom-file" style="min-width: 500px;">
+                                    <input type="text" hidden class="custom-text-input" id="hiddenText" name="type" value="MKVUpload">
+                                    <input type="file" accept=".mkv" class="custom-file-input" id="inputGroupFile01"
+                                        aria-describedby="inputGroupFileAddon01" name="uploadedFile">
+                                    <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-danger" id="customUploadButton">Upload</button>
+                                </div>
+                            </div >
+                        </form>
+                        {% if uploaded_file_name %}
+                            <div class="p-2 ml-3">File uploaded:</div>
+                            <div class="p-2 bg-info"> {{ uploaded_file_name }}</div>
+                        {% endif %}
+                    </div >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pb-2 d-flex flex-row align-items-center">
+        
+        <select class="form-control custom-control-inline" id="selectedMeasure" style="width: 150px; ">
+            <option disabled>Select Measure</option>
+        </select>
+
+        <select style="display:none" id="width_tmp_select">
+            <option id="width_tmp_option"></option>
+        </select>
+    </div>
+    
+
+    <!-- Highcharts display -->
+    <div class="border" id="chart_container" style="min-width: 500px; height: 400px; margin: 0 auto"></div>
+
+    <hr/>
+    
+
+    <!--Accordion wrapper-->
+    <div class="accordion" id="accordionEx" role="tablist" aria-multiselectable="true">
+        <div class="card">
+            <div class="card-header" role="tab" id="headingOne1">
+                <a class="collapsed d-flex flex-row align-items-center" data-toggle="collapse" data-parent="#accordionEx" href="#collapseLabelingSettings" aria-expanded="true" aria-controls="collapseLabelingSettings">
+                    <h5 class="mb-0"> Labeling Settings </h5><i class="ml-auto fa fa-angle-down rotate-icon"></i>
+                </a>
+            </div>
+        
+            <!-- Card body -->
+            <div id="collapseLabelingSettings" class="collapse show" role="tabpanel" aria-labelledby="collapseLabelingSettings" data-parent="#accordionEx">
+                <div class="card-body d-flex flex-row align-items-center">
+                    <span class="mr-3">Event Resolution: </span>
+                    <input class="slider mr-3" id="eventResSlider" type="range" value="1.0" min="0.1" max="3.0" step="0.1">
+                    <span id="eventResSlider_value" style="width: 50px;">0</span>
+                    <div class="p-2 ml-3">
+                        <div class="form-check">
+                            <label class="form-check-label" for="textCheck">Text Labels:</label>
+                            <input type="checkbox" class="form-check-input" id="textLabelsActive" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+        <!-- Accordion card -->
+    
+        <!-- Accordion card -->
+        <div class="card">
+    
+            <!-- Card header -->
+            <div class="card-header" role="tab" id="headingTwo2">
+                <a class="collapsed d-flex flex-row align-items-center" data-toggle="collapse" data-parent="#accordionEx" href="#collapseLabelUpload" aria-expanded="false" aria-controls="collapseLabelUpload">
+                    <h5 class="mb-0"> Label Upload </h5><i class="ml-auto fa fa-angle-down rotate-icon"></i>
+                </a>
+            </div>
+    
+            <!-- Card body -->
+            <div id="collapseLabelUpload" class="collapse" role="tabpanel" aria-labelledby="collapseLabelUpload" data-parent="#accordionEx">
+                <div class="card-body">
+                    <form id="labelFileForm" enctype="multipart/form-data" method="post" name="fileinfo">
+                        <div class="input-group align-items-center">
+                            <label class="form-check-label mr-1" for="textCheck">Upload Labels:</label>
+                            <div class="custom-file" style="min-width: 500px;">
+                                <input type="text" hidden class="custom-text-input" id="hiddenText" name="type" value="LabelUpload">
+                                <input type="file" accept=".csv, .srt, .ass" class="custom-file-input" id="inputGroupFile01"
+                                    aria-describedby="inputGroupFileAddon01" name="uploadedFile">
+                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-danger" id="labelUploadButton">Upload</button>
+                            </div>
+                        </div >
+                    </form>
+                </div>
+            </div>
+    
+        </div>
+    
+        <!-- Accordion card -->
+        <div class="card">
+            <!-- Card header -->
+            <div class="card-header" role="tab" id="headingThree3">
+                <a class="collapsed d-flex flex-row align-items-center" data-toggle="collapse" data-parent="#accordionEx" href="#collapseAutoLabeling" aria-expanded="false" aria-controls="collapseAutoLabeling">
+                    <h5 class="mb-0"> Automatic Labeling </h5><i class="ml-auto fa fa-angle-down rotate-icon"></i>
+                </a>
+            </div>
+            <!-- Card body -->
+            <div id="collapseAutoLabeling" class="collapse" role="tabpanel" aria-labelledby="collapseAutoLabeling" data-parent="#accordionEx">
+                <div class="card-body">
+                    <div class="d-flex flex-row  align-items-end">
+                    
+                        <div class="col" width="width: 420px;">
+
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">Pre-Event Window Length: </span>
+                                <input class="slider mr-3" id="preEventWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span id="preEventWindowLengthSlider_value" style="width: 50px;">0</span>
+
+                            </div>
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">Post-Event Window Length: </span>
+                                <input class="slider mr-3" id="postEventWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span id="postEventWindowLengthSlider_value" style="width: 50px;">0</span>
+                            </div>
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">Voting Window Length: </span>
+                                <input class="slider mr-3" id="votingWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span id="votingWindowLengthSlider_value" style="width: 50px;">0</span>
+                            </div>
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">Threshold: </span>
+                                <input class="slider mr-3" id="thresMinSlider" type="range" value="5" min="1" max="30" step="1">
+                                <span id="thresMinSlider_value" style="width: 50px;">0</span>
+                            </div>
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">Threshold Linear: </span>
+                                <input class="slider mr-3" id="thresLinearCoeffSlider" type="range" value="0.005" min="0.001" max="0.01" step="0.001">
+                                <span id="thresLinearCoeffSlider_value" style="width: 50px;">0</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" id="autoLabel" class="btn btn-dark pull-right">Auto Label</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accordion card -->
+    <div class="card">
+        <!-- Card header -->
+        <div class="card-header" role="tab" id="headingThree3">
+            <a class="collapsed d-flex flex-row align-items-center" data-toggle="collapse" data-parent="#accordionEx" href="#collapseReview" aria-expanded="false" aria-controls="collapseReview">
+                <h5 class="mb-0"> Review Mode </h5><i class="ml-auto fa fa-angle-down rotate-icon"></i>
+            </a>
+        </div>
+        <!-- Card body -->
+        <div id="collapseReview" class="collapse" role="tabpanel" aria-labelledby="collapseReview" data-parent="#accordionEx">
+            <div class="card-body">
+                <div class="player text-center">
+                    <button class="btn btn-outline-dark" type="button" id="button_fbw" class="btn" onclick='reviewRewindPress()'>
+                      <i class="fa fa-fast-backward"></i>
+                    </button>
+                    
+                    <button class="btn btn-outline-dark" type="button" id="button_bw" class="btn" onclick='reviewBackPress()'>
+                      <i class="fa fa-backward"></i>
+                    </button>
+                    
+                    <button class="btn btn-outline-dark" type="button" id="button_fw" class="btn" onclick='reviewForwardPress()'>
+                      <i class="fa fa-forward"></i>
+                    </button>
+                    
+                    <button class="btn btn-outline-dark" type="button" id="button_ffw" class="btn" onclick='reviewEndPress()'>
+                      <i class="fa fa-fast-forward"></i>
+                    </button>    
+                  </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Settings at the bottom below the chart -->
+    <div class="d-flex flex-row align-items-center">
+
+        <div class="p-2">
+            <button type="submit" id="removeLabels" class="btn btn-danger pull-right">Remove all Labels</button>
+        </div>
+        
+        <!-- <div class="p-2 ml-3">
+            <div class="form-check">
+                <label class="form-check-label" for="textCheck">Range Labels</label>
+                <input type="checkbox" class="form-check-input" id="rangeLabelsActive" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+            </div>
+        </div> -->
+        <!-- Pull export button to the right of the page -->
+        <div class="p-2 ml-auto">
+            <button type="submit" id="exportCSV" class="btn btn-dark pull-right">Download CSV</button>
+        </div>
+        <!-- Pull export button to the right of the page -->
+        <div class="p-2">
+            <button type="submit" id="exportMKV" class="btn btn-dark pull-right">Download MKV with Subs</button>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="labelModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Enter Label</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <div class="input-group-prepend">
+                            <label class="form-check-label">Select one of the following or enter new.</label>
+                        </div>
+                        <select class="user-form selectpicker show-tick form-control" id="selectLabelInput" data-live-search="true">
+                            <option value="unknown" disabled selected>Choose a label already used</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="input-group-prepend">
+                            <label class="form-check-label">Enter new label:</label>
+                        </div>
+                        <input type="text" id="textLabelInput" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default modalCancel" id="labelModalCancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default modalOk" id="labelModalOk" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="changeLabelModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Change Label</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <div class="input-group-prepend">
+                            <label class="form-check-label">Select one of the following or enter new.</label>
+                        </div>
+                        <select class="user-form selectpicker show-tick form-control" id="selectChangeLabelInput" data-live-search="true">
+                            <option value="unknown" disabled selected>Choose a label already used</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="input-group-prepend">
+                            <label class="form-check-label">New label:</label>
+                        </div>
+                        <input type="text" id="textChangeLabelInput" class="form-control" />
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="input-group-prepend">
+                            <label class="form-check-label">Change all with that name:</label>
+                        </div>
+                        <input type="checkbox" id="checkChangeAllLabels" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger" >
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default modalCancel" id="changeLabelModalCancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default modalOk" id="changeLabelModalOk" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <!-- Fix for switch at the bottom -->
+    <div class="modal fade" id="exportCSVModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+        <div class="modal-dialog modal-dialog-centered">
+        
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">CSV Export</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-dialog">Export options:</p>
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Column Sep.:</label>
+                            <div class="col-sm-8">
+                                <select class="selectpicker show-tick form-control" id="modalCSVColumnSep">
+                                    <option value="t" selected>Tab</option>
+                                    <option value=" ">Space</option>
+                                    <option value=",">Comma</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row align-items-center"">
+                            <label class="col-sm-4 col-form-label">Range Labels:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" id="modalCSVRangeLabelCheck" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                            </div>
+                            <label class="col-sm-4 col-form-label">Header:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" id="modalCSVHeader" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                            </div>
+                            <label class="col-sm-4 col-form-label">Time:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" id="modalCSVSeconds" data-toggle="toggle" data-size="sm" data-on="Seconds" data-off="Timestamps" data-onstyle="outline-warning" data-offstyle="outline-info"  style="min-width: 80px;" >
+                            </div>
+                            
+                        </div>
+                          
+                    </form>
+                           
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default modalCancel" id="CSVModalCancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default modalOk" id="CSVModalOk" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal hide" id="progressBarModal" data-keyboard="false" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+        <div class="modal-dialog modal-dialog-centered">
+            <!-- Modal content-->
+            <div class="modal-header float-right"></div>
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h4 id="progressBarText">Processing...</h4>
+                    <div class="progress progress-striped active">
+                        <div id="uploadBar" class="progress-bar progress-bar-striped bg-info" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="exportMKVModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+        <div class="modal-dialog modal-dialog-centered">
+        
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">MKV Export</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-dialog">Export options:</p>
+                    <form>
+                        <div class="form-group row align-items-center has-success">
+                            <label class="col-sm-4 col-form-label">Format:</label>
+                            <div class="col-sm-8">
+                                <select class="selectpicker show-tick form-control" id="modalMKVFormat">
+                                    <option value="MKV" selected>MKV</option>
+                                    <option value="SRT">SRT</option>
+                                    <option value="ASS">ASS</option>
+                                </select>
+                                <span id="ASShelp" hidden class="help-block">ASS only supports times up to 10h.</span>
+                            </div>
+                            <label class="col-sm-4 col-form-label">Include Data:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" id="modalMKVIncludeData" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                            </div>
+                            <label class="col-sm-4 col-form-label">Selected Range:</label>
+                            <div class="col-sm-8">
+                                <input type="checkbox" id="modalMKVSelRange" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                            </div>
+                        </div>
+                          
+                    </form>
+                           
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default modalCancel" id="MKVModalCancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default modalOk" id="MKVModalOk" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+    <hr/>
+
+    <!-- Alert message if upload went wrong -->
+    {% if message %}
+    <script>
+        alert('{{ message }}');
+    </script>
+    {% endif %}
+
+    </style>
+    <!-- Javascript stuff -->
+    <script>
+
+        var statusSocket = null;
+        connectWs();
+
+        function connectWs() {
+            var statusSocket = new WebSocket(
+                'ws://'
+                + window.location.host
+                + '/ws/'
+            );
+            console.log(window.location.host);
+
+            statusSocket.onmessage = webSocketMsg;
+
+            statusSocket.onclose = function(e) {
+                console.error('WS closed unexpectedly');
+            };
+
+
+            statusSocket.onclose = function(e) {
+                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+                setTimeout(function() {
+                    connectWs();
+                }, 1000);
+            };
+
+            statusSocket.onerror = function(err) {
+                console.error('Socket encountered error: ', err.message, 'Closing socket');
+                ws.close();
+                setTimeout(function() {
+                    connectWs();
+                }, 1000);
+            };
+        }
+
+        function webSocketMsg(e) {
+            const data = JSON.parse(e.data);
+            console.log(data);
+            if ("status" in data) {
+                if (progressBar.isShown()) progressBar.setText(data["status"]);
+            }
+            if ("percent" in data) {
+                if (progressBar.isShown()) progressBar.setPercent(data["percent"]);
+            }
+        }
+
+        $("#modalMKVFormat").change(function(){
+            let formatSel = document.getElementById("modalMKVFormat"); 
+            let format = formatSel[formatSel.selectedIndex].value;
+            if (format !== "MKV") {
+                $('#modalMKVIncludeData').bootstrapToggle('off')  
+                $('#modalMKVIncludeData').bootstrapToggle('disable')  
+            } else  {
+                $('#modalMKVIncludeData').bootstrapToggle('enable')  
+            }
+            if (format != "ASS") {
+                $('#ASShelp').hide();
+            } else {
+                $('#ASShelp').show();  
+            }
+        });
+
+
+        $(".modalOk").on("click", function(){
+            console.log("Modal okay");
+            modalResult = "okay";
+        });
+
+        $( ".modalCancel" ).on("click", function(){
+            console.log("Modal cancel");
+            modalResult = "cancel";
+        });
+
+        $('#labelModal').on('shown.bs.modal', function () {
+            $('#textLabelInput').focus();
+        })  
+        $('#changeLabelModal').on('shown.bs.modal', function () {
+            $('#textChangeLabelInput').focus();
+        })  
+
+        $(document).keypress(function(e) {
+            if ($("#labelModal").hasClass('show') && (e.keycode == 13 || e.which == 13)) {
+                $('#labelModalOk').click();  
+            }
+            if ($("#changeLabelModal").hasClass('show') && (e.keycode == 13 || e.which == 13)) {
+                $('#changeLabelModalOk').click();  
+            }
+            console.log(e.keyCode);
+            // Todo remove after debugging
+            // if (e.keyCode == 108) {
+            //     var deviceEl = document.getElementById('selDev');
+            //     deviceEl.selectedIndex = 1;
+            //     device = deviceEl[deviceEl.selectedIndex].value;
+            //     date = document.getElementById('dateInpFIRED');
+            //     date.value = "08/04/2020";
+            //     console.log(device + ": " + date.value );
+            //     newFIREDSelected(device, "p", date.value );
+            // }
+        });
+
+        // Navigation bar change of tab
+        $(document).ready(function(){
+            $(".nav-tabs a").click(function(){
+                $(this).tab('show');
+            });
+            $('.nav-tabs a').on('shown.bs.tab', function(event){
+                var x = $(event.target).text();         // active tab
+                console.log("Changed to: " + x);
+            });
+        });
+
+        // File input change label to selected file
+        $(".custom-file-input").on("change", function() {
+            fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+
+        // Dict holding all events
+        var eventInfo = new Object();
+        var events = [];
+        var labels = [];
+        var startTs = 0;
+        var fileName = "";
+        var chart = null;
+        var deviceEl = document.getElementById('selDev');
+        var device = deviceEl[deviceEl.selectedIndex].value;
+        var deviceName = device;
+        var date = document.getElementById('dateInpFIRED').value;
+        var dataType = "FIRED";
+        var newlabels = false;
+
+        $.ajaxSetup({ 
+            beforeSend: function(xhr, settings) {
+                var csrftoken = '{{ csrf_token }}';
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            } 
+        });
+
+        function getNextKey(list, dict) {
+            var arrayLength = list.length;
+            for (var i = 0; i < arrayLength; i++) {
+                if (list[i] in dict) {
+                    return list[i];
+                }
+            }
+            return null;
+        }
+
+        $("#labelFileForm").submit(function(e) {
+            e.preventDefault();    
+            var formData = new FormData(this);
+            if (chart === null) {
+                alert("Please first load the data.")
+                return;
+            }
+            formData.append("timestamp", chart.xAxis[0].min/1000   );
+            $.ajax({
+                url: 'data/uploadLabel/',
+                type: 'POST',
+                data: formData,
+                xhr: xhrInit,
+                success: function (data) {
+                    if ("message" in data) {
+                        alert(data["message"])
+                    }
+                    if ("labels" in data) {
+                        let numLabels = data["labels"].length;
+                        if (numLabels > 0) {
+                            firstLabel = data["labels"][0];
+                            var timeStampKey = getNextKey(["Timestamp", "timestamp", "ts", "startTs", "startTS", "start"], firstLabel);
+                            var labelKey = getNextKey(["Label", "label"], firstLabel);
+                            if (timeStampKey === null) {
+                                alert("No timestamp found in data");
+                                return;
+                            }
+                        }
+                        for (let i=0; i < numLabels; i++) {
+                            let labelEntry = data["labels"][i];
+                            var label = "";
+                            if (textLabelsActive) label = "unknown";
+                            if (labelKey !== null && labelKey in labelEntry) label = labelEntry[labelKey];
+                            ts = labelEntry[timeStampKey]*1000;
+                            let result = checkTSWithingBounds(ts);
+                            var tsOld = result[0];
+                            var index = result[1];
+                            // Already exists, lets delete
+                            if (index > -1) {
+                                console.log("Must remove old label before");
+                                removeLabel(tsOld);
+                            }
+                            addPlotLine(ts, 0, label);
+                            newlabels = false;
+                        }
+                    }
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+        
+        var progressBar;
+        
+        function uploadProgress(e){
+            if(e.lengthComputable){
+                progressBar.setText("Uploading ...");
+                var max = e.total;
+                var current = e.loaded;
+
+                var percentage = (current * 100)/max;
+                console.log("Upload: " + percentage);
+                // $('.progress-bar').animate({ width: String(Math.round(percentage)) + '%' }, { duration: 1000  });
+                // $('#uploadBar').width(percentage + '%');
+
+                progressBar.setPercent(percentage);
+                //     width: percentage + '%'
+                // }, 0.100);
+                if(percentage >= 100) {
+                    progressBar.hide();
+                // process completed  
+                    // $('.progress-container').prop("hidden", true);
+                }
+            }  
+        }
+       
+        function downloadProgress(e){
+            if(e.lengthComputable){
+                progressBar.setText("Downloading ...");
+                var max = e.total;
+                var current = e.loaded;
+
+                var percentage = (current * 100)/max;
+                console.log("Download: " + percentage);
+                progressBar.setPercent(percentage);
+                // $('#downloadBar').width(percentage + '%');
+                if(percentage >= 100) {
+                    progressBar.hide();
+                    // $('.progress-container').prop("hidden", true);
+                // process completed  
+                }
+            }  
+        }
+          
+        progressBar = progressBar || (function () {
+            return {
+                isShown: function() {
+                    return $("#progressBarModal").hasClass('show');
+                },
+                show: function() {
+                    console.log("show progress bar");
+                    $('.progress-bar').width('0%', 0);
+                    $('#progressBarModal').modal("show");
+                },
+                setPercent: function(percent) {
+                    console.log("Set percent: " + percent);
+                    $('.progress-bar').width(percent + '%');
+                },
+                setText: function(text) {
+                    console.log("Set progress title: " + text);
+                    $('#progressBarText').text(text);
+                },
+                hide: function () {
+                    console.log("hide progress bar");
+                    $('#progressBarModal').modal('hide');
+                },
+                animate: function (on) {
+                    console.log("change animation: " + on);
+                    if (on === true) {
+                        $('.progress-bar').addClass('progress-bar-animated');
+
+                    } else {
+                        $('.progress-bar').removeClass('progress-bar-animated');
+                    }
+                },
+
+            };
+        })();
+
+        function xhrInit() {
+            progressBar.setText("Uploading");
+            progressBar.show();
+            
+            // $('.progress-container').prop("hidden", false);
+            // $('.progress-bar').width('0%', 0);
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){
+                myXhr.upload.addEventListener('progress',uploadProgress, false);
+            }
+            myXhr.addEventListener('progress',downloadProgress, false);
+            return myXhr;
+        }
+
+        $("#customUploadForm").submit(function(e) {
+            e.preventDefault();    
+            var formData = new FormData(this);
+            $.ajax({
+                url: 'data/uploadFile/',
+                type: 'POST',
+                data: formData,
+                xhr: xhrInit,
+                success: function (data) {
+                    console.log("ajax success")
+                    $("#exportCSV").prop("disabled", false);
+                    $("#exportMKV").prop("disabled", false);
+                    $("#autoLabel").prop("disabled", false);
+                    var ctx = document.getElementById("chart_container");
+
+                    var redrawEnabled = true;
+                    chart = Highcharts.stockChart(ctx, data['chart'], function (chart) {
+
+                        // apply the date pickers
+                        setTimeout(function () {
+                            $('input.highcharts-range-selector', $(chart.container).parent())
+                                .datepicker();
+                        }, 0);
+                    });
+                    resetStuff();
+                    dataType = "Upload";
+                    startTs = data["startTs"];
+                    var subs = data['subs'];
+                    fileName = data['filename'];
+                    deviceName = data['device'];
+                    date = data['date'];
+                    numSubs = subs.length;
+                    for (i=0; i < numSubs; i++) {
+                        sub = subs[i];
+                        console.log(sub["startTs"] + "->" + sub["stopTs"] + ": "  + sub["text"]);
+                        let ts = sub["startTs"]*1000;
+                        addPlotLine(ts, 0, sub["text"]);
+                    }
+                    newlabels = false;
+
+                    measures = data["measures"];
+                    addMeasuresToSel(measures);
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+
+        function addMeasuresToSel(measures) {
+            var sel = document.getElementById('selectedMeasure');
+            sel.onchange = null;
+            // Remove all entries
+            while (sel.firstChild) {
+                sel.removeChild(sel.firstChild);
+            }
+            // Add new one
+            var numMeasures = measures.length;
+            for (var i = 0; i < numMeasures; i++) {
+                var opt = document.createElement('option');
+                opt.setAttribute("value", measures[i]["id"]);
+                opt.appendChild( document.createTextNode(measures[i]["name"]) );
+                sel.appendChild(opt);
+            }
+            sel.onchange = measureSelected;
+        }
+
+        function measureSelected() {
+
+            $("#width_tmp_option").html($('#selectedMeasure option:selected').text()); 
+            $('#selectedMeasure').width($("#width_tmp_select").width()+20); 
+            var sel = this.value;  
+            console.log(sel);
+            startTs = chart.xAxis[0].dataMin/1000.0;
+            stopTs = chart.xAxis[0].dataMax/1000.0;
+            newSelection(startTs, stopTs);
+        }
+
+        function ajax_download(url, data, input_name) {
+            var $iframe,
+                iframe_doc,
+                iframe_html;
+
+            if (($iframe = $('#download_iframe')).length === 0) {
+                $iframe = $("<iframe id='download_iframe'" +
+                            " style='display: none' src='about:blank'></iframe>"
+                        ).appendTo("body");
+            }
+
+            iframe_doc = $iframe[0].contentWindow || $iframe[0].contentDocument;
+            if (iframe_doc.document) {
+                iframe_doc = iframe_doc.document;
+            }
+            var csrftoken = '{{ csrf_token }}';
+            iframe_html = "<html><head></head><body><form method='POST' download action='" +
+                        url +"'>" +
+                        "<input type=hidden name='" + input_name + "' value='" +
+                        JSON.stringify(data) +"'/>" +
+                        "<input type=hidden name='csrfmiddlewaretoken' value='" + csrftoken + "'>"
+                        + "</form>" +
+                        "</body></html>";
+
+            iframe_doc.open();
+            iframe_doc.write(iframe_html);
+            $(iframe_doc).find('form').submit();
+        }
+
+        $("#exportCSV").prop("disabled", events.length === 0);
+        $("#exportMKV").prop("disabled", events.length === 0);
+        $("#autoLabel").prop("disabled", events.length === 0);
+        $(document).ready(function(){
+            $(document).on('click','#exportMKV', function(){
+                console.log("export MKV");
+                // TODO
+                $("#exportMKVModal").modal("show");
+                $('#exportMKVModal').on('hidden.bs.modal', function (e) {
+                    modalOpen = false;
+                    if (modalResult === "okay") {
+                        let formatSel = document.getElementById("modalMKVFormat"); 
+                        let format = formatSel[formatSel.selectedIndex].value;
+                        let range = document.getElementById("modalMKVSelRange").checked;
+                        let includeData = document.getElementById("modalMKVIncludeData").checked;
+                        var min = max = -1;
+                        var data = {"filename": fileName, "format": format, "includeData":includeData, "type": dataType, "events":eventInfo};
+                        if (range) {
+                            ({min, max} = chart.axes[0].getExtremes());
+                            data["range"] = [min/1000.0,max/1000.0];
+                        }
+                        ajax_download('data/downloadMKV/', data, 'data');
+                        newlabels = false;
+
+                    } else {
+                        console.log("Modal func cancel");
+                    }
+                    modalResult = null;
+                    // Important to unbind the method now
+                    $("#exportMKVModal").unbind('hidden.bs.modal');
+                });
+
+            });
+
+
+            $(document).on('click','#removeLabels', function(){
+                const oldLabels = [...events];
+                let numLabels = oldLabels.length;
+                for (var i = 0; i < numLabels; i++) {
+                    removeLabel(oldLabels[i]);
+                }
+            });
+
+            $(document).on('click','#exportCSV', function(){
+
+                if (events.length == 0) {
+                    var strconfirm = confirm("You have not added any event, do you want to export an empty csv?");
+                    if (strconfirm == false) {
+                        return;
+                    }
+                }
+                // TODO
+                $("#exportCSVModal").modal("show");
+                $('#exportCSVModal').on('hidden.bs.modal', function (e) {
+                    modalOpen = false;
+                    if (modalResult === "okay") {
+                        let separatorSel = document.getElementById("modalCSVColumnSep"); 
+                        let separator = separatorSel[separatorSel.selectedIndex].value;
+                        let rangeLabels = document.getElementById("modalCSVRangeLabelCheck").checked;
+                        let header = document.getElementById("modalCSVHeader").checked;
+                        let seconds = document.getElementById("modalCSVSeconds").checked;
+                        if (separator === "t") separator = "\t";
+                        let csvContent = "data:text/csv;charset=utf-8,";
+                        // Sort based on timestamps
+                        var sorted = [];
+                        var useLabels = false;
+                        for (var key in eventInfo) {
+                            if ("label" in eventInfo[key]) {
+                                useLabels = true;
+                                break;
+                            }
+                        }
+                        events = events.sort(function(a, b){return a-b});
+
+                        if (header === true) {
+                            if (seconds === true) {
+                                csvContent += "Seconds";
+                            } else {
+                                csvContent += "Timestamp";
+                            }
+                            csvContent += separator + "Value";
+                            if (useLabels === true) {
+                                csvContent += separator + "Label";
+                            }
+                            csvContent += "\r\n";
+                        }
+
+                        var keys = Object.keys(eventInfo); // or loop over the object to get the array
+                        // keys will be in any order
+                        keys.sort(function(a, b){return a-b});
+                        // keys now will be in wanted order
+
+                        for (var i=0; i<keys.length; i++) { // now lets iterate in sort order
+                            var ts = keys[i];
+                            // let ts = events[key];
+                            let row = "";
+                            if (seconds === true) {
+                                let sec = ts/1000 - startTs;
+                                row += String(round(sec,3));
+                            } else {
+                                row += String(round(ts/1000,3));
+                            }
+                            row += separator + String(round(eventInfo[ts]["power"],2)); 
+                            if (useLabels)  {
+                                if ("label" in eventInfo[ts]) row += separator + eventInfo[ts]["label"];
+                                else row += "\tunknown";
+                            }
+                            csvContent += row + "\r\n";
+                        }
+
+                        var encodedUri = encodeURI(csvContent);
+                        var link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        var myFileName = fileName.split(".")[0];
+                        myFileName = myFileName.replaceAll(" ", "_");
+                        myFileName += ".csv";
+                        link.setAttribute("download", myFileName);
+                        document.body.appendChild(link); // Required for FF
+
+                        newlabels = false;
+                        link.click(); // This will download the data file named "my_data.csv".
+                    } else {
+                        console.log("Modal func cancel");
+                    }
+                    modalResult = null;
+                    // Important to unbind the method now
+                    $("#exportCSVModal").unbind('hidden.bs.modal');
+                });
+
+            });
+        });
+
+        $(document).on('click','#autoLabel', function(){
+            var data = { 
+                "parameter": {
+                    "pre": Number(sliderValues["preEventWindowLength"]["value"]),
+                    "post": Number(sliderValues["postEventWindowLength"]["value"]),
+                    "voting": Number(sliderValues["votingWindowLength"]["value"]),
+                    "thres": Number(sliderValues["thresMin"]["value"]),
+                    "linearCoeff": Number(sliderValues["thresLinearCoeff"]["value"]),
+                    "minDist": Number(sliderValues["eventRes"]["value"]),
+                }, "filename": fileName, "type": dataType,
+            }
+            console.log("Auto Label start");
+            progressBar.setText("Processing...");
+            progressBar.show();
+            progressBar.animate(true);
+            progressBar.setPercent(100);
+            $.ajax({
+                url: 'data/autoLabel/',
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(data),
+                // xhr: xhrInit,
+                success: function (data) {
+
+                    progressBar.animate(false);
+                    progressBar.hide();
+                    console.log("Response from autolabel");
+                    console.log(data);
+                    if ("msg" in data) {
+                        alert(data["msg"])
+                    }
+                    if ("labels" in data) {
+                        let numLabels = data["labels"].length;
+                        if (numLabels > 0) {
+                            firstLabel = data["labels"][0];
+                            var timeStampKey = getNextKey(["Timestamp", "timestamp", "ts", "startTs", "startTS", "start"], firstLabel);
+                            var labelKey = getNextKey(["Label", "label"], firstLabel);
+                            if (timeStampKey === null) {
+                                alert("No timestamp found in data");
+                                return;
+                            }
+                        }
+                        for (let i=0; i < numLabels; i++) {
+                            let labelEntry = data["labels"][i];
+                            var label = "";
+                            if (textLabelsActive) label = "unknown";
+                            if (labelKey !== null && labelKey in labelEntry) label = labelEntry[labelKey];
+                            ts = labelEntry[timeStampKey]*1000;
+                            let result = checkTSWithingBounds(ts);
+                            var tsOld = result[0];
+                            var index = result[1];
+                            // Already exists, lets delete
+                            if (index > -1) {
+                                console.log("Must remove old label before");
+                                removeLabel(tsOld);
+                            }
+                            addPlotLine(ts, 0, label);
+                            newlabels = false;
+                        }
+                    }
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+
+        function unsavedCheck() {
+            if (newlabels) {
+                var r = confirm("You have added labels which will be lost, are you sure?");
+                return r;
+            }
+            return true;
+        }
+
+        $(document).ready(function(){
+            $(document).on('click','#apply', function(){
+                if (unsavedCheck() == false) return
+                var deviceEl = document.getElementById('selDev');
+                date = document.getElementById('dateInpFIRED').value;
+                device = deviceEl[deviceEl.selectedIndex].value;
+                // startTs = Date.parse(date)/1000;
+                // stopTs = startTs + 24*60*60;
+                console.log("date:<" + date + ">");
+                // TODO: Remove
+                // date = "07/15/2020"
+                if (date === "") {
+                    alert("Please select a valid date");
+                } else {
+                    newFIREDSelected(device, "None", date);
+                }
+            })
+
+            $(document).on('click','#applyREDD', function(){
+                if (unsavedCheck() == false) return
+                var houseSEl = document.getElementById('selREDDHouse');
+                house = houseSEl[houseSEl.selectedIndex].value;
+                var channelSEl = document.getElementById('selREDDChannel');
+                channel = channelSEl[channelSEl.selectedIndex].value;
+                date = document.getElementById('dateInpREDD').value;
+                // startTs = Date.parse(date)/1000;
+                // stopTs = startTs + 24*60*60;
+                console.log("date:<" + date + ">");
+                console.log(house);
+                // TODO: Remove
+                // date = "07/15/2020"
+                if (date === "") {
+                    alert("Please select a valid date");
+                } else {
+                    newREDDSelected(house, channel, date, " ");
+                }
+            })
+        })
+
+        var reddInfo = JSON.parse('{{ REDDInfo|safe }}');
+        console.log(reddInfo);
+
+        function removeOptionsFrom(selectElement) {
+            var i, L = selectElement.options.length - 1;
+            for(i = L; i >= 0; i--) {
+                selectElement.remove(i);
+            }
+        }
+
+        function setREDDChannels() {
+            var sel = document.getElementById('selREDDChannel');
+            removeOptionsFrom(sel);
+
+            var houseSel = document.getElementById('selREDDHouse');
+            console.log(houseSel[houseSel.selectedIndex]);
+            var house = Number(houseSel[houseSel.selectedIndex].value);
+            console.log(house);
+            if (house in reddInfo) {
+                let numChannels = reddInfo[house]["channels"].length;
+                for (var i = 0; i < numChannels; i++) {
+                    addOptionToSelect( sel, reddInfo[house]["channels"][i]);
+                }
+            }
+
+            var REDDRange = reddInfo[house]["times"];
+            var dateStart = new Date(REDDRange[0]*1000);
+            var dateEnd = new Date(REDDRange[1]*1000);
+
+            
+            $("#dateInpREDD").datepicker( "destroy" );
+
+            var date_input=$('input[id="dateInpREDD"]'); //our date input has the name "date"
+            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+           
+            date_input.datepicker({
+                format: 'dd/mm/yyyy',
+                minDate: dateStart,
+                maxDate: dateEnd,
+                // container: container,
+                todayHighlight: true,
+                autoclose: true,
+            })
+            date_input.val("");
+        }
+
+        $(document).ready(function(){
+            var FIREDRange = JSON.parse("{{FIRED_range}}");
+            var dateStart = new Date(FIREDRange[0]*1000);
+            var dateEnd = new Date(FIREDRange[1]*1000);
+
+            var date_input=$('input[id="dateInpFIRED"]'); //our date input has the name "date"
+            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+            
+            date_input.datepicker({
+                format: 'dd/mm/yyyy',
+                minDate: dateStart,
+                maxDate: dateEnd,
+                container: container,
+                todayHighlight: true,
+                autoclose: true,
+            })
+            console.log(reddInfo);
+                
+            for (let house in reddInfo){
+                console.log(house);
+                addOptionToSelect(document.getElementById("selREDDHouse"), String(house));
+            }
+            setREDDChannels();
+            document.getElementById("selREDDHouse").onchange = setREDDChannels;
+            // var sel = document.getElementById('selREDDHouse');
+            // sel.selectedIndex = 0;
+
+
+        })
+
+        var title = "Select a device and time, then click apply.";
+        var data = [0,0,0,0];
+
+        Highcharts.setOptions({
+                boost: { useGPUTranslations: true, enabled : false },
+                plotOptions: { series: { boost: { useGPUTranslations: true, enabled : false }, } },
+        });
+
+
+        Highcharts.theme = {
+            chart: {
+                backgroundColor: null,
+            },
+            scrollbar: { enabled: false },
+            credits: { enabled: false },
+            rangeSelector: {
+                selected: 2,
+                enabled: true,
+                buttonTheme: { // styles for the buttons
+                    fill: 'none',
+                    stroke: 'none',
+                    'stroke-width': 0,
+                    r: 8,
+                },
+                inputEnabled: false, // it supports only days
+                buttons: [{
+                    type: 'minute',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'hour',
+                    count: 1,
+                    text: '1h'
+                }, {
+                    type: 'day',
+                    count: 1,
+                    text: '1D'
+                }, {
+                    type: 'all',
+                    count: 1,
+                    text: 'All'
+                }],
+            },
+            xAxis: {
+                crosshair: false,
+                events : {
+                    afterSetExtremes: afterSetExtremes,
+                    // afterSetExtremes : afterSetExtremes
+                },
+                lineWidth: 2.0,
+                minRange: 1000, // one Second,
+                lineColor: "#474747",
+            },
+            plotOptions:{
+                series:{
+                    allowPointSelect: true,
+                    point: {
+                        events:{
+                            select: pointClicked,
+                        }                  
+                    }
+                }
+            },
+            yAxis: {
+                opposite: false,
+                visible: true,    
+                startOnTick: true,
+                endOnTick: true,
+                lineWidth: 2.0,
+                gridLineWidth: 0,
+                lineColor: "#474747",
+            },
+        };
+
+        // Apply the theme
+        Highcharts.setOptions(Highcharts.theme);
+
+        function resetStuff() {
+            events = [];
+            eventInfo = {};
+            newlabels = false;
+        }
+        function newREDDSelected(house, channel, day, measure) {
+            var url;
+            // device = dev;
+            $.ajax({
+                url: "data/REDD/house=" + house + "&channel=" + channel + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                dataType: 'json',
+                xhr: xhrInit,
+                success: newChart,
+            });
+            dataType = "REDD";
+        }
+        
+        function newFIREDSelected(dev, measure, day) {
+            var url;
+            device = dev;
+            $.ajax({
+                url: "data/FIRED/dev=" + dev + "&measure=" + measure + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                dataType: 'json',
+                xhr: xhrInit,
+                success: newChart
+            });
+            dataType = "FIRED";
+        }
+
+        function newChart(data) {
+            console.log("ajax success")
+            $("#exportCSV").prop("disabled", false);
+            $("#exportMKV").prop("disabled", false);
+            $("#autoLabel").prop("disabled", false);
+            // need to be set first
+            if ('timeZone' in data) {
+                console.log("Using Datetime");
+                Highcharts.setOptions({
+                    global : {
+                        useUTC : data["timeZone"] === "UTC"
+                    },
+                    getTimezoneOffset: function (timestamp) {
+                        var zone = data["timeZone"],
+                            timezoneOffset = -moment.tz(timestamp, zone).utcOffset();
+
+                        return timezoneOffset;
+                    },
+                });
+            }
+            var ctx = document.getElementById("chart_container");
+            chart = Highcharts.stockChart(ctx, data['chart'], function (chart) {
+                // apply the date pickers
+                setTimeout(function () {
+                    $('input.highcharts-range-selector', $(chart.container).parent())
+                        .datepicker();
+                }, 0);
+            });
+            resetStuff();
+            if ('title' in data) chart.setTitle(data[title]);
+
+            startTs = data["startTs"];
+            deviceName = data['device'];
+            date = data['date'];
+            fileName = data['filename'];
+            if ("subs" in data) {
+                var subs = data['subs'];
+                numSubs = subs.length;
+                for (i=0; i < numSubs; i++) {
+                    sub = subs[i];
+                    console.log(sub["startTs"] + "->" + sub["stopTs"] + ": "  + sub["text"]);
+                    let ts = sub["startTs"]*1000;
+
+                    addPlotLine(ts, 0, sub["text"]);
+                }
+            }
+            newlabels = false;
+
+            measures = data["measures"];
+            addMeasuresToSel(measures);
+        }
+
+        function newSelection(start, stop) {
+            var url;
+            var measureSel = document.getElementById('selectedMeasure');
+            var measure = measureSel[measureSel.selectedIndex].value;
+            var url = "";
+            chart.showLoading('Loading data from server...');
+            if (dataType === "Upload") {
+                url = "data/uploaded/measure=" + measure + "&startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
+            } else if (dataType === "REDD") {
+                url = "data/REDD/startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
+            } else {
+                url = "data/FIRED/dev="+ device + "&measure=" + measure + "&startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
+            }
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                success: newChartData,
+            });
+            var sel = document.getElementById("selectedMeasure").value = measure;
+        }
+
+
+        function afterSetExtremes(e) {
+            const { chart } = e.target;
+            stopTs = Math.round(e.max/1000);
+            startTs = Math.round(e.min/1000);
+            console.log("afterSetExtremes");
+            newSelection(startTs, stopTs);
+        }
+
+        function newChartData(data) {
+            console.log("ajax success");
+            if ('title' in data) {
+                chart.setTitle(data[title]);
+            }
+            if ('timeZone' in data) {
+                console.log("Using Datetime");
+                Highcharts.setOptions({
+                    global : {
+                        useUTC : false
+                    },
+                    getTimezoneOffset: function (timestamp) {
+                        var zone = data["timeZone"],
+                            timezoneOffset = -moment.tz(timestamp, zone).utcOffset();
+
+                        return timezoneOffset;
+                    },
+                });
+            }
+            var numSeries = data['series'].length;
+            for (var i = 0; i < numSeries; i++) {
+                series = data['series'][i]['data'];
+                startTs = data['series'][i]['startTs'];
+                interval = data['series'][i]['interval'];
+                if (series.length > 0) {
+                    chart.series[i].options.pointStart = startTs*1000;
+                    chart.series[i].options.pointInterval = interval*1000;
+                    chart.series[i].isDirty = true;
+                    chart.series[i].setData(series);
+                    chart.hideLoading();
+                }
+                console.log(data['series'][i]['measureText']);
+                if ('measureText' in data['series'][i] & "unit" in data['series'][i]) {
+                    chart.yAxis[0].axisTitle.attr({
+                        text: data['series'][i]['measureText'] + " [" + data['series'][i]['unit'] + "]"
+                    });
+
+                    chart.series[i].update({
+                            name: data['series'][i]['measureText'],
+                            tooltip:{
+                                valueSuffix: " " + data['series'][i]['unit'],
+                            },
+                    });
+                }
+                
+            }
+
+        }
+
+        var sliderValues = {
+            "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s"},
+            "postEventWindowLength": {"value": getStoredValue("postEventWindowLength"),"unit":"s"},
+            "votingWindowLength": {"value": getStoredValue("votingWindowLength"),"unit":"s"},
+            "thresMin": {"value": getStoredValue("thresMin"),"unit":"W"},
+            "thresLinearCoeff": {"value": getStoredValue("thresLinearCoeff"),"unit":""},
+            "eventRes": {"value": getStoredValue("eventRes"),"unit":"s"},
+        }
+
+        for (var key in sliderValues){
+            let slider = document.getElementById(key + "Slider");
+            if (slider !== null) slider.value = sliderValues[key]["value"];
+            let value = document.getElementById(key + "Slider_value");
+            if (value !== null) value.innerHTML = sliderValues[key]["value"] + " " + sliderValues[key]["unit"];
+        }
+
+        // All sliders  on input store variable as default and set value label with unit
+        $('.slider').on('input', function () {
+            var id = $(this).attr('id');
+            let name = id.replace("Slider", "");
+            let output = document.getElementById(id + "_value");
+            console.log(name);
+            let value = this.value;
+            sliderValues[name]["value"] = value;
+            storeValue(String(name), value);
+            output.innerHTML = value + " " + sliderValues[name]["unit"];
+        });
+        
+
+        // Checkboxen
+        var textLabelsActive = (getStoredValue("textLabelsActive") == 'true');
+        document.getElementById("textLabelsActive").checked = textLabelsActive;
+        
+        $('#textLabelsActive').change(function () {
+            textLabelsActive = this.checked;
+            storeValue("textLabelsActive", textLabelsActive);
+        });
+        
+        // FUNCTION to round number
+        function round(value, precision) {
+            if(precision === 0) return Math.round(value);  	
+            exp = 1;
+            for(i=0;i<precision;i++) exp *= 10;
+            return Math.round(value*exp)/exp;
+        }
+
+
+        var modalOpen = false;
+        var modalResult = null;
+
+        $(document).on("click", "#modalOk", function(event){
+            event.stopPropagation();
+            console.log("Modal okay");
+            modalResult = "okay";
+        });
+        $(document).on("click", "#modalCancel", function(event){
+            event.stopPropagation();
+            console.log("Modal cancel");
+            modalResult = "cancel";
+        });
+
+        function checkTSWithingBounds(ts) {
+            var numEvents = events.length;
+            var index = -1;
+            var tsNew = ts;
+            let eventResolution = Number(sliderValues["eventRes"]);
+            let min = ts - eventResolution*1000;
+            let max = ts + eventResolution*1000;
+            for (var i = 0; i < numEvents; i++) {
+                if (min < events[i] && events[i] < max) {
+                    index = i;
+                    let distance = (ts-events[i])/1000;
+                    console.log("Found near by entry @" + round(events[i]/1000,3));
+                    console.log("distance: " + round(distance,3));
+                    tsNew = events[i];
+                    break;
+                }
+            }
+            return [tsNew, index]
+        }
+
+        function pointClicked(e) {   
+            var ts = e.target.x;
+            let selPower = e.target.y;   
+            console.log("Clicked @" + round(ts/1000,3) + ", Value: " + round(selPower,2) + "W");
+            let result = checkTSWithingBounds(ts);
+            ts = result[0];
+            let index = result[1];
+            let theID = 'vertLine_'+String(ts)
+            // Already exists, lets delete
+            if (index > -1) {
+                console.log("remove");
+                removeLabel(ts);
+            } else {
+                console.log("Add");   
+                var label = "";
+                
+                if (textLabelsActive === true) {
+                    document.getElementById('textLabelInput').value = "";
+
+                    $("#labelModal").modal("show");
+                    $('#labelModal').on('hidden.bs.modal', function (e) {
+                        modalOpen = false;
+                        if (modalResult === "okay") {
+                            var text = document.getElementById('textLabelInput').value;
+                            var sel = document.getElementById('selectLabelInput');
+                            label = "unknown";
+                            // If sth selected 
+                            if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
+                            if (text !== "") label = text;
+    
+                            // if (rangeLabelsActive) {
+                            //     let theID = 'vertBand_'+String(ts)
+                            //     addPlotBand(ts, theID, selPower, label);
+                            // } else {
+                            addPlotLine(ts, selPower, label);
+                            // }
+                        } else {
+                            console.log("Modal func cancel");
+                        }
+                        modalResult = null;
+                        // Important to unbind the method now
+                        $("#labelModal").unbind('hidden.bs.modal');
+                    });
+                    return;
+                } else {
+                    addPlotLine(ts, selPower, null);
+                }
+            }
+            console.log("Eventlist: " + events);  
+        }
+        function removeLabel(ts) {
+            let theID = 'vertLine_' + String(ts)
+            delete eventInfo[ts];
+            let index = events.indexOf(ts);
+            if (index > -1) events.splice(index, 1);
+            chart.xAxis[0].removePlotLine(theID);
+        }
+
+        function textOfPlotlineBand(plotLB) {
+            console.log(plotLB);
+            var text = plotLB.options.label.text;
+            console.log(text);
+            if (text.includes("<div")) {
+                text = text.split(">")[1].split("<")[0]
+            }
+            return text;
+        }
+
+        function textForPlotline(text, id) {
+            return '<div class="labels" id=' + id + '>' + text + '</div>';
+        }
+
+
+        function addOptionToSelect(sel, labelName, value=null) {
+            // Add options to selections
+            var opt = document.createElement('option');
+            opt.appendChild( document.createTextNode(labelName) );
+            if (value !== null) opt.value = value;
+            sel.appendChild(opt);
+        }
+
+        function addLabelToEventSelects(label) {
+            // Add options to selections
+            if (labels.indexOf(label) === -1) {
+                labels.push(label);
+                addOptionToSelect(document.getElementById("selectLabelInput"), label);
+                addOptionToSelect(document.getElementById("selectChangeLabelInput"), label);
+            }
+        }
+
+        function addPlotLine(ts, pow, label) {
+            let theID = 'vertLine_' + String(ts)
+            ts = Number(ts);
+            eventInfo[ts] = {"ts":ts, "power":pow};
+            events.push(ts);
+            //  Keep array sorted
+            events.sort(function(a, b){return a-b});
+            newlabels = true;
+            
+            if (textLabelsActive === true) {
+                if (label === "" || label === null) {
+                    label = "unknown";
+                }
+                addLabelToEventSelects(label);
+            } else {
+                label = ""
+            }
+
+            labelID = theID + "_label";
+            // labelInf = null
+            // if (label !== null) {
+            eventInfo[ts]["label"] = label;
+            labelInf = { 
+                useHTML:true,
+                text: textForPlotline(label, labelID),
+                verticalAlign: 'top',
+                rotation: 0,
+                style: {
+                    color: 'green',
+                    fontWeight: 'bold'
+                },
+            };
+
+            chart.xAxis[0].addPlotLine({ // mark the weekend
+                color: 'green',
+                width: 3,
+                value: ts,
+                id: theID,
+                label: labelInf,
+                events: {
+                    // Remove on click on it
+                    click: function(e) {
+                        removeLabel(this.options.value);
+                    }
+                }
+            })
+        }
+
+        function plotLineBandByID(id) {
+            for (var i = 0; i < chart.xAxis[0].plotLinesAndBands.length; i++) {
+                if (chart.xAxis[0].plotLinesAndBands[i].id === id) {
+                    return chart.xAxis[0].plotLinesAndBands[i];
+                }
+            }
+            return null;
+        }
+
+        // Clicked on the label to change it
+        // This is the current item we are working on
+        var currentPlotline = null;
+        $(document).on("click",".labels", function () {
+            // Get id of clicked label
+            var labelID = $(this).attr('id');
+            // labelID is line ID + "_label"
+            var lineID = labelID.replaceAll("_label", "");
+            // Get plotline from id
+            currentPlotline = plotLineBandByID(lineID);
+            // Just a check if this worked
+            if (currentPlotline === null) {
+                console.log("plotblineID not found");
+                return;
+            }
+            // Get the current text of the plotline and set the textfield
+            var currentText = textOfPlotlineBand(currentPlotline);
+            console.log("currentText: " + currentText);
+            document.getElementById('textChangeLabelInput').value = currentText;
+            document.getElementById('selectChangeLabelInput').selectedIndex = 0;
+            // Show modal
+            $("#changeLabelModal").modal("show");
+            $('#changeLabelModal').on('hidden.bs.modal', function (e) {
+                modalOpen = false;
+                // If result of modal is okay
+                if (modalResult === "okay") {
+                    // Get text entry 
+                    var text = document.getElementById('textChangeLabelInput').value;
+                    var sel = document.getElementById('selectChangeLabelInput');
+                    var changeAll = document.getElementById('checkChangeAllLabels').checked;
+                    label = "unknown";
+                    // If sth selected 
+                    if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
+                    var currentText = textOfPlotlineBand(currentPlotline);
+                    console.log("oldText: " + currentText);
+                    if (text !== currentText) label = text;
+                    console.log("NewText: " + label);
+                    if (changeAll === true) {
+                        changeAllLabels(currentText, label);
+                    } else {
+                        changeLabel(currentPlotline, label);
+                    }
+                    // text = textForPlotline(label, currentPlotline.id);
+                    // currentPlotline.label.attr({
+                    //     text: text
+                    // });
+                    // currentPlotline.options.text = text;
+                    // ts = Number(currentPlotline.options.value);
+                    // eventInfo[ts]["label"] = label;
+                    // addLabelToEventSelects(label);
+                    // chart.xAxis[0].redraw();
+                } else {
+                    console.log("Modal func cancel");
+                }
+                modalResult = null;
+                // Important to unbind the method now
+                $("#changeLabelModal").unbind('hidden.bs.modal');
+            });
+        });
+
+        function changeLabel(plotline, label, redraw=true) {
+            console.log(plotline);
+            console.log("Changing one plotline: \"" + label + "\"");
+            var ts = Number(plotline.options.value);
+            eventInfo[ts]["label"] = label;
+            addLabelToEventSelects(label);
+            text = textForPlotline(label, plotline.id),
+            console.log(plotline);
+            if (plotline.label !== undefined) {
+                plotline.label.attr({
+                    text: text
+                });
+            }
+            plotline.options.label.text = text;
+            if (redraw) chart.xAxis[0].redraw();
+        }
+
+        function changeAllLabels(oldText, newText, redraw=true) {
+            console.log("Changing all lines with \"" + oldText + "\" to \"" + newText + "\""); 
+            const oldPlotlines = [...chart.xAxis[0].plotLinesAndBands];
+            let numLines = oldPlotlines.length;
+            for (var j = 0; j < numLines; j++) {
+                var text = textOfPlotlineBand(oldPlotlines[j]);
+                console.log(text);
+                if (text === oldText) {
+                    console.log("match");
+                    changeLabel(oldPlotlines[j], newText, redraw=false);
+                }
+            }
+            if (redraw) chart.xAxis[0].redraw();
+        }
+
+        // var currentPlotband = null;
+        // function addPlotBand(ts, theID, pow, label) {
+        //     ts = Number(ts);
+        //     eventInfo[ts] = {"ts":ts, "power":pow};
+            
+        //     events.push(ts);
+        //     labelInf = null
+        //     if (label !== null) {
+        //         eventInfo[ts]["label"] = label;
+        //         labelInf = { 
+        //             text: label,
+        //             verticalAlign: 'top',
+        //             rotation: 0,
+        //             style: {
+        //                 color: 'black',
+        //                 fontWeight: 'bold'
+        //             },
+        //         };
+        //     }
+        //     chart.xAxis[0].addPlotBand({ // mark the weekend
+        //         color: 'rgba(255,255,0,0.5)',
+        //         // color: 'red',
+        //         from: ts,
+        //         to: ts+1000*60*2,
+        //         id: theID,
+        //         label: labelInf,
+        //         events: {
+        //             // Remove on click on it
+        //             click: function(e) {
+        //                 // removeLabel(this.options.value);
+        //                 // edit label
+        //                 console.log("edit label")
+        //                 console.log(this)
+        //                 console.log(this.id);
+        //                 currentPlotband = this;
+        //                 document.getElementById('textChangeLabelInput').value = this.options.label.text;
+        //                 $("#changeLabelModal").modal("show");
+        //                 $('#changeLabelModal').on('hidden.bs.modal', function (e) {
+        //                     modalOpen = false;
+        //                     if (modalResult === "okay") {
+        //                         var text = document.getElementById('textChangeLabelInput').value;
+        //                         var sel = document.getElementById('selectChangeLabelInput');
+        //                         label = "unknown";
+        //                         // If sth selected 
+        //                         if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
+        //                         if (text !== "") label = text;
+        //                         console.log(currentPlotband.options.from);
+        //                         console.log(currentPlotband.options.to);
+        //                         ts = currentPlotband.options.from;
+        //                         theID = currentPlotband.options.id;
+        //                         pow = 0;
+        //                         chart.xAxis[0].removePlotBand(theID);
+        //                         addPlotBand(ts, theID, pow, label);
+        //                     } else {
+        //                         console.log("Modal func cancel");
+        //                     }
+        //                     modalResult = null;
+        //                     // Important to unbind the method now
+        //                     $("#changeLabelModal").unbind('hidden.bs.modal');
+        //                 });
+        //             }
+        //         }
+        //     })
+        // }
+
+        // _______________________________REVIEW____________________________________________
+        
+        var index = 0;
+        function reviewRewindPress() {
+            index = 0;
+            reviewEntryWithIndex(index);
+        }
+        
+        function reviewBackPress() {
+            index -= 1;
+            if (index < 0) {
+                index = 0;
+                if (events.length > 0) {
+                    alert("This is the first event");
+                }
+            }
+            reviewEntryWithIndex(index);
+        }
+        
+        function reviewForwardPress() {
+            index += 1;
+            if (index >= events.length) {
+                index = events.length-1;
+                if (events.length > 0) {
+                    alert("This is the last event");
+                }
+            }
+            if (index < 0) index = 0;
+            reviewEntryWithIndex(index);
+        }
+
+        function reviewEndPress() {
+            index = events.length-1;
+            reviewEntryWithIndex(index);
+        }
+
+        function reviewEntryWithIndex(i) {
+            if (events.length > i && i >= 0) {
+                reviewEntry(events[index]);
+            }
+        }
+
+        function reviewEntry(ts) {
+            let xMin = ts-60*1000;
+            let xMax = ts+60*1000;
+		    chart.xAxis[0].setExtremes(xMin,xMax);	
+        }
+        
+        // _______________________________MISC____________________________________________
+        
+        function storeValue(key, value) {
+            if (localStorage) {
+                localStorage.setItem(key, value);
+            } else {
+                $.cookies.set(key, value);
+            }
+        }
+
+        function getStoredValue(key) {
+            if (localStorage) {
+                return localStorage.getItem(key);
+            } else {
+                return $.cookies.get(key);
+            }
+        }
+    </script>
+    
+
+
+
+{% endblock %}
