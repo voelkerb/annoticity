@@ -1,0 +1,81 @@
+
+        <!-- Selected measure, only contains stuff after data is loaded -->
+        <!-- <div class="mb-3 mr-0 pr-0 ml-auto align-self-end ">
+            <div class="btn-group" id="measureSelectContainer" role="group" aria-label="Basic example">
+            </div>
+        </div> -->
+        // // __________________________________ MEASURE SELECT _____________________________________
+        // function addOptionToButtonContainer(container, name, value=null, func=null) {
+        //     var buttonEl = document.createElement("button");
+        //     buttonEl.type = "button";
+        //     buttonEl.className = "btn btn-secondary";
+        //     buttonEl.innerText = name;
+        //     if (value !== null) buttonEl.value = value;
+        //     container.appendChild(buttonEl);
+        //     if (func !== null) buttonEl.onclick = function() { measureClicked(buttonEl); }
+        //     return buttonEl;
+        // }
+        
+        // var measureBtns = [];
+        // function measureClicked(btn) {
+        //     if (btn.classList.contains("btn-primary")) {
+        //         btn.className = "btn btn-secondary";
+        //         // Look if at least one button is selected
+        //         let numButtons = measureBtns.length;
+        //         var lastActive = true;
+        //         for (var i = 0; i < numButtons; i++) {
+        //             if (measureBtns[i].classList.contains("btn-primary")) lastActive = false;
+        //         }
+        //         if (lastActive) btn.className = "btn btn-primary active";
+        //         else deselectedMeasure(btn.value);
+        //     } else {
+        //         btn.className = "btn btn-primary active";
+        //         selectedMeasure(btn.value);
+        //     }
+        // }
+
+        // function getActiveMeasures() {
+        //     let numButtons = measureBtns.length;
+        //     var activeMeasures = [];
+        //     for (var i = 0; i < numButtons; i++) {
+        //         if (measureBtns[i].classList.contains("btn-primary")) activeMeasures.push(measureBtns[i].value);
+        //     }
+        //     console.log(activeMeasures);
+        //     return activeMeasures;
+        // }
+
+        // function setAvailableMeasures(measures, activeMeasures=[]) {
+        //     // Add new one
+        //     var cont = document.getElementById('measureSelectContainer');
+        //     measureBtns = [];
+        //     cont.innerHTML = "";
+        //     var numMeasures = measures.length;
+        //     for (var i = 0; i < numMeasures; i++) {
+        //         var numMeasures = measures.length;
+        //         var btn = addOptionToButtonContainer(cont, measures[i]["name"], value=measures[i]["id"], func=measureClicked);
+        //         if (activeMeasures.includes(measures[i]["id"])) {
+        //             btn.className = "btn btn-primary active";
+        //         }
+        //         measureBtns.push(btn);
+        //     }
+        // }
+        
+        // function selectedMeasure(measure) {
+        //     console.log("selected measure: " + measure);
+        //     startTs = chart.xAxis[0].dataMin/1000.0;
+        //     stopTs = chart.xAxis[0].dataMax/1000.0;
+        //     addMeasureSelection(startTs, stopTs, measure);
+        // }
+        // function deselectedMeasure(measure) {
+        //     console.log("deselected measure: " + measure);
+        //     removeChartSeries(measure);
+        // }
+
+        // // Called when the user selects new measure to display
+        // function measureSelected() {
+        //     var sel = this.value;  
+        //     console.log("newMeasureSelected: " + sel);
+        //     startTs = chart.xAxis[0].dataMin/1000.0;
+        //     stopTs = chart.xAxis[0].dataMax/1000.0;
+        //     newSelection(startTs, stopTs);
+        // }

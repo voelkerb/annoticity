@@ -26,22 +26,22 @@
 {% block content %}
 
 
-        
+    <!-- Disables that progress bar transitions to new value -->
     <!-- <style>
         .progress.active .progress-bar {
             -webkit-transition: none !important;
             transition: none !important;
         }
     </style> -->
+    <!-- Left align this -->
     <div class="d-flex flex-start">
-
+        <!-- no Margin -->
         <div class="p-0">
-            <!-- <h2>Annoticity Labeling Tool</h2> -->
+            <!-- Instructions -->
             <p>Load a dataset from the server or upload your own file to label it.</p>  
-
+            <!-- All available datasts + upload -->
             <!-- Nav tabs -->
             <ul class="nav nav-tabs">
-
                 <li class="nav-item">
                     <a class="nav-link {% if navbar == 'FIRED' %}active{% endif %}" href="#FIRED" onclick="return false;">FIRED</a>
                 </li>
@@ -49,21 +49,28 @@
                     <a class="nav-link {% if navbar == 'REDD' %}active{% endif %}" href="#REDD" onclick="return false;">REDD</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {% if navbar == 'UKDALE' %}active{% endif %}" href="#UKDALE" onclick="return false;">UK-DALE</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if navbar == 'BLOND' %}active{% endif %}" href="#BLOND" onclick="return false;">BLOND</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if navbar == 'ECO' %}active{% endif %}" href="#ECO" onclick="return false;">ECO</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {% if navbar == 'Custom' %}active{% endif %}" href="#Custom" onclick="return false;">Custom Upload</a>
                 </li>
             </ul>
 
-            <!-- Tab panes -->
+            <!-- Content of tabs -->
             <div class="tab-content border mb-3">
+                <!-- FIRED Dataset selection -->
                 <div id="FIRED" class="container tab-pane {% if navbar == 'FIRED' %}active{% endif %}"><br>
                     <!-- FIRED Selection Form -->
                     <div class="form-inline mb-3">
                         <div class="form-group">
                             <label class="mr-1">Device: </label><br>  
-                            <select class="form-control custom-control-inline" id="selDev">
-                                {% for dev in FIREDDevices%}
-                                    <option>{{dev}}</option>
-                                {% endfor %}
+                            <select class="form-control content-width custom-control-inline" id="selFIREDDev">
                             </select>
                             <div class="input-group custom-control-inline">
                                 <div class="input-group-prepend">
@@ -71,19 +78,27 @@
                                 </div>
                                 <input class="form-control" id="dateInpFIRED" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
-                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
+                            <button type="submit" id="applyFIRED" class="btn btn-dark">Apply</button>
                         </div>
-                    </div>     
+                    </div>   
+                    <div class="row m-0">
+                        The FIRED dataset (2020) covers 52 days electricity recordings of a 79sqm apartment building in Germany.
+                    </div> 
+                    <div class="flex-row mb-2">
+                        <a href="http://redd.csail.mit.edu">TODO: More info</a>
+                        <a class="ml-3" href="http://redd.csail.mit.edu/kolter-kddsust11.pdf">TODO: Publication</a>
+                    </div> 
                 </div>
+                <!-- REDD Dataset selection -->
                 <div id="REDD" class="container tab-pane {% if navbar == 'REDD' %}active{% endif %}"><br>
                     <!-- FIRED Selection Form -->
                     <div class="form-inline mb-3">
                         <div class="form-group">
                             <label class="mr-1">House: </label><br>  
-                            <select class="form-control custom-control-inline" id="selREDDHouse">
+                            <select class="form-control content-width custom-control-inline" id="selREDDHouse">
                             </select>
                             <label class="mr-1">Channel: </label><br>  
-                            <select class="form-control custom-control-inline" id="selREDDChannel">
+                            <select class="form-control content-width custom-control-inline" id="selREDDChannel">
                             </select>
                             <div class="input-group custom-control-inline">
                                 <div class="input-group-prepend">
@@ -93,8 +108,105 @@
                             </div>
                             <button type="submit" id="applyREDD" class="btn btn-dark">Apply</button>
                         </div>
-                    </div>     
+                    </div>    
+                    
+                    <div class="row m-0">
+                        The REDD dataset (2011) covers several weeks electricity recordings of 6 houses in the US.
+                    </div> 
+                    <div class="flex-row mb-2">
+                        <a href="http://redd.csail.mit.edu">More info</a>
+                        <a class="ml-3" href="http://redd.csail.mit.edu/kolter-kddsust11.pdf">Publication</a>
+                    </div> 
                 </div>
+                <!-- UK-Dale Dataset selection -->
+                <div id="UKDALE" class="container tab-pane {% if navbar == 'UKDALE' %}active{% endif %}"><br>
+                    <!-- FIRED Selection Form -->
+                    <div class="form-inline mb-3">
+                        <div class="form-group">
+                            <label class="mr-1">House: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selUKDALEHouse">
+                            </select>
+                            <label class="mr-1">Meter: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selUKDALEMeter">
+                            </select>
+                            <div class="input-group custom-control-inline">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Date:</span>
+                                </div>
+                                <input class="form-control" id="dateInpUKDALE" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                            </div>
+                            <button type="submit" id="applyUKDALE" class="btn btn-dark">Apply</button>
+                        </div>
+                    </div>   
+                    
+                    <div class="row m-0">
+                        The UK-Dale dataset (2012-2017) covers multiple years electricity recordings of 5 houses in the UK.
+                    </div> 
+                    <div class="flex-row mb-2">
+                        <a href="https://data.ukedc.rl.ac.uk/browse/edc/efficiency/residential/EnergyConsumption/Domestic/UK-DALE-2017/ReadMe_DALE-2017.html">More info</a>
+                        <a class="ml-3" href="https://www.doi.org/10.1038/sdata.2015.7">Publication</a>
+                    </div>  
+                </div>
+                <!-- BLOND Dataset selection -->
+                <div id="BLOND" class="container tab-pane {% if navbar == 'BLOND' %}active{% endif %}"><br>
+                    <!-- BLOND Selection Form -->
+                    <div class="form-inline mb-3">
+                        <div class="form-group">
+                            <label class="mr-1">Set: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selBLONDSet">
+                            </select>
+                            <label class="mr-1">Meter: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selBLONDMeter">
+                            </select>
+                            <label class="mr-1">Channel: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selBLONDChannel">
+                            </select>
+                            <div class="input-group custom-control-inline">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Date:</span>
+                                </div>
+                                <input class="form-control" id="dateInpBLOND" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                            </div>
+                            <button type="submit" id="applyBLOND" class="btn btn-dark">Apply</button>
+                        </div>
+                    </div>    
+                    <div class="row m-0">
+                        The BLOND dataset (2016-2017) covers high frequency electricity recordings of an office building in Germany.
+                    </div> 
+                    <div class="flex-row mb-2">
+                        <a href="https://mediatum.ub.tum.de/1375836">More info</a>
+                        <a class="ml-3" href="https://www.doi.org/10.1038/sdata.2018.48">Publication</a>
+                    </div>    
+                </div>
+                <!-- ECO Dataset selection -->
+                <div id="ECO" class="container tab-pane {% if navbar == 'ECO' %}active{% endif %}"><br>
+                    <!-- ECO Selection Form -->
+                    <div class="form-inline mb-3">
+                        <div class="form-group">
+                            <label class="mr-1">House: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selECOHouse">
+                            </select>
+                            <label class="mr-1">Meter: </label><br>  
+                            <select class="form-control content-width custom-control-inline" id="selECOMeter">
+                            </select>
+                            <div class="input-group custom-control-inline">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">Date:</span>
+                                </div>
+                                <input class="form-control" id="dateInpECO" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                            </div>
+                            <button type="submit" id="applyECO" class="btn btn-dark">Apply</button>
+                        </div>
+                    </div>      
+                    <div class="row m-0">
+                        The ECO dataset (2012-2013) covers electricity recordings of 6 houses in Switzerland.
+                    </div> 
+                    <div class="flex-row mb-2">
+                        <a href="https://www.vs.inf.ethz.ch/res/show.html?what=eco-data">More info</a>
+                        <a class="ml-3" href="https://doi.org/10.1145/2674061.2674064">Publication</a>
+                    </div>  
+                </div>
+                <!-- Custom file upload -->
                 <div id="Custom" class="container tab-pane {% if navbar == 'Custom' %}active{% endif %}"><br>
                     <!-- Custom upload form -->
                     <div class="d-flex flex-row mb-3">
@@ -111,30 +223,20 @@
                                 </div>
                             </div >
                         </form>
-                        {% if uploaded_file_name %}
-                            <div class="p-2 ml-3">File uploaded:</div>
-                            <div class="p-2 bg-info"> {{ uploaded_file_name }}</div>
-                        {% endif %}
                     </div >
                 </div>
             </div>
         </div>
+
     </div>
 
-    <div class="pb-2 d-flex flex-row align-items-center">
-        
-        <select class="form-control custom-control-inline" id="selectedMeasure" style="width: 150px; ">
-            <option disabled>Select Measure</option>
-        </select>
-
-        <select style="display:none" id="width_tmp_select">
-            <option id="width_tmp_option"></option>
-        </select>
-    </div>
-    
+    <!-- Hidden select to get size of content and set selects accordingly -->
+    <select class="w-auto form-control" style="display:none" id="width_tmp_select">
+        <option id="width_tmp_option">test </option>
+    </select>
 
     <!-- Highcharts display -->
-    <div class="border" id="chart_container" style="min-width: 500px; height: 400px; margin: 0 auto"></div>
+    <div class="border" id="chart_container" style="min-width: 500px; height: 700px; margin: 0 auto"></div>
 
     <hr/>
     
@@ -152,7 +254,7 @@
             <div id="collapseLabelingSettings" class="collapse show" role="tabpanel" aria-labelledby="collapseLabelingSettings" data-parent="#accordionEx">
                 <div class="card-body d-flex flex-row align-items-center">
                     <span class="mr-3">Event Resolution: </span>
-                    <input class="slider mr-3" id="eventResSlider" type="range" value="1.0" min="0.1" max="3.0" step="0.1">
+                    <input class="slider mr-3" id="eventResSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
                     <span id="eventResSlider_value" style="width: 50px;">0</span>
                     <div class="p-2 ml-3">
                         <div class="form-check">
@@ -290,19 +392,9 @@
             <button type="submit" id="removeLabels" class="btn btn-danger pull-right">Remove all Labels</button>
         </div>
         
-        <!-- <div class="p-2 ml-3">
-            <div class="form-check">
-                <label class="form-check-label" for="textCheck">Range Labels</label>
-                <input type="checkbox" class="form-check-input" id="rangeLabelsActive" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
-            </div>
-        </div> -->
         <!-- Pull export button to the right of the page -->
         <div class="p-2 ml-auto">
-            <button type="submit" id="exportCSV" class="btn btn-dark pull-right">Download CSV</button>
-        </div>
-        <!-- Pull export button to the right of the page -->
-        <div class="p-2">
-            <button type="submit" id="exportMKV" class="btn btn-dark pull-right">Download MKV with Subs</button>
+            <button type="submit" id="exportButton" class="btn btn-dark pull-right">Export</button>
         </div>
     </div>
 
@@ -386,57 +478,86 @@
     </div>
 
     <!-- Modal -->
-    <!-- Fix for switch at the bottom -->
-    <div class="modal fade" id="exportCSVModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+    <div class="modal fade" id="exportModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
         <div class="modal-dialog modal-dialog-centered">
         
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">CSV Export</h4>
+                    <h3 class="modal-title">File Export</h3>
                 </div>
                 <div class="modal-body">
-                    <p class="modal-dialog">Export options:</p>
+                    <!-- <h5 class="mt-0 mb-1 modal-dialog">Export options:</h5> -->
                     <form>
-                        <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Column Sep.:</label>
-                            <div class="col-sm-8">
-                                <select class="selectpicker show-tick form-control" id="modalCSVColumnSep">
-                                    <option value="t" selected>Tab</option>
-                                    <option value=" ">Space</option>
-                                    <option value=",">Comma</option>
+                        <div class="form-group row mb-0 align-items-center has-success">
+                            <label class="col-sm-6 col-form-label">Format:</label>
+                            <div class="col-sm-6">
+                                <select class="selectpicker show-tick form-control" id="modalExportFormat">
+                                    <option value="MKV" selected>MKV</option>
+                                    <option value="CSV">CSV</option>
+                                    <option value="SRT">SRT</option>
+                                    <option value="ASS">ASS</option>
                                 </select>
+                                <span id="ASShelp" class="help-block">ASS only supports times up to 10h.</span>
                             </div>
-                        </div>
-                        <div class="form-group row align-items-center"">
-                            <label class="col-sm-4 col-form-label">Range Labels:</label>
-                            <div class="col-sm-8">
-                                <input type="checkbox" id="modalCSVRangeLabelCheck" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                            <hr class="col-sm-12">
+                            <div class="container m-0 p-0 row align-items-center" id="exportIncludeDataContainer">
+                                <h5 class="mt-0 mb-1 col-sm-12 modal-dialog">MKV options:</h5>
+                                <label class="col-sm-6 col-form-label">Include Data:</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" id="modalMKVIncludeData" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                                </div>
+                                <hr class="col-sm-12">
                             </div>
-                            <label class="col-sm-4 col-form-label">Header:</label>
-                            <div class="col-sm-8">
-                                <input type="checkbox" id="modalCSVHeader" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                            <div class="container m-0 p-0 row align-items-center" id="exportCSVContainer">
+
+                                <h5 class="mt-0 mb-1 col-sm-12 modal-dialog">CSV options:</h5>
+                                <label class="col-sm-6 col-form-label">Column Separator:</label>
+                                <div class="col-sm-6">
+                                    <select class="selectpicker show-tick form-control" id="modalCSVColumnSep">
+                                        <option value="t" selected>Tab</option>
+                                        <option value=" ">Space</option>
+                                        <option value=",">Comma</option>
+                                    </select>
+                                </div>
+                                <!-- <label class="col-sm-6 col-form-label">Range Labels:</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" id="modalCSVRangeLabelCheck" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                                </div> -->
+                                <label class="col-sm-6 col-form-label">Header:</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" id="modalCSVHeader" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                                </div>
+                                <label class="col-sm-6 col-form-label">Use Seconds:</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" id="modalCSVSeconds" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                                    <!-- <input type="checkbox" id="modalCSVSeconds" data-toggle="toggle" data-size="sm" data-on="Seconds" data-off="Timestamps" data-onstyle="outline-warning" data-offstyle="outline-info"  style="min-width: 80px;" > -->
+                                </div>
+                                
+                                <hr class="col-sm-12">
                             </div>
-                            <label class="col-sm-4 col-form-label">Time:</label>
-                            <div class="col-sm-8">
-                                <input type="checkbox" id="modalCSVSeconds" data-toggle="toggle" data-size="sm" data-on="Seconds" data-off="Timestamps" data-onstyle="outline-warning" data-offstyle="outline-info"  style="min-width: 80px;" >
+                            <div class="container m-0 p-0 row align-items-center" id="exportSelRangeContainer">
+                                <label class="col-sm-6 col-form-label">Selected Range:</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" id="modalExportSelRange" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
+                                </div>
                             </div>
-                            
                         </div>
                           
                     </form>
                            
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default modalCancel" id="CSVModalCancel" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-default modalOk" id="CSVModalOk" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-default modalCancel" id="ExportModalCancel" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-default modalOk" id="ExportModalOk" data-dismiss="modal">Ok</button>
                 </div>
             </div>
         
         </div>
     </div>
 
-    <!-- Modal -->
+
+    <!-- Progress bar Modal -->
     <div class="modal hide" id="progressBarModal" data-keyboard="false" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
         <div class="modal-dialog modal-dialog-centered">
             <!-- Modal content-->
@@ -452,55 +573,12 @@
         </div>
     </div>
     
-    <!-- Modal -->
-    <div class="modal fade" id="exportMKVModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
-        <div class="modal-dialog modal-dialog-centered">
-        
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">MKV Export</h4>
-                </div>
-                <div class="modal-body">
-                    <p class="modal-dialog">Export options:</p>
-                    <form>
-                        <div class="form-group row align-items-center has-success">
-                            <label class="col-sm-4 col-form-label">Format:</label>
-                            <div class="col-sm-8">
-                                <select class="selectpicker show-tick form-control" id="modalMKVFormat">
-                                    <option value="MKV" selected>MKV</option>
-                                    <option value="SRT">SRT</option>
-                                    <option value="ASS">ASS</option>
-                                </select>
-                                <span id="ASShelp" hidden class="help-block">ASS only supports times up to 10h.</span>
-                            </div>
-                            <label class="col-sm-4 col-form-label">Include Data:</label>
-                            <div class="col-sm-8">
-                                <input type="checkbox" id="modalMKVIncludeData" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
-                            </div>
-                            <label class="col-sm-4 col-form-label">Selected Range:</label>
-                            <div class="col-sm-8">
-                                <input type="checkbox" id="modalMKVSelRange" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger">
-                            </div>
-                        </div>
-                          
-                    </form>
-                           
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default modalCancel" id="MKVModalCancel" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-default modalOk" id="MKVModalOk" data-dismiss="modal">Ok</button>
-                </div>
-            </div>
-        
-        </div>
-    </div>
     <hr/>
 
     <!-- Alert message if upload went wrong -->
     {% if message %}
     <script>
-        alert('{{ message }}');
+        alert('{{ msg }}');
     </script>
     {% endif %}
 
@@ -508,103 +586,385 @@
     <!-- Javascript stuff -->
     <script>
 
-        var statusSocket = null;
-        connectWs();
+        // __________________________________ GLOBAL VARIABLES ___________________________________
+        // Dict holding all events
+        var eventInfo = new Object();
+        var events = [];
+        var labels = [];
+        var fileName = "";
+        var chart = null;
+        var device = null;
+        var date = document.getElementById('dateInpFIRED').value;
+        var dataType = "FIRED";
+        var newlabels = false;
+        var progressBar;
+        var reddInfo = JSON.parse('{{ REDDInfo|safe }}');
+        var ukdaleInfo = JSON.parse('{{ UKDALEInfo|safe }}');
+        var ecoInfo = JSON.parse('{{ ECOInfo|safe }}');
+        var firedInfo = JSON.parse('{{ FIREDInfo|safe }}');
+        var blondInfo = JSON.parse('{{ BLONDInfo|safe }}');
+        var sliderValues = {
+            "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s"},
+            "postEventWindowLength": {"value": getStoredValue("postEventWindowLength"),"unit":"s"},
+            "votingWindowLength": {"value": getStoredValue("votingWindowLength"),"unit":"s"},
+            "thresMin": {"value": getStoredValue("thresMin"),"unit":"W"},
+            "thresLinearCoeff": {"value": getStoredValue("thresLinearCoeff"),"unit":""},
+            "eventRes": {"value": getStoredValue("eventRes"),"unit":"s"},
+        }
+        var textLabelsActive = (getStoredValue("textLabelsActive") == 'true');
+        var title = "Select a device and time, then click apply.";
+        var data = [0,0,0,0];
+        var modalOpen = false;
+        var modalResult = null;
+        // Need to be done here, does not work in document ready
+        document.getElementById("textLabelsActive").checked = textLabelsActive;
 
-        function connectWs() {
-            var statusSocket = new WebSocket(
-                'ws://'
-                + window.location.host
-                + '/ws/'
-            );
-            console.log(window.location.host);
+        // __________________________________ UI _____________________________________
+        // Load slider and checkboxes depending on stored values values
+        // Load datepicker and sall stuff to display correct
+        $(document).ready(function(){
+            // Slider values
+            for (var key in sliderValues){
+                let slider = document.getElementById(key + "Slider");
+                if (slider !== null) slider.value = sliderValues[key]["value"];
+                let value = document.getElementById(key + "Slider_value");
+                if (value !== null) value.innerHTML = sliderValues[key]["value"] + " " + sliderValues[key]["unit"];
+            }
 
-            statusSocket.onmessage = webSocketMsg;
+            // Data of FIRED
+            var sel = document.getElementById("selFIREDDev");
+            // Set meters
+            for (let dev in firedInfo) {
+                if (dev != "range") {
+                    addOptionToSelect(sel, firedInfo[dev], value=dev);
+                }
+            }
+            // Set date range
+            var dateStart = new Date(firedInfo["range"][0]*1000);
+            var dateEnd = new Date(firedInfo["range"][1]*1000);
+            var date_input=$('input[id="dateInpFIRED"]'); //our date input has the name "date"
+            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+            date_input.datepicker({
+                format: 'dd/mm/yyyy',
+                minDate: dateStart,
+                maxDate: dateEnd,
+                container: container,
+                todayHighlight: true,
+                autoclose: true,
+            })
+                
 
-            statusSocket.onclose = function(e) {
-                console.error('WS closed unexpectedly');
-            };
+            // Data of FIRED
+            var selSet = document.getElementById("selBLONDSet");
+            var selMeter = document.getElementById("selBLONDMeter");
+            // Set meters
+            for (let set in blondInfo) {
+                addOptionToSelect(selSet, set);
+            }
+            selMeter.dispatchEvent(new Event('change'));
+            // Set channels and time depending on current set selection
+            setBLONDMeters();
+            setBLONDChannels();
+            selSet.onchange = setBLONDMeters;
+            selMeter.onchange = setBLONDChannels;
 
+            // Data of REDD
+            // Set House
+            for (let house in reddInfo){
+                addOptionToSelect(document.getElementById("selREDDHouse"), String(house));
+            }
+            // Set channels and time depending on current house selection
+            setREDDChannels();
+            document.getElementById("selREDDHouse").onchange = setREDDChannels;
 
-            statusSocket.onclose = function(e) {
-                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-                setTimeout(function() {
-                    connectWs();
-                }, 1000);
-            };
+            var selHouse = document.getElementById("selECOHouse");
+            var selMeter = document.getElementById("selECOMeter");
+            // Data of ECO
+            // Set House
+            for (let house in ecoInfo){
+                addOptionToSelect(selHouse, String(house));
+            }
+            // Set channels and time depending on current house selection
+            setECOMeters();
+            setECOTimes();
+            selHouse.onchange = setECOMeters;
+            selMeter.onchange = setECOTimes;
 
-            statusSocket.onerror = function(err) {
-                console.error('Socket encountered error: ', err.message, 'Closing socket');
-                ws.close();
-                setTimeout(function() {
-                    connectWs();
-                }, 1000);
-            };
+            var selHouse = document.getElementById("selUKDALEHouse");
+            var selMeter = document.getElementById("selUKDALEMeter");
+            // Set House
+            for (let house in ukdaleInfo){
+                addOptionToSelect(selHouse, String(house));
+            }
+
+            // Set channels and time depending on current house selection
+            setUKDALEMeters();
+            setUKDALETimes();
+            selHouse.onchange = setUKDALEMeters;
+            selMeter.onchange = setUKDALETimes;
+        });
+
+        function setUKDALEMeters() {
+            var meterSel = document.getElementById('selUKDALEMeter');
+            removeOptionsFromSelect(meterSel);
+
+            var houseSel = document.getElementById('selUKDALEHouse');
+            var house = houseSel[houseSel.selectedIndex].value;
+            console.log("Sel UKDale House: " + house);
+            if (ukdaleInfo[house] !== null) {
+                numMeters = ukdaleInfo[house]["meters"].length;
+                for (var i=0; i < numMeters; i++) {
+                    let meter = ukdaleInfo[house]["meters"][i]
+                    var niceName = meter + ": " + ukdaleInfo[house]["mapping"][meter];
+                    addOptionToSelect( meterSel, label=niceName, value=ukdaleInfo[house]["meters"][i]);
+                }
+
+                meterSel.dispatchEvent(new Event('change'));
+                setUKDALETimes();
+            }
+        }
+        
+        var currentUKDaleTimes = null;
+        function checkUKDaleDate(date) {
+            if (currentUKDaleTimes !== null) {
+                var seconds = date.getTime() / 1000;
+                let rangesLen = currentUKDaleTimes.length;
+                for (var i=0; i<rangesLen; i++) {
+                    let startTs = currentUKDaleTimes[i][0];
+                    var sdate = new Date(startTs*1000);
+                    sdate.setHours(0, 0, 0, 0);
+                    startTs = sdate.getTime() / 1000;
+                    let stopTs = currentUKDaleTimes[i][1];
+                    if (startTs <= seconds && seconds <= stopTs) return [true];
+                    // Should make it faster
+                    if (startTs > seconds) break; 
+                }
+            }
+            return [false];
         }
 
-        function webSocketMsg(e) {
-            const data = JSON.parse(e.data);
-            console.log(data);
-            if ("status" in data) {
-                if (progressBar.isShown()) progressBar.setText(data["status"]);
+        function setUKDALETimes() {
+            var houseSel = document.getElementById('selUKDALEHouse');
+            var house = houseSel[houseSel.selectedIndex].value;
+            var meterSel = document.getElementById('selUKDALEMeter');
+            var meter = meterSel[meterSel.selectedIndex].value;
+
+            $.ajax({
+                url: 'data/UKDALE/times/house=' + house + '&meter=' + meter,
+                success: function (data) {
+                    currentUKDaleTimes = data["ranges"];
+                    var oldDate = document.getElementById('dateInpUKDALE').value;
+                    var startTs = currentUKDaleTimes[0][0]
+                    var stopTs = currentUKDaleTimes[currentUKDaleTimes.length-1][1]
+                    var dateStart = new Date(startTs*1000);
+                    var dateEnd = new Date(stopTs*1000);
+                    // Need to reinit datepicker object 
+                    $("#dateInpUKDALE").datepicker( "destroy" );
+
+                    var date_input=$('input[id="dateInpUKDALE"]'); //our date input has the name "date"
+                    var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+                    console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+                
+                    date_input.datepicker({
+                        format: 'dd/mm/yyyy',
+                        todayHighlight: true,
+                        autoclose: true,
+                        beforeShowDay: checkUKDaleDate,
+                        defaultDate: dateStart,
+                        minDate: dateStart,
+                        maxDate: dateEnd,
+                    });
+                    if (checkUKDaleDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
+                    else date_input.val("");
+                }
+            });
+
+        }
+
+        function checkEcoDate(date) {
+            var meterSel = document.getElementById('selECOMeter');
+            var meter = Number(meterSel[meterSel.selectedIndex].value);
+            var houseSel = document.getElementById('selECOHouse');
+            var house = Number(houseSel[houseSel.selectedIndex].value);
+            if (ecoInfo[house] !== null && ecoInfo[house][meter] !== null) {
+                var ranges = ecoInfo[house][meter];
+                var seconds = date.getTime() / 1000;
+                let rangesLen = ranges.length;
+                for (var i=0; i<rangesLen; i++) {
+                    let startTs = ranges[i][0];
+                    var sdate = new Date(startTs*1000);
+                    sdate.setHours(0, 0, 0, 0);
+                    startTs = sdate.getTime() / 1000;
+                    let stopTs = ranges[i][1];
+                    if (startTs <= seconds && seconds <= stopTs) return [true];
+                    // Should make it faster
+                    if (startTs > seconds) break; 
+                }
             }
-            if ("percent" in data) {
-                if (progressBar.isShown()) progressBar.setPercent(data["percent"]);
+            return [false];
+        }
+
+        function setECOTimes() {
+            var meterSel = document.getElementById('selECOMeter');
+            var meter = meterSel[meterSel.selectedIndex].value;
+
+            var houseSel = document.getElementById('selECOHouse');
+            var house = houseSel[houseSel.selectedIndex].value;
+            console.log("Sel Meter: " + meter);
+            if (ecoInfo[house] !== null && ecoInfo[house][meter] !== null) {
+
+                var oldDate = document.getElementById('dateInpECO').value;
+                var ranges = ecoInfo[house][meter];
+
+                var startTs = ranges[0][0]
+                var stopTs = ranges[ranges.length-1][1]
+                var dateStart = new Date(startTs*1000);
+                var dateEnd = new Date(stopTs*1000);
+                // Need to reinit datepicker object 
+                $("#dateInpECO").datepicker( "destroy" );
+
+                var date_input=$('input[id="dateInpECO"]'); //our date input has the name "date"
+                var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+                console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+            
+                date_input.datepicker({
+                    format: 'dd/mm/yyyy',
+                    todayHighlight: true,
+                    autoclose: true,
+                    beforeShowDay: checkEcoDate,
+                    defaultDate: dateStart,
+                    minDate: dateStart,
+                    maxDate: dateEnd,
+                });
+                if (checkEcoDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
+                else date_input.val("");
+            }
+        }
+        function setECOMeters() {
+            var meterSel = document.getElementById('selECOMeter');
+            removeOptionsFromSelect(meterSel);
+
+            var houseSel = document.getElementById('selECOHouse');
+            var house = houseSel[houseSel.selectedIndex].value;
+            console.log("Sel House: " + house);
+            if (ecoInfo[house] !== null) {
+                for (var meter in ecoInfo[house]) {
+                    console.log(meter);
+                    addOptionToSelect( meterSel,  meter);
+                }
+
+                meterSel.dispatchEvent(new Event('change'));
+                setECOTimes();
             }
         }
 
-        $("#modalMKVFormat").change(function(){
-            let formatSel = document.getElementById("modalMKVFormat"); 
-            let format = formatSel[formatSel.selectedIndex].value;
-            if (format !== "MKV") {
-                $('#modalMKVIncludeData').bootstrapToggle('off')  
-                $('#modalMKVIncludeData').bootstrapToggle('disable')  
-            } else  {
-                $('#modalMKVIncludeData').bootstrapToggle('enable')  
+        // Set available BLOND channels and date depending on current house selection
+        function setBLONDChannels() {
+            var meterSel = document.getElementById('selBLONDMeter');
+            var meter = meterSel[meterSel.selectedIndex].value;
+            var setSel = document.getElementById('selBLONDSet');
+            var set = setSel[setSel.selectedIndex].value;
+
+            var channelSel = document.getElementById('selBLONDChannel');
+            if (set in blondInfo && meter in blondInfo[set]["meters"]) {
+                var channels = blondInfo[set]["meters"][meter];
+                let numChannels = channels.length;
+                removeOptionsFromSelect(channelSel);
+                for (var i=0; i<numChannels; i++) {
+                    addOptionToSelect(channelSel, channels[i]);
+                }
+                document.getElementById('selBLONDChannel').dispatchEvent(new Event('change'));
             }
-            if (format != "ASS") {
-                $('#ASShelp').hide();
-            } else {
-                $('#ASShelp').show();  
+        }
+
+        function setBLONDMeters() {
+            var meterSel = document.getElementById('selBLONDMeter');
+            removeOptionsFromSelect(meterSel);
+
+            var setSel = document.getElementById('selBLONDSet');
+            var set = setSel[setSel.selectedIndex].value;
+            if (set in blondInfo) {
+                for (var meter in blondInfo[set]["meters"]) {
+                    addOptionToSelect( meterSel,  meter);
+                }
+                document.getElementById('selBLONDMeter').dispatchEvent(new Event('change'));
+                var BLONDRange = blondInfo[set]["range"];
+                var dateStart = new Date(BLONDRange[0]*1000);
+                var dateEnd = new Date(BLONDRange[1]*1000);
+
+                // Need to reinit datepicker object 
+                $("#dateInpBLOND").datepicker( "destroy" );
+
+                var date_input=$('input[id="dateInpBLOND"]'); //our date input has the name "date"
+                var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+                console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+            
+                date_input.datepicker({
+                    format: 'dd/mm/yyyy',
+                    minDate: dateStart,
+                    maxDate: dateEnd,
+                    // container: container,
+                    todayHighlight: true,
+                    autoclose: true,
+                })
+                date_input.val("");
             }
+        }
+
+        // Set available REDD channels and date depending on current house selection
+        function setREDDChannels() {
+            var sel = document.getElementById('selREDDChannel');
+            removeOptionsFromSelect(sel);
+
+            var houseSel = document.getElementById('selREDDHouse');
+            var house = Number(houseSel[houseSel.selectedIndex].value);
+            console.log("Sel house: " + house);
+            if (house in reddInfo) {
+                let numChannels = reddInfo[house]["channels"].length;
+                for (var i = 0; i < numChannels; i++) {
+                    let channel = "channel_" + reddInfo[house]["channels"][i];
+                    var niceName = reddInfo[house]["channels"][i] + ": " + reddInfo[house]["mapping"][channel]
+                    addOptionToSelect( sel,  niceName, value=reddInfo[house]["channels"][i]);
+                }
+            }
+
+            var REDDRange = reddInfo[house]["times"];
+            var dateStart = new Date(REDDRange[0]*1000);
+            var dateEnd = new Date(REDDRange[1]*1000);
+
+            // Need to reinit datepicker object 
+            $("#dateInpREDD").datepicker( "destroy" );
+
+            var date_input=$('input[id="dateInpREDD"]'); //our date input has the name "date"
+            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+           
+            date_input.datepicker({
+                format: 'dd/mm/yyyy',
+                minDate: dateStart,
+                maxDate: dateEnd,
+                // container: container,
+                todayHighlight: true,
+                autoclose: true,
+            })
+            date_input.val("");
+        }
+
+
+        $('#textLabelsActive').change(function () {
+            textLabelsActive = this.checked;
+            storeValue("textLabelsActive", textLabelsActive);
         });
 
-
-        $(".modalOk").on("click", function(){
-            console.log("Modal okay");
-            modalResult = "okay";
-        });
-
-        $( ".modalCancel" ).on("click", function(){
-            console.log("Modal cancel");
-            modalResult = "cancel";
-        });
-
-        $('#labelModal').on('shown.bs.modal', function () {
-            $('#textLabelInput').focus();
-        })  
-        $('#changeLabelModal').on('shown.bs.modal', function () {
-            $('#textChangeLabelInput').focus();
-        })  
-
-        $(document).keypress(function(e) {
-            if ($("#labelModal").hasClass('show') && (e.keycode == 13 || e.which == 13)) {
-                $('#labelModalOk').click();  
-            }
-            if ($("#changeLabelModal").hasClass('show') && (e.keycode == 13 || e.which == 13)) {
-                $('#changeLabelModalOk').click();  
-            }
-            console.log(e.keyCode);
-            // Todo remove after debugging
-            // if (e.keyCode == 108) {
-            //     var deviceEl = document.getElementById('selDev');
-            //     deviceEl.selectedIndex = 1;
-            //     device = deviceEl[deviceEl.selectedIndex].value;
-            //     date = document.getElementById('dateInpFIRED');
-            //     date.value = "08/04/2020";
-            //     console.log(device + ": " + date.value );
-            //     newFIREDSelected(device, "p", date.value );
-            // }
+        // All sliders  on input store variable as default and set value label with unit
+        $('.slider').on('input', function () {
+            var id = $(this).attr('id');
+            let name = id.replace("Slider", "");
+            let output = document.getElementById(id + "_value");
+            let value = this.value;
+            sliderValues[name]["value"] = value;
+            storeValue(String(name), value);
+            output.innerHTML = value + " " + sliderValues[name]["unit"];
         });
 
         // Navigation bar change of tab
@@ -621,162 +981,54 @@
         // File input change label to selected file
         $(".custom-file-input").on("change", function() {
             fileName = $(this).val().split("\\").pop();
+            if (fileName.length > 49) {
+                fileName = fileName.substring(0,45) + "...";
+            }
             $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
         });
 
-        // Dict holding all events
-        var eventInfo = new Object();
-        var events = [];
-        var labels = [];
-        var startTs = 0;
-        var fileName = "";
-        var chart = null;
-        var deviceEl = document.getElementById('selDev');
-        var device = deviceEl[deviceEl.selectedIndex].value;
-        var deviceName = device;
-        var date = document.getElementById('dateInpFIRED').value;
-        var dataType = "FIRED";
-        var newlabels = false;
-
-        $.ajaxSetup({ 
-            beforeSend: function(xhr, settings) {
-                var csrftoken = '{{ csrf_token }}';
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                }
-            } 
-        });
-
-        function getNextKey(list, dict) {
-            var arrayLength = list.length;
-            for (var i = 0; i < arrayLength; i++) {
-                if (list[i] in dict) {
-                    return list[i];
-                }
-            }
-            return null;
-        }
-
-        $("#labelFileForm").submit(function(e) {
-            e.preventDefault();    
-            var formData = new FormData(this);
-            if (chart === null) {
-                alert("Please first load the data.")
-                return;
-            }
-            formData.append("timestamp", chart.xAxis[0].min/1000   );
-            $.ajax({
-                url: 'data/uploadLabel/',
-                type: 'POST',
-                data: formData,
-                xhr: xhrInit,
-                success: function (data) {
-                    if ("message" in data) {
-                        alert(data["message"])
-                    }
-                    if ("labels" in data) {
-                        let numLabels = data["labels"].length;
-                        if (numLabels > 0) {
-                            firstLabel = data["labels"][0];
-                            var timeStampKey = getNextKey(["Timestamp", "timestamp", "ts", "startTs", "startTS", "start"], firstLabel);
-                            var labelKey = getNextKey(["Label", "label"], firstLabel);
-                            if (timeStampKey === null) {
-                                alert("No timestamp found in data");
-                                return;
-                            }
-                        }
-                        for (let i=0; i < numLabels; i++) {
-                            let labelEntry = data["labels"][i];
-                            var label = "";
-                            if (textLabelsActive) label = "unknown";
-                            if (labelKey !== null && labelKey in labelEntry) label = labelEntry[labelKey];
-                            ts = labelEntry[timeStampKey]*1000;
-                            let result = checkTSWithingBounds(ts);
-                            var tsOld = result[0];
-                            var index = result[1];
-                            // Already exists, lets delete
-                            if (index > -1) {
-                                console.log("Must remove old label before");
-                                removeLabel(tsOld);
-                            }
-                            addPlotLine(ts, 0, label);
-                            newlabels = false;
-                        }
-                    }
-                },
-                cache: false,
-                contentType: false,
-                processData: false
+        // Size of all selects based on dropdown selection
+        $(document).ready(function(){
+            $("select.content-width").each(function(){
+                $("#width_tmp_option").html($(this).children("option:selected").text()); 
+                $(this).width($("#width_tmp_select").width()); 
             });
         });
+        $("select.content-width").each(function(){
+            $(this).on('change', function() {
+                $("#width_tmp_option").html($(this).children("option:selected").text()); 
+                $(this).width($("#width_tmp_select").width()); 
+            });
+        });
+
+        // Disable download buttons if no data is displayed
+        $(document).ready(function(){
+            $("#exportButton").prop("disabled", events.length === 0);
+            $("#autoLabel").prop("disabled", events.length === 0);
+            $("#removeLabels").prop("disabled", events.length === 0);
+        });
+
         
-        var progressBar;
-        
-        function uploadProgress(e){
-            if(e.lengthComputable){
-                progressBar.setText("Uploading ...");
-                var max = e.total;
-                var current = e.loaded;
-
-                var percentage = (current * 100)/max;
-                console.log("Upload: " + percentage);
-                // $('.progress-bar').animate({ width: String(Math.round(percentage)) + '%' }, { duration: 1000  });
-                // $('#uploadBar').width(percentage + '%');
-
-                progressBar.setPercent(percentage);
-                //     width: percentage + '%'
-                // }, 0.100);
-                if(percentage >= 100) {
-                    progressBar.hide();
-                // process completed  
-                    // $('.progress-container').prop("hidden", true);
-                }
-            }  
-        }
-       
-        function downloadProgress(e){
-            if(e.lengthComputable){
-                progressBar.setText("Downloading ...");
-                var max = e.total;
-                var current = e.loaded;
-
-                var percentage = (current * 100)/max;
-                console.log("Download: " + percentage);
-                progressBar.setPercent(percentage);
-                // $('#downloadBar').width(percentage + '%');
-                if(percentage >= 100) {
-                    progressBar.hide();
-                    // $('.progress-container').prop("hidden", true);
-                // process completed  
-                }
-            }  
-        }
-          
+        // __________________________________ PROGRESS BAR _____________________________________
         progressBar = progressBar || (function () {
             return {
                 isShown: function() {
                     return $("#progressBarModal").hasClass('show');
                 },
                 show: function() {
-                    console.log("show progress bar");
                     $('.progress-bar').width('0%', 0);
                     $('#progressBarModal').modal("show");
                 },
                 setPercent: function(percent) {
-                    console.log("Set percent: " + percent);
                     $('.progress-bar').width(percent + '%');
                 },
                 setText: function(text) {
-                    console.log("Set progress title: " + text);
                     $('#progressBarText').text(text);
                 },
                 hide: function () {
-                    console.log("hide progress bar");
                     $('#progressBarModal').modal('hide');
                 },
                 animate: function (on) {
-                    console.log("change animation: " + on);
                     if (on === true) {
                         $('.progress-bar').addClass('progress-bar-animated');
 
@@ -788,102 +1040,51 @@
             };
         })();
 
+        // Called during data upload
+        function uploadProgress(e){
+            if(e.lengthComputable){
+                progressBar.setText("Uploading ...");
+                var percentage = (e.loaded * 100)/e.total;
+                progressBar.setPercent(percentage);
+                if(percentage >= 100) progressBar.hide();
+            }  
+        }
+       
+        // Called during data download
+        function downloadProgress(e){
+            if(e.lengthComputable){
+                progressBar.setText("Downloading ...");
+                var percentage = (e.loaded * 100)/e.total;
+                progressBar.setPercent(percentage);
+                if(percentage >= 100) progressBar.hide();
+            }  
+        }
+
         function xhrInit() {
             progressBar.setText("Uploading");
             progressBar.show();
-            
-            // $('.progress-container').prop("hidden", false);
-            // $('.progress-bar').width('0%', 0);
             var myXhr = $.ajaxSettings.xhr();
-            if(myXhr.upload){
-                myXhr.upload.addEventListener('progress',uploadProgress, false);
-            }
+            if(myXhr.upload) myXhr.upload.addEventListener('progress',uploadProgress, false);
             myXhr.addEventListener('progress',downloadProgress, false);
             return myXhr;
         }
 
-        $("#customUploadForm").submit(function(e) {
-            e.preventDefault();    
-            var formData = new FormData(this);
-            $.ajax({
-                url: 'data/uploadFile/',
-                type: 'POST',
-                data: formData,
-                xhr: xhrInit,
-                success: function (data) {
-                    console.log("ajax success")
-                    $("#exportCSV").prop("disabled", false);
-                    $("#exportMKV").prop("disabled", false);
-                    $("#autoLabel").prop("disabled", false);
-                    var ctx = document.getElementById("chart_container");
+        
 
-                    var redrawEnabled = true;
-                    chart = Highcharts.stockChart(ctx, data['chart'], function (chart) {
-
-                        // apply the date pickers
-                        setTimeout(function () {
-                            $('input.highcharts-range-selector', $(chart.container).parent())
-                                .datepicker();
-                        }, 0);
-                    });
-                    resetStuff();
-                    dataType = "Upload";
-                    startTs = data["startTs"];
-                    var subs = data['subs'];
-                    fileName = data['filename'];
-                    deviceName = data['device'];
-                    date = data['date'];
-                    numSubs = subs.length;
-                    for (i=0; i < numSubs; i++) {
-                        sub = subs[i];
-                        console.log(sub["startTs"] + "->" + sub["stopTs"] + ": "  + sub["text"]);
-                        let ts = sub["startTs"]*1000;
-                        addPlotLine(ts, 0, sub["text"]);
-                    }
-                    newlabels = false;
-
-                    measures = data["measures"];
-                    addMeasuresToSel(measures);
-                },
-                cache: false,
-                contentType: false,
-                processData: false
-            });
+        // __________________________________ AJAX SETUP _____________________________________
+        $.ajaxSetup({ 
+            beforeSend: function(xhr, settings) {
+                var csrftoken = '{{ csrf_token }}';
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            } 
         });
 
-        function addMeasuresToSel(measures) {
-            var sel = document.getElementById('selectedMeasure');
-            sel.onchange = null;
-            // Remove all entries
-            while (sel.firstChild) {
-                sel.removeChild(sel.firstChild);
-            }
-            // Add new one
-            var numMeasures = measures.length;
-            for (var i = 0; i < numMeasures; i++) {
-                var opt = document.createElement('option');
-                opt.setAttribute("value", measures[i]["id"]);
-                opt.appendChild( document.createTextNode(measures[i]["name"]) );
-                sel.appendChild(opt);
-            }
-            sel.onchange = measureSelected;
-        }
-
-        function measureSelected() {
-
-            $("#width_tmp_option").html($('#selectedMeasure option:selected').text()); 
-            $('#selectedMeasure').width($("#width_tmp_select").width()+20); 
-            var sel = this.value;  
-            console.log(sel);
-            startTs = chart.xAxis[0].dataMin/1000.0;
-            stopTs = chart.xAxis[0].dataMax/1000.0;
-            newSelection(startTs, stopTs);
-        }
-
+        // Download using ajax iframe
         function ajax_download(url, data, input_name) {
-            var $iframe,
-                iframe_doc,
-                iframe_html;
+            var $iframe, iframe_doc, iframe_html;
 
             if (($iframe = $('#download_iframe')).length === 0) {
                 $iframe = $("<iframe id='download_iframe'" +
@@ -909,197 +1110,265 @@
             $(iframe_doc).find('form').submit();
         }
 
-        $("#exportCSV").prop("disabled", events.length === 0);
-        $("#exportMKV").prop("disabled", events.length === 0);
-        $("#autoLabel").prop("disabled", events.length === 0);
+        // __________________________________KEYPRESSES_____________________________________
+        $(document).keyup(function(e) {
+            // Escape or enter pressed
+            if ((e.keyCode == 13 || e.which == 13)) {
+                // If a modal is opened, close it
+                if ($("#labelModal").hasClass('show')) $('#labelModalOk').click(); 
+                if ($("#changeLabelModal").hasClass('show')) $('#changeLabelModalOk').click();  
+            }
+
+            // See if active element is a text input
+            var activeElement = document.activeElement;
+            var inputs = ['input', 'select', 'button', 'textarea'];
+
+            // No text input
+            if (!(activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1)) {
+                // Arrow keys pressed with shift key down
+                if (e.shiftKey) {
+                    if (e.keyCode == 38) reviewRewindPress();
+                    else if (e.keyCode == 37) reviewBackPress();
+                    else if (e.keyCode == 39) reviewForwardPress();
+                    else if (e.keyCode == 40) reviewEndPress();
+                }
+
+                // TODO: remove after debugging
+                // Press l to load fridge on specific da
+                if (e.keyCode == 76) {
+                    var deviceEl = document.getElementById('selFIREDDev');
+                    deviceEl.selectedIndex = 1;
+                    device = deviceEl[deviceEl.selectedIndex].value;
+                    date = document.getElementById('dateInpFIRED');
+                    date.value = "08/04/2020";
+                    newFIREDSelected(device, date.value );
+                }
+            }
+        });
+
+        // _________________________________ WEBSOCKET _______________________________________
+        var statusSocket = null;
+
+        // Constructor of websocket
+        connectWs();
+        function connectWs() {
+            var statusSocket = new WebSocket( 'ws://' + window.location.host + '/ws/' );
+            statusSocket.onmessage = webSocketMsg;
+            // Reconnect on close and on error
+            statusSocket.onclose = function(e) {
+                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+                setTimeout(function() { connectWs(); }, 1000);
+            };
+            statusSocket.onerror = function(err) {
+                console.error('Socket encountered error: ', err.message, 'Closing socket');
+                ws.close();
+                setTimeout(function() { connectWs(); }, 1000);
+            };
+        }
+
+        // Received a websocket msg
+        function webSocketMsg(e) {
+            const data = JSON.parse(e.data);
+            if ("msg" in data) {
+                alert(data["msg"]);
+            }
+            if ("task" in data) {
+                var task = data["task"];
+                if (task == "dismissProgressbar") progressBar.hide();
+                else if (task == "showProgressbar") progressBar.show();
+                else console.log("Unknown task: " + task);
+            }
+            if ("status" in data) {
+                if (progressBar.isShown()) progressBar.setText(data["status"]);
+            }
+            if ("percent" in data) {
+                if (progressBar.isShown()) progressBar.setPercent(data["percent"]);
+            }
+        }
+
+        // _________________________________ RESET _______________________________________
+        function resetStuff() {
+            events = [];
+            eventInfo = {};
+            newlabels = false;
+        }
+
+
+        // _________________________________ MODALS _______________________________________
+        // All modals okay or cancel pressed
+        $(".modalOk").on("click", function(){
+            modalResult = "okay";
+            // Remove focus of text field
+            if (document.activeElement) document.activeElement.blur();
+        });
+        $( ".modalCancel" ).on("click", function(){
+            modalResult = "cancel";
+            // Remove focus of text field
+            if (document.activeElement) document.activeElement.blur();
+        });
+        // For each modale, set text focus to first text input here
+        $('#labelModal').on('shown.bs.modal', function () {
+            $('#textLabelInput').focus();
+        })  
+        $('#changeLabelModal').on('shown.bs.modal', function () {
+            $('#textChangeLabelInput').focus();
+        })  
+
+        // _________________________________ DOWNLOAD _______________________________________
         $(document).ready(function(){
-            $(document).on('click','#exportMKV', function(){
-                console.log("export MKV");
-                // TODO
-                $("#exportMKVModal").modal("show");
-                $('#exportMKVModal').on('hidden.bs.modal', function (e) {
-                    modalOpen = false;
-                    if (modalResult === "okay") {
-                        let formatSel = document.getElementById("modalMKVFormat"); 
-                        let format = formatSel[formatSel.selectedIndex].value;
-                        let range = document.getElementById("modalMKVSelRange").checked;
-                        let includeData = document.getElementById("modalMKVIncludeData").checked;
-                        var min = max = -1;
-                        var data = {"filename": fileName, "format": format, "includeData":includeData, "type": dataType, "events":eventInfo};
-                        if (range) {
-                            ({min, max} = chart.axes[0].getExtremes());
-                            data["range"] = [min/1000.0,max/1000.0];
-                        }
-                        ajax_download('data/downloadMKV/', data, 'data');
-                        newlabels = false;
-
-                    } else {
-                        console.log("Modal func cancel");
-                    }
-                    modalResult = null;
-                    // Important to unbind the method now
-                    $("#exportMKVModal").unbind('hidden.bs.modal');
-                });
-
-            });
+            $("#modalExportFormat").change()
+        });
+        $("#modalExportFormat").change(function(){
+            let formatSel = document.getElementById("modalExportFormat"); 
+            let format = formatSel[formatSel.selectedIndex].value;
+            if (format !== "MKV") {
+                $('#modalMKVIncludeData').bootstrapToggle('off')  
+                $('#modalMKVIncludeData').bootstrapToggle('disable')  
+                $('#exportIncludeDataContainer').hide();
+            } else  {
+                $('#modalMKVIncludeData').bootstrapToggle('enable')  
+                $('#exportIncludeDataContainer').show();
+            }
+            if (format === "CSV") {
+                $('#exportCSVContainer').show();
+            } else {
+                $('#exportCSVContainer').hide();
+            }
+            if (format !== "ASS") {
+                $('#ASShelp').hide();
+            } else {
+                $('#ASShelp').show();  
+            }
+        });
 
 
-            $(document).on('click','#removeLabels', function(){
-                const oldLabels = [...events];
-                let numLabels = oldLabels.length;
-                for (var i = 0; i < numLabels; i++) {
-                    removeLabel(oldLabels[i]);
+        // Download pressed
+        $(document).on('click','#exportButton', function(){
+            if (events.length == 0) {
+                var strconfirm = confirm("You have not added any event, do you want to export anyway?");
+                if (strconfirm == false) {
+                    return;
                 }
-            });
-
-            $(document).on('click','#exportCSV', function(){
-
-                if (events.length == 0) {
-                    var strconfirm = confirm("You have not added any event, do you want to export an empty csv?");
-                    if (strconfirm == false) {
-                        return;
-                    }
-                }
-                // TODO
-                $("#exportCSVModal").modal("show");
-                $('#exportCSVModal').on('hidden.bs.modal', function (e) {
-                    modalOpen = false;
-                    if (modalResult === "okay") {
+            }
+            console.log("export");
+            // TODO
+            $("#exportModal").modal("show");
+            $('#exportModal').on('hidden.bs.modal', function (e) {
+                modalOpen = false;
+                if (modalResult === "okay") {
+                    let formatSel = document.getElementById("modalExportFormat"); 
+                    let format = formatSel[formatSel.selectedIndex].value;
+                    let rangeOnly = document.getElementById("modalExportSelRange").checked;
+                    var min = max = -1;
+                    ({min, max} = chart.axes[0].getExtremes());
+                    if (format === "CSV") {
                         let separatorSel = document.getElementById("modalCSVColumnSep"); 
                         let separator = separatorSel[separatorSel.selectedIndex].value;
-                        let rangeLabels = document.getElementById("modalCSVRangeLabelCheck").checked;
                         let header = document.getElementById("modalCSVHeader").checked;
                         let seconds = document.getElementById("modalCSVSeconds").checked;
                         if (separator === "t") separator = "\t";
-                        let csvContent = "data:text/csv;charset=utf-8,";
-                        // Sort based on timestamps
-                        var sorted = [];
-                        var useLabels = false;
-                        for (var key in eventInfo) {
-                            if ("label" in eventInfo[key]) {
-                                useLabels = true;
-                                break;
-                            }
-                        }
-                        events = events.sort(function(a, b){return a-b});
-
-                        if (header === true) {
-                            if (seconds === true) {
-                                csvContent += "Seconds";
-                            } else {
-                                csvContent += "Timestamp";
-                            }
-                            csvContent += separator + "Value";
-                            if (useLabels === true) {
-                                csvContent += separator + "Label";
-                            }
-                            csvContent += "\r\n";
-                        }
-
-                        var keys = Object.keys(eventInfo); // or loop over the object to get the array
-                        // keys will be in any order
-                        keys.sort(function(a, b){return a-b});
-                        // keys now will be in wanted order
-
-                        for (var i=0; i<keys.length; i++) { // now lets iterate in sort order
-                            var ts = keys[i];
-                            // let ts = events[key];
-                            let row = "";
-                            if (seconds === true) {
-                                let sec = ts/1000 - startTs;
-                                row += String(round(sec,3));
-                            } else {
-                                row += String(round(ts/1000,3));
-                            }
-                            row += separator + String(round(eventInfo[ts]["power"],2)); 
-                            if (useLabels)  {
-                                if ("label" in eventInfo[ts]) row += separator + eventInfo[ts]["label"];
-                                else row += "\tunknown";
-                            }
-                            csvContent += row + "\r\n";
-                        }
-
-                        var encodedUri = encodeURI(csvContent);
-                        var link = document.createElement("a");
-                        link.setAttribute("href", encodedUri);
-                        var myFileName = fileName.split(".")[0];
-                        myFileName = myFileName.replaceAll(" ", "_");
-                        myFileName += ".csv";
-                        link.setAttribute("download", myFileName);
-                        document.body.appendChild(link); // Required for FF
-
-                        newlabels = false;
-                        link.click(); // This will download the data file named "my_data.csv".
+                        var range = [min, max];
+                        exportCSV(separator, header, seconds, range);
                     } else {
-                        console.log("Modal func cancel");
+                        let includeData = document.getElementById("modalMKVIncludeData").checked;
+                        var data = {"filename": fileName, "format": format, "includeData":includeData, "type": dataType, "events":eventInfo};
+                        if (rangeOnly) {
+                            ({min, max} = chart.axes[0].getExtremes());
+                            data["range"] = [min/1000.0,max/1000.0];
+                        }
+                        progressBar.setText("Preparing download...");
+                        progressBar.show();
+                        progressBar.setPercent(100.0);
+                        ajax_download('data/downloadMKV/', data, 'data');
                     }
-                    modalResult = null;
-                    // Important to unbind the method now
-                    $("#exportCSVModal").unbind('hidden.bs.modal');
-                });
-
+                    newlabels = false;
+                } else {
+                }
+                modalResult = null;
+                // Important to unbind the method now
+                $("#exportModal").unbind('hidden.bs.modal');
             });
+
         });
 
-        $(document).on('click','#autoLabel', function(){
-            var data = { 
-                "parameter": {
-                    "pre": Number(sliderValues["preEventWindowLength"]["value"]),
-                    "post": Number(sliderValues["postEventWindowLength"]["value"]),
-                    "voting": Number(sliderValues["votingWindowLength"]["value"]),
-                    "thres": Number(sliderValues["thresMin"]["value"]),
-                    "linearCoeff": Number(sliderValues["thresLinearCoeff"]["value"]),
-                    "minDist": Number(sliderValues["eventRes"]["value"]),
-                }, "filename": fileName, "type": dataType,
+        // _________________________________ CSV Export _______________________________________
+        function exportCSV(separator, header, seconds, range) {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            // Sort based on timestamps
+            var sorted = [];
+            var useLabels = false;
+            for (var key in eventInfo) {
+                if ("label" in eventInfo[key]) {
+                    useLabels = true;
+                    break;
+                }
             }
-            console.log("Auto Label start");
-            progressBar.setText("Processing...");
-            progressBar.show();
-            progressBar.animate(true);
-            progressBar.setPercent(100);
-            $.ajax({
-                url: 'data/autoLabel/',
-                type: 'POST',
-                dataType: 'json',
-                data: JSON.stringify(data),
-                // xhr: xhrInit,
-                success: function (data) {
+            events = events.sort(function(a, b){return a-b});
 
-                    progressBar.animate(false);
-                    progressBar.hide();
-                    console.log("Response from autolabel");
-                    console.log(data);
+            if (header === true) {
+                if (seconds === true) csvContent += "Seconds";
+                else csvContent += "Timestamp";
+                csvContent += separator + "Value";
+                if (useLabels === true) csvContent += separator + "Label";
+                csvContent += "\r\n";
+            }
+
+            var keys = Object.keys(eventInfo); // or loop over the object to get the array
+            // keys will be in any order
+            keys.sort(function(a, b){return a-b});
+            // keys now will be in wanted order
+
+            let min = range[0];
+            let max = range[1];
+            let eventLength = keys.length;
+            for (var i=0; i<eventLength; i++) { // now lets iterate in sort order
+                var ts = keys[i];
+                if (min !== -1 && ts < min) continue
+                if (max !== -1 && ts > max) continue
+                // let ts = events[key];
+                let row = "";
+                if (seconds === true) row += String(round((ts/1000 - startTs),3));
+                else row += String(round(ts/1000,3));
+                row += separator + String(round(eventInfo[ts]["power"],2)); 
+                if (useLabels)  {
+                    if ("label" in eventInfo[ts]) row += separator + eventInfo[ts]["label"];
+                    else row += "\tunknown";
+                }
+                csvContent += row + "\r\n";
+            }
+
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            var myFileName = fileName.split(".")[0].replaceAll(" ", "_") + ".csv";
+            link.setAttribute("download", myFileName);
+            document.body.appendChild(link); // Required for FF
+            link.click(); // This will download the data file
+            document.body.removeChild(link); // Required for FF
+        }
+        
+
+
+        // __________________________________ UPLOAD LABELS _____________________________________
+        $("#labelFileForm").submit(function(e) {
+            e.preventDefault();    
+            var formData = new FormData(this);
+            if (chart === null) {
+                alert("Please first load the data.")
+                return;
+            }
+            formData.append("timestamp", chart.xAxis[0].min/1000   );
+            $.ajax({
+                url: 'data/uploadLabel/',
+                type: 'POST',
+                data: formData,
+                xhr: xhrInit,
+                success: function (data) {
                     if ("msg" in data) {
                         alert(data["msg"])
                     }
                     if ("labels" in data) {
-                        let numLabels = data["labels"].length;
-                        if (numLabels > 0) {
-                            firstLabel = data["labels"][0];
-                            var timeStampKey = getNextKey(["Timestamp", "timestamp", "ts", "startTs", "startTS", "start"], firstLabel);
-                            var labelKey = getNextKey(["Label", "label"], firstLabel);
-                            if (timeStampKey === null) {
-                                alert("No timestamp found in data");
-                                return;
-                            }
-                        }
-                        for (let i=0; i < numLabels; i++) {
-                            let labelEntry = data["labels"][i];
-                            var label = "";
-                            if (textLabelsActive) label = "unknown";
-                            if (labelKey !== null && labelKey in labelEntry) label = labelEntry[labelKey];
-                            ts = labelEntry[timeStampKey]*1000;
-                            let result = checkTSWithingBounds(ts);
-                            var tsOld = result[0];
-                            var index = result[1];
-                            // Already exists, lets delete
-                            if (index > -1) {
-                                console.log("Must remove old label before");
-                                removeLabel(tsOld);
-                            }
-                            addPlotLine(ts, 0, label);
-                            newlabels = false;
-                        }
+                        addLabelsFromServer(data["labels"]);
                     }
                 },
                 cache: false,
@@ -1107,7 +1376,9 @@
                 processData: false
             });
         });
+        
 
+        // __________________________________ CHECK UNSAVED _____________________________________
         function unsavedCheck() {
             if (newlabels) {
                 var r = confirm("You have added labels which will be lost, are you sure?");
@@ -1116,132 +1387,31 @@
             return true;
         }
 
-        $(document).ready(function(){
-            $(document).on('click','#apply', function(){
-                if (unsavedCheck() == false) return
-                var deviceEl = document.getElementById('selDev');
-                date = document.getElementById('dateInpFIRED').value;
-                device = deviceEl[deviceEl.selectedIndex].value;
-                // startTs = Date.parse(date)/1000;
-                // stopTs = startTs + 24*60*60;
-                console.log("date:<" + date + ">");
-                // TODO: Remove
-                // date = "07/15/2020"
-                if (date === "") {
-                    alert("Please select a valid date");
-                } else {
-                    newFIREDSelected(device, "None", date);
-                }
-            })
-
-            $(document).on('click','#applyREDD', function(){
-                if (unsavedCheck() == false) return
-                var houseSEl = document.getElementById('selREDDHouse');
-                house = houseSEl[houseSEl.selectedIndex].value;
-                var channelSEl = document.getElementById('selREDDChannel');
-                channel = channelSEl[channelSEl.selectedIndex].value;
-                date = document.getElementById('dateInpREDD').value;
-                // startTs = Date.parse(date)/1000;
-                // stopTs = startTs + 24*60*60;
-                console.log("date:<" + date + ">");
-                console.log(house);
-                // TODO: Remove
-                // date = "07/15/2020"
-                if (date === "") {
-                    alert("Please select a valid date");
-                } else {
-                    newREDDSelected(house, channel, date, " ");
-                }
-            })
-        })
-
-        var reddInfo = JSON.parse('{{ REDDInfo|safe }}');
-        console.log(reddInfo);
-
-        function removeOptionsFrom(selectElement) {
-            var i, L = selectElement.options.length - 1;
-            for(i = L; i >= 0; i--) {
-                selectElement.remove(i);
-            }
-        }
-
-        function setREDDChannels() {
-            var sel = document.getElementById('selREDDChannel');
-            removeOptionsFrom(sel);
-
-            var houseSel = document.getElementById('selREDDHouse');
-            console.log(houseSel[houseSel.selectedIndex]);
-            var house = Number(houseSel[houseSel.selectedIndex].value);
-            console.log(house);
-            if (house in reddInfo) {
-                let numChannels = reddInfo[house]["channels"].length;
-                for (var i = 0; i < numChannels; i++) {
-                    addOptionToSelect( sel, reddInfo[house]["channels"][i]);
-                }
-            }
-
-            var REDDRange = reddInfo[house]["times"];
-            var dateStart = new Date(REDDRange[0]*1000);
-            var dateEnd = new Date(REDDRange[1]*1000);
-
-            
-            $("#dateInpREDD").datepicker( "destroy" );
-
-            var date_input=$('input[id="dateInpREDD"]'); //our date input has the name "date"
-            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-           
-            date_input.datepicker({
-                format: 'dd/mm/yyyy',
-                minDate: dateStart,
-                maxDate: dateEnd,
-                // container: container,
-                todayHighlight: true,
-                autoclose: true,
-            })
-            date_input.val("");
-        }
-
-        $(document).ready(function(){
-            var FIREDRange = JSON.parse("{{FIRED_range}}");
-            var dateStart = new Date(FIREDRange[0]*1000);
-            var dateEnd = new Date(FIREDRange[1]*1000);
-
-            var date_input=$('input[id="dateInpFIRED"]'); //our date input has the name "date"
-            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-            
-            date_input.datepicker({
-                format: 'dd/mm/yyyy',
-                minDate: dateStart,
-                maxDate: dateEnd,
-                container: container,
-                todayHighlight: true,
-                autoclose: true,
-            })
-            console.log(reddInfo);
-                
-            for (let house in reddInfo){
-                console.log(house);
-                addOptionToSelect(document.getElementById("selREDDHouse"), String(house));
-            }
-            setREDDChannels();
-            document.getElementById("selREDDHouse").onchange = setREDDChannels;
-            // var sel = document.getElementById('selREDDHouse');
-            // sel.selectedIndex = 0;
+        // __________________________________ UPLOAD DATA _____________________________________
+        $("#customUploadForm").submit(function(e) {
+            e.preventDefault();    
+            if (unsavedCheck() == false) return
+            var formData = new FormData(this);
+            $.ajax({
+                url: 'data/uploadFile/',
+                type: 'POST',
+                data: formData,
+                xhr: xhrInit,
+                success: newChart,
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+            dataType = "Upload";
+        });
 
 
-        })
 
-        var title = "Select a device and time, then click apply.";
-        var data = [0,0,0,0];
-
+        // __________________________________________ CHART OPTIONS _____________________________________
         Highcharts.setOptions({
                 boost: { useGPUTranslations: true, enabled : false },
                 plotOptions: { series: { boost: { useGPUTranslations: true, enabled : false }, } },
         });
-
-
         Highcharts.theme = {
             chart: {
                 backgroundColor: null,
@@ -1306,18 +1476,95 @@
                 lineColor: "#474747",
             },
         };
-
         // Apply the theme
         Highcharts.setOptions(Highcharts.theme);
 
-        function resetStuff() {
-            events = [];
-            eventInfo = {};
-            newlabels = false;
+        // __________________________________ PRESSED APPLY FOR FIRED _____________________________________        
+        $(document).on('click','#applyFIRED', function(){
+            if (unsavedCheck() == false) return
+            var deviceEl = document.getElementById('selFIREDDev');
+            date = document.getElementById('dateInpFIRED').value;
+            device = deviceEl[deviceEl.selectedIndex].value;
+            if (date === "") {
+                alert("Please select a valid date");
+            } else {
+                newFIREDSelected(device, date);
+            }
+        })
+
+        // __________________________________ PRESSED APPLY FOR REDD _____________________________________        
+        $(document).on('click','#applyECO', function(){
+            if (unsavedCheck() == false) return
+            var houseSEl = document.getElementById('selECOHouse');
+            house = houseSEl[houseSEl.selectedIndex].value;
+            var meterlSEl = document.getElementById('selECOMeter');
+            meter = meterlSEl[meterlSEl.selectedIndex].value;
+            date = document.getElementById('dateInpECO').value;
+            if (date === "") {
+                alert("Please select a valid date");
+            } else {
+                newECOSelected(house, meter, date);
+            }
+        })
+        // __________________________________ PRESSED APPLY FOR REDD _____________________________________        
+        $(document).on('click','#applyREDD', function(){
+            if (unsavedCheck() == false) return
+            var houseSEl = document.getElementById('selREDDHouse');
+            house = houseSEl[houseSEl.selectedIndex].value;
+            var channelSEl = document.getElementById('selREDDChannel');
+            channel = channelSEl[channelSEl.selectedIndex].value;
+            date = document.getElementById('dateInpREDD').value;
+            if (date === "") {
+                alert("Please select a valid date");
+            } else {
+                newREDDSelected(house, channel, date);
+            }
+        })
+        // __________________________________ PRESSED APPLY FOR UK-DALE _____________________________________        
+        $(document).on('click','#applyUKDALE', function(){
+            if (unsavedCheck() == false) return
+            var houseSEl = document.getElementById('selUKDALEHouse');
+            house = houseSEl[houseSEl.selectedIndex].value;
+            var meterSEl = document.getElementById('selUKDALEMeter');
+            meter = meterSEl[meterSEl.selectedIndex].value;
+            date = document.getElementById('dateInpUKDALE').value;
+            if (date === "") {
+                alert("Please select a valid date");
+            } else {
+                newUKDALESelected(house, meter, date);
+            }
+        })
+
+        // __________________________________ PRESSED APPLY FOR BLOND _____________________________________        
+        $(document).on('click','#applyBLOND', function(){
+            if (unsavedCheck() == false) return
+            var setSel = document.getElementById('selBLONDSet');
+            set = setSel[setSel.selectedIndex].value;
+            var meterSel = document.getElementById('selBLONDMeter');
+            meter = meterSel[meterSel.selectedIndex].value;
+            var channelSel = document.getElementById('selBLONDChannel');
+            channel = channelSel[channelSel.selectedIndex].value;
+            date = document.getElementById('dateInpBLOND').value;
+            if (date === "") {
+                alert("Please select a valid date");
+            } else {
+                newBLONDSelected(set, meter, channel, date);
+            }
+        })
+
+        // __________________________________ GET NEW REDD _____________________________________
+        function newECOSelected(house, meter, day) {
+            $.ajax({
+                url: "data/ECO/house=" + house + "&meter=" + meter + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                dataType: 'json',
+                xhr: xhrInit,
+                success: newChart,
+            });
+            dataType = "ECO";
         }
-        function newREDDSelected(house, channel, day, measure) {
-            var url;
-            // device = dev;
+
+        // __________________________________ GET NEW REDD _____________________________________
+        function newREDDSelected(house, channel, day) {
             $.ajax({
                 url: "data/REDD/house=" + house + "&channel=" + channel + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
                 dataType: 'json',
@@ -1326,12 +1573,35 @@
             });
             dataType = "REDD";
         }
-        
-        function newFIREDSelected(dev, measure, day) {
-            var url;
+
+        // __________________________________ GET NEW REDD _____________________________________
+        function newUKDALESelected(house, meter, day) {
+            // device = dev;
+            $.ajax({
+                url: "data/UKDALE/house=" + house + "&meter=" + meter + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                dataType: 'json',
+                xhr: xhrInit,
+                success: newChart,
+            });
+            dataType = "UKDALE";
+        }
+
+        // __________________________________ GET NEW BLOND _____________________________________
+        function newBLONDSelected(set, meter, channel, day) {
+            $.ajax({
+                url: "data/BLOND/set=" + set + "&meter=" + meter + "&channel=" + channel + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                dataType: 'json',
+                xhr: xhrInit,
+                success: newChart,
+            });
+            dataType = "BLOND";
+        }
+
+        // __________________________________ GET NEW FIRED _____________________________________
+        function newFIREDSelected(dev, day) {
             device = dev;
             $.ajax({
-                url: "data/FIRED/dev=" + dev + "&measure=" + measure + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                url: "data/FIRED/dev=" + dev + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
                 dataType: 'json',
                 xhr: xhrInit,
                 success: newChart
@@ -1339,14 +1609,17 @@
             dataType = "FIRED";
         }
 
+        // __________________________________ NEW CHART _____________________________________
         function newChart(data) {
-            console.log("ajax success")
-            $("#exportCSV").prop("disabled", false);
-            $("#exportMKV").prop("disabled", false);
+            console.log("ajax success new Chart");
+            // Enable buttons
+            $("#exportButton").prop("disabled", false);
             $("#autoLabel").prop("disabled", false);
-            // need to be set first
+            $("#removeLabels").prop("disabled", false);
+            if ("msg" in data) alert(data["msg"]);
+            // Set the datas time zone
+            // NOTE: need to be set first
             if ('timeZone' in data) {
-                console.log("Using Datetime");
                 Highcharts.setOptions({
                     global : {
                         useUTC : data["timeZone"] === "UTC"
@@ -1359,6 +1632,7 @@
                     },
                 });
             }
+            // Create the chart
             var ctx = document.getElementById("chart_container");
             chart = Highcharts.stockChart(ctx, data['chart'], function (chart) {
                 // apply the date pickers
@@ -1367,175 +1641,178 @@
                         .datepicker();
                 }, 0);
             });
+            // Reset anything done so far
             resetStuff();
-            if ('title' in data) chart.setTitle(data[title]);
 
-            startTs = data["startTs"];
-            deviceName = data['device'];
+            if ('title' in data) chart.setTitle(data[title]);
+            if ('labels' in data) addLabelsFromServer(data["labels"]);
+
+            // Set this fix forever
+            chart.xAxis[0].update({
+                min: chart.xAxis[0].min,
+                max: chart.xAxis[0].max,
+            });
+
             date = data['date'];
             fileName = data['filename'];
-            if ("subs" in data) {
-                var subs = data['subs'];
-                numSubs = subs.length;
-                for (i=0; i < numSubs; i++) {
-                    sub = subs[i];
-                    console.log(sub["startTs"] + "->" + sub["stopTs"] + ": "  + sub["text"]);
-                    let ts = sub["startTs"]*1000;
-
-                    addPlotLine(ts, 0, sub["text"]);
-                }
-            }
-            newlabels = false;
-
-            measures = data["measures"];
-            addMeasuresToSel(measures);
         }
 
+        function getURLForTimeSelection(start, stop, measure=null) {
+            var url = "data/<dataType>/startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
+            url = url.replaceAll("<dataType>", dataType);
+            return url;
+        }
+
+
+        // __________________________________ NEW SELECTION FOR CURRENT DATA _____________________________________
         function newSelection(start, stop) {
-            var url;
-            var measureSel = document.getElementById('selectedMeasure');
-            var measure = measureSel[measureSel.selectedIndex].value;
-            var url = "";
             chart.showLoading('Loading data from server...');
-            if (dataType === "Upload") {
-                url = "data/uploaded/measure=" + measure + "&startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
-            } else if (dataType === "REDD") {
-                url = "data/REDD/startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
-            } else {
-                url = "data/FIRED/dev="+ device + "&measure=" + measure + "&startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
-            }
+            let url = getURLForTimeSelection(start, stop);
             $.ajax({
                 url: url,
                 dataType: 'json',
                 success: newChartData,
             });
-            var sel = document.getElementById("selectedMeasure").value = measure;
         }
 
 
+        var lastUpdate = Math.round(new Date().getTime());
+        var lastExtremes = [-1, -1];
+        // __________________________________ ZOOMED CHART _____________________________________
         function afterSetExtremes(e) {
-            const { chart } = e.target;
-            stopTs = Math.round(e.max/1000);
-            startTs = Math.round(e.min/1000);
-            console.log("afterSetExtremes");
-            newSelection(startTs, stopTs);
+            // alert(e.trigger);
+            if (e.trigger !== undefined) {
+                let now = Math.round(new Date().getTime());
+                // if (now - lastUpdate > 200) {
+                    const { chart } = e.target;
+                    stopTs = Math.max(0, Math.round(e.max/1000));
+                    startTs = Math.max(0, Math.round(e.min/1000));
+                    // Return on same extremes
+                    if (Math.abs(lastExtremes[0]-startTs) < 1 && Math.abs(lastExtremes[1]-stopTs) < 1) return;
+                    console.log("afterSetExtremes " + stopTs + "->" + startTs);
+                    lastExtremes[0] = startTs;
+                    lastExtremes[1] = stopTs;
+                    newSelection(startTs, stopTs);
+                    lastUpdate = now;
+                // }
+            }
         }
 
+        // __________________________________ NEW CHART DATA _____________________________________
         function newChartData(data) {
-            console.log("ajax success");
-            if ('title' in data) {
-                chart.setTitle(data[title]);
-            }
-            if ('timeZone' in data) {
-                console.log("Using Datetime");
-                Highcharts.setOptions({
-                    global : {
-                        useUTC : false
-                    },
-                    getTimezoneOffset: function (timestamp) {
-                        var zone = data["timeZone"],
-                            timezoneOffset = -moment.tz(timestamp, zone).utcOffset();
+            console.log("ajax success newChartData");
 
-                        return timezoneOffset;
-                    },
-                });
-            }
             var numSeries = data['series'].length;
+            var numSeries2 = chart.series.length;
+
             for (var i = 0; i < numSeries; i++) {
                 series = data['series'][i]['data'];
                 startTs = data['series'][i]['startTs'];
                 interval = data['series'][i]['interval'];
-                if (series.length > 0) {
-                    chart.series[i].options.pointStart = startTs*1000;
-                    chart.series[i].options.pointInterval = interval*1000;
-                    chart.series[i].isDirty = true;
-                    chart.series[i].setData(series);
-                    chart.hideLoading();
-                }
-                console.log(data['series'][i]['measureText']);
-                if ('measureText' in data['series'][i] & "unit" in data['series'][i]) {
-                    chart.yAxis[0].axisTitle.attr({
-                        text: data['series'][i]['measureText'] + " [" + data['series'][i]['unit'] + "]"
-                    });
-
-                    chart.series[i].update({
-                            name: data['series'][i]['measureText'],
-                            tooltip:{
-                                valueSuffix: " " + data['series'][i]['unit'],
-                            },
-                    });
+                id = data['series'][i]['id'];
+                for (var j = 0; j < numSeries2; j++) {
+                    if (chart.series[j].options.id == id) {
+                        chart.series[j].options.pointStart = startTs*1000;
+                        chart.series[j].options.pointInterval = interval*1000;
+                        // chart.series[j].isDirty = true;
+                        chart.series[j].setData(series);
+                    }
                 }
                 
             }
-
+            chart.hideLoading();
         }
+      
 
-        var sliderValues = {
-            "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s"},
-            "postEventWindowLength": {"value": getStoredValue("postEventWindowLength"),"unit":"s"},
-            "votingWindowLength": {"value": getStoredValue("votingWindowLength"),"unit":"s"},
-            "thresMin": {"value": getStoredValue("thresMin"),"unit":"W"},
-            "thresLinearCoeff": {"value": getStoredValue("thresLinearCoeff"),"unit":""},
-            "eventRes": {"value": getStoredValue("eventRes"),"unit":"s"},
-        }
 
-        for (var key in sliderValues){
-            let slider = document.getElementById(key + "Slider");
-            if (slider !== null) slider.value = sliderValues[key]["value"];
-            let value = document.getElementById(key + "Slider_value");
-            if (value !== null) value.innerHTML = sliderValues[key]["value"] + " " + sliderValues[key]["unit"];
-        }
+        // __________________________________ LABELLING _____________________________________
 
-        // All sliders  on input store variable as default and set value label with unit
-        $('.slider').on('input', function () {
-            var id = $(this).attr('id');
-            let name = id.replace("Slider", "");
-            let output = document.getElementById(id + "_value");
-            console.log(name);
-            let value = this.value;
-            sliderValues[name]["value"] = value;
-            storeValue(String(name), value);
-            output.innerHTML = value + " " + sliderValues[name]["unit"];
+        // __________________________________ REMOVE ALL LABELS _____________________________________
+        
+        $(document).on('click','#removeLabels', function(){
+            const oldLabels = [...events];
+            let numLabels = oldLabels.length;
+            for (var i = 0; i < numLabels; i++) {
+                removeLabel(oldLabels[i]);
+            }
         });
         
-
-        // Checkboxen
-        var textLabelsActive = (getStoredValue("textLabelsActive") == 'true');
-        document.getElementById("textLabelsActive").checked = textLabelsActive;
-        
-        $('#textLabelsActive').change(function () {
-            textLabelsActive = this.checked;
-            storeValue("textLabelsActive", textLabelsActive);
+        // __________________________________ AUTO LABEL _____________________________________
+        $(document).on('click','#autoLabel', function(){
+            var data = { 
+                "parameter": {
+                    "pre": Number(sliderValues["preEventWindowLength"]["value"]),
+                    "post": Number(sliderValues["postEventWindowLength"]["value"]),
+                    "voting": Number(sliderValues["votingWindowLength"]["value"]),
+                    "thres": Number(sliderValues["thresMin"]["value"]),
+                    "linearCoeff": Number(sliderValues["thresLinearCoeff"]["value"]),
+                    "minDist": Number(sliderValues["eventRes"]["value"]),
+                }, "filename": fileName, "type": dataType,
+            }
+            console.log("Auto Label start");
+            progressBar.setText("Processing...");
+            progressBar.show();
+            progressBar.animate(true);
+            progressBar.setPercent(100);
+            $.ajax({
+                url: 'data/autoLabel/',
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(data),
+                // xhr: xhrInit,
+                success: function (data) {
+                    progressBar.animate(false);
+                    progressBar.hide();
+                    console.log("Response from autolabel");
+                    if ("msg" in data) alert(data["msg"])
+                    if ("labels" in data) {
+                        addLabelsFromServer(data["labels"]);
+                    }
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
         });
         
-        // FUNCTION to round number
-        function round(value, precision) {
-            if(precision === 0) return Math.round(value);  	
-            exp = 1;
-            for(i=0;i<precision;i++) exp *= 10;
-            return Math.round(value*exp)/exp;
+        function addLabelsFromServer(labels) {
+            let numLabels = labels.length;
+            if (numLabels > 0) {
+                firstLabel = labels[0];
+                var timeStampKey = getNextKey(["Timestamp", "timestamp", "ts", "startTs", "startTS", "start"], firstLabel);
+                var labelKey = getNextKey(["Label", "label", "name", "text"], firstLabel);
+                if (timeStampKey === null) {
+                    alert("No timestamp found in data");
+                    return;
+                }
+            }
+            for (let i=0; i < numLabels; i++) {
+                let labelEntry = labels[i];
+                var label = "";
+                if (textLabelsActive) {
+                    label = "unknown";
+                    if (labelKey !== null && labelKey in labelEntry) label = labelEntry[labelKey];
+                }
+                ts = labelEntry[timeStampKey]*1000;
+                let result = checkTSWithingBounds(ts);
+                var tsOld = result[0];
+                var index = result[1];
+                // Already exists, lets delete
+                if (index > -1) {
+                    console.log("Must remove old label before");
+                    removeLabel(tsOld);
+                }
+                addPlotLine(ts, 0, label);
+                newlabels = false;
+            }
         }
 
-
-        var modalOpen = false;
-        var modalResult = null;
-
-        $(document).on("click", "#modalOk", function(event){
-            event.stopPropagation();
-            console.log("Modal okay");
-            modalResult = "okay";
-        });
-        $(document).on("click", "#modalCancel", function(event){
-            event.stopPropagation();
-            console.log("Modal cancel");
-            modalResult = "cancel";
-        });
-
+        // Check if another event is within eventresolution bounds in the neighborhoud
         function checkTSWithingBounds(ts) {
             var numEvents = events.length;
             var index = -1;
             var tsNew = ts;
-            let eventResolution = Number(sliderValues["eventRes"]);
+            let eventResolution = Number(sliderValues["eventRes"]["value"]);
             let min = ts - eventResolution*1000;
             let max = ts + eventResolution*1000;
             for (var i = 0; i < numEvents; i++) {
@@ -1551,10 +1828,12 @@
             return [tsNew, index]
         }
 
+        // Clicked on a point in the plot (on the slope) to add or remove a label
         function pointClicked(e) {   
             var ts = e.target.x;
             let selPower = e.target.y;   
             console.log("Clicked @" + round(ts/1000,3) + ", Value: " + round(selPower,2) + "W");
+            // Look if another event is in the close proximity
             let result = checkTSWithingBounds(ts);
             ts = result[0];
             let index = result[1];
@@ -1581,10 +1860,6 @@
                             if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
                             if (text !== "") label = text;
     
-                            // if (rangeLabelsActive) {
-                            //     let theID = 'vertBand_'+String(ts)
-                            //     addPlotBand(ts, theID, selPower, label);
-                            // } else {
                             addPlotLine(ts, selPower, label);
                             // }
                         } else {
@@ -1598,17 +1873,31 @@
                 } else {
                     addPlotLine(ts, selPower, null);
                 }
-            }
-            console.log("Eventlist: " + events);  
+            } 
         }
+
+        // Remove the label at pos ts
         function removeLabel(ts) {
             let theID = 'vertLine_' + String(ts)
+            let oldLabel = eventInfo[ts]["label"];
             delete eventInfo[ts];
             let index = events.indexOf(ts);
             if (index > -1) events.splice(index, 1);
             chart.xAxis[0].removePlotLine(theID);
+
+            var isInside = false;
+            for (let key in eventInfo) {
+                if (eventInfo[key]["label"] === oldLabel) {
+                    isInside = true;
+                    break;
+                }
+            }
+            if (isInside == false) {
+                removeLabelFromEventSelects(oldLabel);
+            }
         }
 
+        // Get the bare label from an html plotline label
         function textOfPlotlineBand(plotLB) {
             console.log(plotLB);
             var text = plotLB.options.label.text;
@@ -1619,19 +1908,23 @@
             return text;
         }
 
+        // Generate the html text for a clickable plotline label
         function textForPlotline(text, id) {
             return '<div class="labels" id=' + id + '>' + text + '</div>';
         }
 
-
-        function addOptionToSelect(sel, labelName, value=null) {
+        // Remove a label from the list of used labels
+        function removeLabelFromEventSelects(label) {
             // Add options to selections
-            var opt = document.createElement('option');
-            opt.appendChild( document.createTextNode(labelName) );
-            if (value !== null) opt.value = value;
-            sel.appendChild(opt);
+            let index = labels.indexOf(label);
+            if (index != -1) {
+                labels = labels.splice(index, 1)
+                removeOptionFromSelect(document.getElementById("selectLabelInput"), name=label);
+                removeOptionFromSelect(document.getElementById("selectChangeLabelInput"), name=label);
+            }
         }
 
+        // Add to the selects of already used labels a new label
         function addLabelToEventSelects(label) {
             // Add options to selections
             if (labels.indexOf(label) === -1) {
@@ -1641,6 +1934,7 @@
             }
         }
 
+        // Add a plotline to the chart
         function addPlotLine(ts, pow, label) {
             let theID = 'vertLine_' + String(ts)
             ts = Number(ts);
@@ -1651,17 +1945,14 @@
             newlabels = true;
             
             if (textLabelsActive === true) {
-                if (label === "" || label === null) {
-                    label = "unknown";
-                }
+                if (label === "" || label === null) label = "unknown";
                 addLabelToEventSelects(label);
             } else {
                 label = ""
             }
 
             labelID = theID + "_label";
-            // labelInf = null
-            // if (label !== null) {
+            
             eventInfo[ts]["label"] = label;
             labelInf = { 
                 useHTML:true,
@@ -1689,6 +1980,7 @@
             })
         }
 
+        // Get a plotline or band object by its ID
         function plotLineBandByID(id) {
             for (var i = 0; i < chart.xAxis[0].plotLinesAndBands.length; i++) {
                 if (chart.xAxis[0].plotLinesAndBands[i].id === id) {
@@ -1740,15 +2032,6 @@
                     } else {
                         changeLabel(currentPlotline, label);
                     }
-                    // text = textForPlotline(label, currentPlotline.id);
-                    // currentPlotline.label.attr({
-                    //     text: text
-                    // });
-                    // currentPlotline.options.text = text;
-                    // ts = Number(currentPlotline.options.value);
-                    // eventInfo[ts]["label"] = label;
-                    // addLabelToEventSelects(label);
-                    // chart.xAxis[0].redraw();
                 } else {
                     console.log("Modal func cancel");
                 }
@@ -1758,9 +2041,8 @@
             });
         });
 
+        // Change the label for the given plotline element
         function changeLabel(plotline, label, redraw=true) {
-            console.log(plotline);
-            console.log("Changing one plotline: \"" + label + "\"");
             var ts = Number(plotline.options.value);
             eventInfo[ts]["label"] = label;
             addLabelToEventSelects(label);
@@ -1775,85 +2057,18 @@
             if (redraw) chart.xAxis[0].redraw();
         }
 
+        // Change all labels with the given name
         function changeAllLabels(oldText, newText, redraw=true) {
-            console.log("Changing all lines with \"" + oldText + "\" to \"" + newText + "\""); 
             const oldPlotlines = [...chart.xAxis[0].plotLinesAndBands];
             let numLines = oldPlotlines.length;
             for (var j = 0; j < numLines; j++) {
                 var text = textOfPlotlineBand(oldPlotlines[j]);
-                console.log(text);
                 if (text === oldText) {
-                    console.log("match");
                     changeLabel(oldPlotlines[j], newText, redraw=false);
                 }
             }
             if (redraw) chart.xAxis[0].redraw();
         }
-
-        // var currentPlotband = null;
-        // function addPlotBand(ts, theID, pow, label) {
-        //     ts = Number(ts);
-        //     eventInfo[ts] = {"ts":ts, "power":pow};
-            
-        //     events.push(ts);
-        //     labelInf = null
-        //     if (label !== null) {
-        //         eventInfo[ts]["label"] = label;
-        //         labelInf = { 
-        //             text: label,
-        //             verticalAlign: 'top',
-        //             rotation: 0,
-        //             style: {
-        //                 color: 'black',
-        //                 fontWeight: 'bold'
-        //             },
-        //         };
-        //     }
-        //     chart.xAxis[0].addPlotBand({ // mark the weekend
-        //         color: 'rgba(255,255,0,0.5)',
-        //         // color: 'red',
-        //         from: ts,
-        //         to: ts+1000*60*2,
-        //         id: theID,
-        //         label: labelInf,
-        //         events: {
-        //             // Remove on click on it
-        //             click: function(e) {
-        //                 // removeLabel(this.options.value);
-        //                 // edit label
-        //                 console.log("edit label")
-        //                 console.log(this)
-        //                 console.log(this.id);
-        //                 currentPlotband = this;
-        //                 document.getElementById('textChangeLabelInput').value = this.options.label.text;
-        //                 $("#changeLabelModal").modal("show");
-        //                 $('#changeLabelModal').on('hidden.bs.modal', function (e) {
-        //                     modalOpen = false;
-        //                     if (modalResult === "okay") {
-        //                         var text = document.getElementById('textChangeLabelInput').value;
-        //                         var sel = document.getElementById('selectChangeLabelInput');
-        //                         label = "unknown";
-        //                         // If sth selected 
-        //                         if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
-        //                         if (text !== "") label = text;
-        //                         console.log(currentPlotband.options.from);
-        //                         console.log(currentPlotband.options.to);
-        //                         ts = currentPlotband.options.from;
-        //                         theID = currentPlotband.options.id;
-        //                         pow = 0;
-        //                         chart.xAxis[0].removePlotBand(theID);
-        //                         addPlotBand(ts, theID, pow, label);
-        //                     } else {
-        //                         console.log("Modal func cancel");
-        //                     }
-        //                     modalResult = null;
-        //                     // Important to unbind the method now
-        //                     $("#changeLabelModal").unbind('hidden.bs.modal');
-        //                 });
-        //             }
-        //         }
-        //     })
-        // }
 
         // _______________________________REVIEW____________________________________________
         
@@ -1905,6 +2120,16 @@
         
         // _______________________________MISC____________________________________________
         
+        function getNextKey(list, dict) {
+            var arrayLength = list.length;
+            for (var i = 0; i < arrayLength; i++) {
+                if (list[i] in dict) {
+                    return list[i];
+                }
+            }
+            return null;
+        }
+
         function storeValue(key, value) {
             if (localStorage) {
                 localStorage.setItem(key, value);
@@ -1920,6 +2145,47 @@
                 return $.cookies.get(key);
             }
         }
+
+
+        function removeOptionsFromSelect(selectElement) {
+            var i, L = selectElement.options.length - 1;
+            for(i = L; i >= 0; i--) {
+                selectElement.remove(i);
+            }
+        }
+
+        function removeOptionFromSelect(sel, name=null, value=null) {
+            var i, L = sel.options.length - 1;
+            // Add options to selections
+            if (name !== null) {
+                for(i = L; i >= 0; i--) {
+                    if (name === sel[i].innerHTML) sel.remove(i);
+                }
+            }
+            if (value !== null) {
+                for(i = L; i >= 0; i--) {
+                    if (value === sel[i].value) sel.remove(i);
+                }
+            }
+        }
+
+        function addOptionToSelect(sel, labelName, value=null) {
+            // Add options to selections
+            var opt = document.createElement('option');
+            opt.appendChild( document.createTextNode(labelName) );
+            if (value !== null) opt.value = value;
+            sel.appendChild(opt);
+        }
+
+
+        // FUNCTION to round number
+        function round(value, precision) {
+            if(precision === 0) return Math.round(value);  	
+            exp = 1;
+            for(i=0;i<precision;i++) exp *= 10;
+            return Math.round(value*exp)/exp;
+        }
+
     </script>
     
 

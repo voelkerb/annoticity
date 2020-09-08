@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ROOT_URLCONF = 'annoticity.urls'
@@ -82,6 +82,8 @@ TEMPLATES = [
         },
     },
 ]
+
+SMART_ENERGY_TOOLS_PATH = '/Users/voelkerb/Documents/smartenergy/'
 
 WSGI_APPLICATION = 'annoticity.wsgi.application'
 

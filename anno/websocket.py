@@ -3,15 +3,16 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 
 
-consumers = []
 
 class SocketConsumer(WebsocketConsumer):
     def connect(self):
+        id = self.scope["cookies"]["sessionid"]
         self.accept()
-        consumers.append(self)
+        wsManager.addConsumer(id, self)
 
     def disconnect(self, close_code):
-        consumers.remove(self)
+        id = self.scope["cookies"]["sessionid"]
+        wsManager.removeConsumer(id)
         pass
 
     def receive(self, text_data):
@@ -20,3 +21,33 @@ class SocketConsumer(WebsocketConsumer):
 
     def sendDict(self, data):
         self.send(text_data=json.dumps(data))
+
+
+
+class WebSocketManager(object):
+
+    consumers = {}
+    
+    def addConsumer(self, id, consumer):
+        self.consumers[id] = consumer
+
+    def removeConsumer(self, id):
+        del self.consumers[id]
+
+    def sendDict(self, id, data):
+        if id in self.consumers:
+            self.consumers[id].sendDict(data)
+
+    def sendStatus(self, id, text, percent=100):
+        if id in self.consumers:
+            self.consumers[id].sendDict({"status":text, "percent":percent})
+
+    def sendMsg(self, id, msg):
+        if id in self.consumers:
+            self.consumers[id].sendDict({"msg":msg})
+            
+    def sendTask(self, id, task):
+        if id in self.consumers:
+            self.consumers[id].sendDict({"task":task})
+
+wsManager = WebSocketManager()
