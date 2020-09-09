@@ -113,8 +113,11 @@ dataProvider = {}
 
 
 def getSessionData(sessionID, sessionInfo):
-    if sessionID is None: return None
-    dataDict = dm.get(sessionID)
+    if sessionInfo["type"] == "fired":
+        dataDict = dataProvider[sessionInfo["type"]](*sessionInfo["args"])
+    else:
+        if sessionID is None: return None
+        dataDict = dm.get(sessionID)
     if dataDict is None:
         if sessionInfo is not None and sessionInfo["type"] in dataProvider:
             dataDict = dataProvider[sessionInfo["type"]](*sessionInfo["args"])

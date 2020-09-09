@@ -1115,7 +1115,7 @@
         // Constructor of websocket
         connectWs();
         function connectWs() {
-            var statusSocket = new WebSocket( 'ws://' + window.location.host + '/ws/' );
+            statusSocket = new WebSocket( 'wss://' + window.location.host + '/ws/' );
             statusSocket.onmessage = webSocketMsg;
             // Reconnect on close and on error
             statusSocket.onclose = function(e) {
@@ -1124,7 +1124,7 @@
             };
             statusSocket.onerror = function(err) {
                 console.error('Socket encountered error: ', err.message, 'Closing socket');
-                ws.close();
+                statusSocket.close();
                 setTimeout(function() { connectWs(); }, 1000);
             };
         }
@@ -1135,6 +1135,7 @@
             if ("msg" in data) {
                 alert(data["msg"]);
             }
+            console.log(data);
             if ("task" in data) {
                 var task = data["task"];
                 if (task == "dismissProgressbar") progressBar.hide();
