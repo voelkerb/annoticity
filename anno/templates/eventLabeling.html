@@ -1115,11 +1115,18 @@
         // Constructor of websocket
         connectWs();
         function connectWs() {
+
             if (statusSocket !== null) {
                 statusSocket.close();
                 statusSocket = null;
             }
-            statusSocket = new WebSocket( 'ws://' + window.location.host + '/ben/ws/' );
+
+            var loc = window.location;
+            var wsStart = loc.protocol == "https:" ? "wss://" : "ws://"
+            var endpoint = wsStart + loc.host + loc.pathname + "ws"
+            statusSocket = new WebSocket(endpoint);
+
+            // statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
             // statusSocket = new WebSocket( 'ws://' + window.location.host + '/ws/' );
             // statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
             statusSocket.onmessage = webSocketMsg;
@@ -1127,9 +1134,11 @@
             statusSocket.onclose = onWSError;
             statusSocket.onerror = onWSError;
         }
-        
+
         function onWSError() {
-            statusSocket.close();
+            if (statusSocket !== null) {
+                statusSocket.close();
+            }
             statusSocket = null;
             setTimeout(function() { connectWs(); }, 2000);
         }
