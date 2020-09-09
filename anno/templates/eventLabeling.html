@@ -1115,7 +1115,7 @@
         // Constructor of websocket
         connectWs();
         function connectWs() {
-            statusSocket = new WebSocket( 'wss://' + window.location.host + '/ws/' );
+            statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
             statusSocket.onmessage = webSocketMsg;
             // Reconnect on close and on error
             statusSocket.onclose = function(e) {
