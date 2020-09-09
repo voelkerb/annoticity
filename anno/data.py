@@ -3,8 +3,8 @@ from datetime import datetime
 from . import chart
 
 from .powerData import dataManager as dm
-
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys
 sys.path.insert(0, SMART_ENERGY_TOOLS_PATH)

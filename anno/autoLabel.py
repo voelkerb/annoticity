@@ -1,6 +1,5 @@
-
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
-
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 import sys, os
 sys.path.insert(0, SMART_ENERGY_TOOLS_PATH)
 from analyze.analyzeSignal import calcPowers

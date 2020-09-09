@@ -6,7 +6,9 @@ from .websocket import wsManager
 from .powerData import dataManager as dm
 from . import data as dataHp
 
-from annoticity.settings import PROJECT_ROOT, MEDIA_ROOT, MEDIA_URL, SMART_ENERGY_TOOLS_PATH
+from annoticity.settings import PROJECT_ROOT, MEDIA_ROOT, MEDIA_URL
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import os, sys
 sys.path.insert(0, SMART_ENERGY_TOOLS_PATH)

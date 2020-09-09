@@ -1,9 +1,10 @@
-
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys, os
 sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH))
 from datasets.ECO import ecoLoader as eco
+
 
 import numpy as np 
 from datetime import datetime
@@ -18,8 +19,8 @@ from measurement.usefulFunctions import time_format_ymdhms
 
 from .powerData import dataManager as dm
 
-eco.BASE_PATH = os.environ.get("ECO_BASE_PATH")
-print(os.environ)
+eco.BASE_PATH = config('ECO_BASE_PATH')
+
 def info():
     houses = eco.getHouses()
     meters = eco.loadLabelsJson()

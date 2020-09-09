@@ -3,7 +3,8 @@ import numpy as np
 from . import chart
 from . import data as dataHp
 
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys, os
 sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH, "datasets", "FIRED"))
@@ -12,9 +13,7 @@ import helper as hp
 from django.http import JsonResponse
 
 
-hp.FIRED_BASE_FOLDER = "/Users/voelkerb/dump/FIRED/"
-
-
+hp.FIRED_BASE_FOLDER = config('FIRED_BASE_PATH')
 
 
 def info():

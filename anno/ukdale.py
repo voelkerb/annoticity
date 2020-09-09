@@ -1,5 +1,5 @@
-
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys, os
 sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH))
@@ -18,7 +18,7 @@ from measurement.usefulFunctions import time_format_ymdhms
 
 from .powerData import dataManager as dm
 
-ukdale.BASE_PATH = "/users/voelkerb/NILM_Datasets/UKDale/"
+ukdale.BASE_PATH = config('UKDALE_BASE_PATH')
 
 
 

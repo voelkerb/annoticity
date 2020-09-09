@@ -1,5 +1,5 @@
 
-db.sqlite3
+db.*
 
 __pycache__/
 
@@ -16,3 +16,5 @@ data/*
 # Eagle temporary board and schematic file
 **/*.b#*
 **/*.s#*
+
+.env

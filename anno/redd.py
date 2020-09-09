@@ -1,6 +1,5 @@
-
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
-
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 import sys, os
 sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH))
 from datasets.REDD import reddLoader as redd
@@ -18,7 +17,7 @@ from measurement.usefulFunctions import time_format_ymdhms
 
 from .powerData import dataManager as dm
 
-redd.BASE_PATH = "/users/voelkerb/NILM_Datasets/REDD/"
+redd.BASE_PATH = config('REDD_BASE_PATH')
 
 
 def info():

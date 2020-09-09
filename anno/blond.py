@@ -3,8 +3,8 @@ import numpy as np
 from . import chart
 from . import data as dataHp
 from .powerData import dataManager as dm
-
-from annoticity.settings import SMART_ENERGY_TOOLS_PATH
+from decouple import config
+SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys, os
 sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH, "datasets", "BLOND"))
@@ -13,7 +13,7 @@ import blondLoader as bl
 from django.http import JsonResponse
 
 
-bl.BASE_PATH = "/Users/voelkerb/NILM_Datasets/BLOND/"
+bl.BASE_PATH = config('BLOND_BASE_PATH')
 bl.DOWNLOAD_PATH = os.path.join(bl.BASE_PATH, "tmp")
 
 

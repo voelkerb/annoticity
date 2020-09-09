@@ -83,7 +83,7 @@ TEMPLATES = [
     },
 ]
 
-SMART_ENERGY_TOOLS_PATH = '/Users/voelkerb/Documents/smartenergy/'
+
 
 WSGI_APPLICATION = 'annoticity.wsgi.application'
 
