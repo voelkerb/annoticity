@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap4',
     'channels',
     'anno',
+    'sslserver',
 ]
 
 ASGI_APPLICATION = 'annoticity.routing.application'
