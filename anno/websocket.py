@@ -20,8 +20,12 @@ class SocketConsumer(WebsocketConsumer):
             print("Cannot retrieve id from websocket" + str(self.scope))
 
     def disconnect(self, close_code):
-        id = self.scope["cookies"]["sessionid"]
-        wsManager.removeConsumer(id)
+        if "cookies" in self.scope and "sessionid" in self.scope["cookies"]:
+            id = self.scope["cookies"]["sessionid"]
+        elif "cookies" in self.scope and "csrftoken" in self.scope["cookies"]:
+            id = self.scope["cookies"]["csrftoken"]
+        if id != None:
+            wsManager.removeConsumer(id)
         pass
 
     def receive(self, text_data):
