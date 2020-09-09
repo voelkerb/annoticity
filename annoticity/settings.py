@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = 'm=#5tjrzun5$j##9_*svgybfk_oxdkdpsk3$5gmionzaug*vyy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "192.168.0.24", "earth.informatik.uni-freiburg.de"]
 
@@ -137,3 +137,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+print("endof Settings")
