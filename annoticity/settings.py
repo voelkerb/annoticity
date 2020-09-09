@@ -24,10 +24,6 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = 'm=#5tjrzun5$j##9_*svgybfk_oxdkdpsk3$5gmionzaug*vyy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-
-os.environ['MPLCONFIGDIR'] = os.path.join(BASE_DIR, '/tmp/')
-print(os.environ.get('MPLCONFIGDIR'))
-
 DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "192.168.0.24", "earth.informatik.uni-freiburg.de"]

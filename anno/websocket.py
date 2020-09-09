@@ -8,6 +8,7 @@ class SocketConsumer(WebsocketConsumer):
     def connect(self):
         id = self.scope["cookies"]["sessionid"]
         self.accept()
+        print("added WS with id" + str(id))
         wsManager.addConsumer(id, self)
 
     def disconnect(self, close_code):
