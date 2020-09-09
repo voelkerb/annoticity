@@ -24,7 +24,8 @@ urlpatterns = [
     
     path('data/ECO/startTs=<int:startTs>&stopTs=<int:stopTs>', eco.getData, name='getData'),
     path('data/ECO/house=<str:house>&meter=<str:meter>&day=<str:day>', eco.initChart, name='initChart'),
-        
+    path('data/ECO/times/house=<str:house>&meter=<str:meter>', eco.getTimes, name='getTimes'), 
+    
     path('data/UKDALE/startTs=<int:startTs>&stopTs=<int:stopTs>', ukdale.getData, name='getData'),
     path('data/UKDALE/house=<str:house>&meter=<str:meter>&day=<str:day>', ukdale.initChart, name='initChart'),
     path('data/UKDALE/times/house=<str:house>&meter=<str:meter>', ukdale.getTimes, name='getTimes'),

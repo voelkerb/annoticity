@@ -18,13 +18,25 @@ from measurement.usefulFunctions import time_format_ymdhms
 
 from .powerData import dataManager as dm
 
-eco.BASE_PATH = "/users/voelkerb/NILM_Datasets/ECO/"
-
-
+eco.BASE_PATH = os.environ.get("ECO_BASE_PATH")
+print(os.environ)
 def info():
     houses = eco.getHouses()
-    ecoInfo = {h:{m:eco.getTimeRange(h, m) for m in eco.getMeters(h)} for h in houses}
+    meters = eco.loadLabelsJson()
+    ecoInfo = {}
+    for h in houses:
+        meters = eco.getMeters(h)
+        mapping = {m:eco.getDevice(h, m) for m in meters}
+        ecoInfo[h] = {"meters":meters, "mapping": mapping}
     return ecoInfo
+
+def getTimes(request, house, meter):
+    h = int(house)
+    m = int(meter)
+    availability = eco.getTimeRange(h, m)
+    response = {}
+    response["ranges"] = availability
+    return JsonResponse(response)
 
 def loadData(house, meter, day, samplingrate=1):
     startDate = datetime.strptime(day, "%m_%d_%Y").replace(hour=0, minute=0, second=0, microsecond=0)

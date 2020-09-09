@@ -5,7 +5,7 @@ from datetime import datetime
 def get(title, measures):
     chart = {
         # 'colors': ["rgba(235, 162, 59, 1)", "#c1a374"],
-        'chart': {'type': 'area', 'zoomType': 'x', 'panning': True, 'animation': False, 'spacingTop': 5},
+        'chart': {'type': 'area', 'zoomType': 'xy', 'resetZoomEnabled':False, 'animation': False, 'spacingTop': 5},
         'boost': { 'useGPUTranslations': True, 'enabled' : False },
         'navigator' : {
             'adaptToUpdatedData': False,
@@ -28,7 +28,7 @@ def get(title, measures):
                 'marker': { 'enabled': False },
             },
         },
-        'exporting': { 'enabled': False },
+        'exporting': { 'enabled': True },
         'title': { 'text':title},
         'xAxis': {
             'ordinal' : False,
@@ -67,6 +67,7 @@ def get(title, measures):
             'name': measureText,
             'color': '#0066FF',
             'dataGrouping': { 'enabled': False },
+            'showInNavigator': True,
             'tooltip': { 'valueSuffix': " " + unit }, 
         }
         color = getColor(m)

@@ -38,7 +38,7 @@
         <!-- no Margin -->
         <div class="p-0">
             <!-- Instructions -->
-            <p>Load a dataset from the server or upload your own file to label it.</p>  
+            <p>Select one of the datasets below or upload your own file.</p>  
             <!-- All available datasts + upload -->
             <!-- Nav tabs -->
             <ul class="nav nav-tabs">
@@ -82,7 +82,7 @@
                         </div>
                     </div>   
                     <div class="row m-0">
-                        The FIRED dataset (2020) covers 52 days electricity recordings of a 79sqm apartment building in Germany.
+                        The FIRED dataset (2020) covers 52 days electricity recordings of a 79m&sup2; apartment building in Germany.
                     </div> 
                     <div class="flex-row mb-2">
                         <a href="http://redd.csail.mit.edu">TODO: More info</a>
@@ -723,24 +723,53 @@
                 setUKDALETimes();
             }
         }
-        
-        var currentUKDaleTimes = null;
-        function checkUKDaleDate(date) {
-            if (currentUKDaleTimes !== null) {
+
+        var newTimes = null;
+        function checkDate(date) {
+            if (newTimes !== null) {
                 var seconds = date.getTime() / 1000;
-                let rangesLen = currentUKDaleTimes.length;
+                let rangesLen = newTimes.length;
                 for (var i=0; i<rangesLen; i++) {
-                    let startTs = currentUKDaleTimes[i][0];
+                    let startTs = newTimes[i][0];
                     var sdate = new Date(startTs*1000);
                     sdate.setHours(0, 0, 0, 0);
                     startTs = sdate.getTime() / 1000;
-                    let stopTs = currentUKDaleTimes[i][1];
+                    let stopTs = newTimes[i][1];
                     if (startTs <= seconds && seconds <= stopTs) return [true];
                     // Should make it faster
                     if (startTs > seconds) break; 
                 }
             }
             return [false];
+        }
+
+        function loadedTimes(datePickerId, data) {
+            newTimes = data["ranges"];
+            console.log(datePickerId + ": " + newTimes);
+            var oldDate = document.getElementById(datePickerId).value;
+            var startTs = newTimes[0][0]
+            var stopTs = newTimes[newTimes.length-1][1]
+            var dateStart = new Date(startTs*1000);
+            var dateEnd = new Date(stopTs*1000);
+            // Need to reinit datepicker object 
+            $("#" + datePickerId).datepicker( "destroy" );
+
+            var date_input=$('input[id="'+ datePickerId+ '"]'); //our date input has the name "date"
+            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
+        
+            date_input.datepicker({
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                autoclose: true,
+                beforeShowDay: checkDate,
+                defaultDate: dateStart,
+                minDate: dateStart,
+                maxDate: dateEnd,
+            });
+            if (checkDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
+            else date_input.val("");
+
         }
 
         function setUKDALETimes() {
@@ -752,111 +781,47 @@
             $.ajax({
                 url: 'data/UKDALE/times/house=' + house + '&meter=' + meter,
                 success: function (data) {
-                    currentUKDaleTimes = data["ranges"];
-                    var oldDate = document.getElementById('dateInpUKDALE').value;
-                    var startTs = currentUKDaleTimes[0][0]
-                    var stopTs = currentUKDaleTimes[currentUKDaleTimes.length-1][1]
-                    var dateStart = new Date(startTs*1000);
-                    var dateEnd = new Date(stopTs*1000);
-                    // Need to reinit datepicker object 
-                    $("#dateInpUKDALE").datepicker( "destroy" );
-
-                    var date_input=$('input[id="dateInpUKDALE"]'); //our date input has the name "date"
-                    var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-                    console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-                
-                    date_input.datepicker({
-                        format: 'dd/mm/yyyy',
-                        todayHighlight: true,
-                        autoclose: true,
-                        beforeShowDay: checkUKDaleDate,
-                        defaultDate: dateStart,
-                        minDate: dateStart,
-                        maxDate: dateEnd,
-                    });
-                    if (checkUKDaleDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
-                    else date_input.val("");
+                    loadedTimes('dateInpUKDALE', data);
                 }
             });
 
         }
 
-        function checkEcoDate(date) {
-            var meterSel = document.getElementById('selECOMeter');
-            var meter = Number(meterSel[meterSel.selectedIndex].value);
-            var houseSel = document.getElementById('selECOHouse');
-            var house = Number(houseSel[houseSel.selectedIndex].value);
-            if (ecoInfo[house] !== null && ecoInfo[house][meter] !== null) {
-                var ranges = ecoInfo[house][meter];
-                var seconds = date.getTime() / 1000;
-                let rangesLen = ranges.length;
-                for (var i=0; i<rangesLen; i++) {
-                    let startTs = ranges[i][0];
-                    var sdate = new Date(startTs*1000);
-                    sdate.setHours(0, 0, 0, 0);
-                    startTs = sdate.getTime() / 1000;
-                    let stopTs = ranges[i][1];
-                    if (startTs <= seconds && seconds <= stopTs) return [true];
-                    // Should make it faster
-                    if (startTs > seconds) break; 
-                }
-            }
-            return [false];
-        }
 
         function setECOTimes() {
             var meterSel = document.getElementById('selECOMeter');
             var meter = meterSel[meterSel.selectedIndex].value;
-
             var houseSel = document.getElementById('selECOHouse');
             var house = houseSel[houseSel.selectedIndex].value;
-            console.log("Sel Meter: " + meter);
-            if (ecoInfo[house] !== null && ecoInfo[house][meter] !== null) {
 
-                var oldDate = document.getElementById('dateInpECO').value;
-                var ranges = ecoInfo[house][meter];
-
-                var startTs = ranges[0][0]
-                var stopTs = ranges[ranges.length-1][1]
-                var dateStart = new Date(startTs*1000);
-                var dateEnd = new Date(stopTs*1000);
-                // Need to reinit datepicker object 
-                $("#dateInpECO").datepicker( "destroy" );
-
-                var date_input=$('input[id="dateInpECO"]'); //our date input has the name "date"
-                var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-                console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-            
-                date_input.datepicker({
-                    format: 'dd/mm/yyyy',
-                    todayHighlight: true,
-                    autoclose: true,
-                    beforeShowDay: checkEcoDate,
-                    defaultDate: dateStart,
-                    minDate: dateStart,
-                    maxDate: dateEnd,
-                });
-                if (checkEcoDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
-                else date_input.val("");
-            }
+            $.ajax({
+                url: 'data/ECO/times/house=' + house + '&meter=' + meter,
+                success: function (data) {
+                    loadedTimes('dateInpECO', data);
+                }
+            });
         }
+
         function setECOMeters() {
             var meterSel = document.getElementById('selECOMeter');
             removeOptionsFromSelect(meterSel);
-
             var houseSel = document.getElementById('selECOHouse');
             var house = houseSel[houseSel.selectedIndex].value;
             console.log("Sel House: " + house);
             if (ecoInfo[house] !== null) {
-                for (var meter in ecoInfo[house]) {
+                let numMeters = ecoInfo[house]["meters"].length;
+                for (var i=0; i < numMeters; i++) {
+                    let meter = ecoInfo[house]["meters"][i];
                     console.log(meter);
-                    addOptionToSelect( meterSel,  meter);
+                    let name =  String(meter) + ": " + ecoInfo[house]["mapping"][meter];
+                    console.log(name);
+                    addOptionToSelect( meterSel, name, value=meter);
                 }
-
                 meterSel.dispatchEvent(new Event('change'));
                 setECOTimes();
             }
         }
+
 
         // Set available BLOND channels and date depending on current house selection
         function setBLONDChannels() {
@@ -864,7 +829,6 @@
             var meter = meterSel[meterSel.selectedIndex].value;
             var setSel = document.getElementById('selBLONDSet');
             var set = setSel[setSel.selectedIndex].value;
-
             var channelSel = document.getElementById('selBLONDChannel');
             if (set in blondInfo && meter in blondInfo[set]["meters"]) {
                 var channels = blondInfo[set]["meters"][meter];
@@ -915,7 +879,6 @@
         function setREDDChannels() {
             var sel = document.getElementById('selREDDChannel');
             removeOptionsFromSelect(sel);
-
             var houseSel = document.getElementById('selREDDHouse');
             var house = Number(houseSel[houseSel.selectedIndex].value);
             console.log("Sel house: " + house);
@@ -1609,6 +1572,13 @@
             dataType = "FIRED";
         }
 
+        function resetYZoom() {
+            console.log("resetYZoom");
+            chart.yAxis[0].setExtremes(null, null);
+            resetButton.hide();
+        }
+
+        var resetButton = null;
         // __________________________________ NEW CHART _____________________________________
         function newChart(data) {
             console.log("ajax success new Chart");
@@ -1632,6 +1602,24 @@
                     },
                 });
             }
+            // Fancy exporting
+            data['chart']['exporting'] = {
+                sourceWidth: 1500,
+                sourceHeight: 700,
+                allowHTML: true,
+                scale: 1,
+                menuItemDefinitions: {
+                    downloadPDF: {
+                            onclick: function() {
+                                console.log("export pdf");
+                                this.exportChart({
+                                    type: 'application/pdf',
+                                    width: null
+                                });
+                            },
+                    }
+                }
+            };
             // Create the chart
             var ctx = document.getElementById("chart_container");
             chart = Highcharts.stockChart(ctx, data['chart'], function (chart) {
@@ -1643,6 +1631,13 @@
             });
             // Reset anything done so far
             resetStuff();
+            
+            resetButton = chart.renderer.button('Reset Y Zoom',chart.chartWidth-140, 10).attr({
+                    zIndex: 3
+            }).on('click', function () {
+                resetYZoom();
+            }).add();
+            resetButton.hide();
 
             if ('title' in data) chart.setTitle(data[title]);
             if ('labels' in data) addLabelsFromServer(data["labels"]);
@@ -1652,6 +1647,8 @@
                 min: chart.xAxis[0].min,
                 max: chart.xAxis[0].max,
             });
+            initialYExtremes[0] = chart.xAxis[0].min;
+            initialYExtremes[1] = chart.xAxis[0].max;
 
             date = data['date'];
             fileName = data['filename'];
@@ -1678,6 +1675,7 @@
 
         var lastUpdate = Math.round(new Date().getTime());
         var lastExtremes = [-1, -1];
+        var initialYExtremes = [-1,-1];
         // __________________________________ ZOOMED CHART _____________________________________
         function afterSetExtremes(e) {
             // alert(e.trigger);
@@ -1694,6 +1692,17 @@
                     lastExtremes[1] = stopTs;
                     newSelection(startTs, stopTs);
                     lastUpdate = now;
+
+                    extY = chart.yAxis[0].getExtremes();
+                    console.log(extY);
+                    console.log(e.trigger);
+                    chart.resetZoomButton.hide();
+                    if (e.trigger === "zoom" && (chart.yAxis[0].min !== initialYExtremes[0] ||  chart.yAxis[0].min !== initialYExtremes[1])) {
+                        console.log("zoomedY");
+                        resetButton.show();
+                    } else {
+                        resetButton.hide();
+                    }
                 // }
             }
         }
@@ -1968,6 +1977,7 @@
             chart.xAxis[0].addPlotLine({ // mark the weekend
                 color: 'green',
                 width: 3,
+                zIndex: 10,
                 value: ts,
                 id: theID,
                 label: labelInf,
