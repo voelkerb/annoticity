@@ -1,0 +1,4 @@
+django-bootstrap-datepicker-plus
+django-bootstrap4
+channels
+python-decouple
