@@ -3,13 +3,21 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 
 
+print("test")
 
 class SocketConsumer(WebsocketConsumer):
     def connect(self):
-        id = self.scope["cookies"]["sessionid"]
-        self.accept()
-        print("added WS with id" + str(id))
-        wsManager.addConsumer(id, self)
+        id = None
+        if "cookies" in self.scope and "sessionid" in self.scope["cookies"]:
+            id = self.scope["cookies"]["sessionid"]
+        elif "cookies" in self.scope and "csrftoken" in self.scope["cookies"]:
+            id = self.scope["cookies"]["csrftoken"]
+        if id != None:
+            self.accept()
+            wsManager.addConsumer(id, self)
+            print("added WS with id" + str(id))
+        else:
+            print("Cannot retrieve id from websocket" + str(self.scope))
 
     def disconnect(self, close_code):
         id = self.scope["cookies"]["sessionid"]

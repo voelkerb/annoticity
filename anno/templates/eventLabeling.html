@@ -1115,18 +1115,23 @@
         // Constructor of websocket
         connectWs();
         function connectWs() {
-            statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
+            if (statusSocket !== null) {
+                statusSocket.close();
+                statusSocket = null;
+            }
+            statusSocket = new WebSocket( 'ws://' + window.location.host + '/ben/ws/' );
+            // statusSocket = new WebSocket( 'ws://' + window.location.host + '/ws/' );
+            // statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
             statusSocket.onmessage = webSocketMsg;
             // Reconnect on close and on error
-            statusSocket.onclose = function(e) {
-                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-                setTimeout(function() { connectWs(); }, 1000);
-            };
-            statusSocket.onerror = function(err) {
-                console.error('Socket encountered error: ', err.message, 'Closing socket');
-                statusSocket.close();
-                setTimeout(function() { connectWs(); }, 1000);
-            };
+            statusSocket.onclose = onWSError;
+            statusSocket.onerror = onWSError;
+        }
+        
+        function onWSError() {
+            statusSocket.close();
+            statusSocket = null;
+            setTimeout(function() { connectWs(); }, 2000);
         }
 
         // Received a websocket msg
