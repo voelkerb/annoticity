@@ -45,7 +45,8 @@ class WebSocketManager(object):
         self.consumers[id] = consumer
 
     def removeConsumer(self, id):
-        del self.consumers[id]
+        if id in self.consumers:
+            del self.consumers[id]
 
     def sendDict(self, id, data):
         if id in self.consumers:

@@ -171,7 +171,6 @@ def getMeasureUnit(measure):
     unit = ""
     if measure.split("_l")[0] in measureTexts:
         measureText = measureTexts[measure.split("_l")[0]]["name"]
-        print(measure)
         if len(measure.split("_l")) > 1: measureText += " L" + measure.split("_l")[-1]
         unit = measureTexts[measure.split("_l")[0]]["unit"]
     return measureText, unit

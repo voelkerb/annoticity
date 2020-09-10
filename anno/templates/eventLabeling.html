@@ -20,6 +20,8 @@
     <!-- For datepicker -->
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    {% load static %}
+    <script src='{% static "js/reconnecting-websocket.js" %}'></script>
 
 {% endblock %}
 
@@ -585,7 +587,7 @@
     </style>
     <!-- Javascript stuff -->
     <script>
-
+        
         // __________________________________ GLOBAL VARIABLES ___________________________________
         // Dict holding all events
         var eventInfo = new Object();
@@ -1115,20 +1117,12 @@
         // Constructor of websocket
         connectWs();
         function connectWs() {
-
-            if (statusSocket !== null) {
-                statusSocket.close();
-                statusSocket = null;
-            }
-
             var loc = window.location;
             var wsStart = loc.protocol == "https:" ? "wss://" : "ws://"
             var endpoint = wsStart + loc.host + loc.pathname + "ws"
-            statusSocket = new WebSocket(endpoint);
+            // statusSocket = new WebSocket(endpoint);
+            statusSocket = new ReconnectingWebSocket(endpoint);
 
-            // statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
-            // statusSocket = new WebSocket( 'ws://' + window.location.host + '/ws/' );
-            // statusSocket = new WebSocket( 'wss://' + window.location.host + '/ben/ws/' );
             statusSocket.onmessage = webSocketMsg;
             // Reconnect on close and on error
             statusSocket.onclose = onWSError;
@@ -1136,11 +1130,7 @@
         }
 
         function onWSError() {
-            if (statusSocket !== null) {
-                statusSocket.close();
-            }
-            statusSocket = null;
-            setTimeout(function() { connectWs(); }, 2000);
+            console.log("websocket error");
         }
 
         // Received a websocket msg

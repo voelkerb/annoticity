@@ -44,8 +44,6 @@ def loadData(house, meter, day, samplingrate=1):
     stopTs = startTs + 60*60*24
     
     dataDict = ukdale.load(house, meter, startDate)
-    print(len(dataDict["data"]))
-    print(dataDict["data"])
 
     startTs = float(dataDict["ts"][0])
     stopTs = float(dataDict["ts"][-1])
