@@ -31,6 +31,9 @@ def loadData(meter, day, samplingrate=50):
 
     # Load once in best resolution and downsample later on
     dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+    dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
+    dataDict["tz"] = hp.getTimeZone().zone
+    
     return dataDict
 
 # Register data provider
@@ -68,6 +71,7 @@ def getData(request, startTs, stopTs):
 
         samplingrate = min(50, dataHp.srBasedOnDur(duration, "p"))
         dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+        dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
         chartData = chart.responseForData(dataDict, dataDict["measures"], startTs, stopTs)
     
     return JsonResponse(chartData)

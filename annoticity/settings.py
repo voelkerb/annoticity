@@ -25,7 +25,7 @@ SECRET_KEY = 'm=#5tjrzun5$j##9_*svgybfk_oxdkdpsk3$5gmionzaug*vyy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-DEBUG = False
+# DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1", "192.168.0.24", "earth.informatik.uni-freiburg.de"]
 

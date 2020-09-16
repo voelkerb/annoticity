@@ -1,6 +1,7 @@
 from . import data as dataHp
 import numpy as np
 from datetime import datetime
+import pytz
 
 def get(title, measures):
     chart = {
@@ -103,7 +104,6 @@ def responseForInitChart(dataDict, measures=None):
         m = dataDict["measures"][0]
         if len(usableKeys) > 0: m = usableKeys[0]
         ms.append(m)
-    
 
     duration = dataDict["duration"]
 
@@ -111,8 +111,6 @@ def responseForInitChart(dataDict, measures=None):
     stopTs = startTs + dataDict["duration"]
     title = "unknown"
     device = "unknown"
-    if (dataDict["timestamp"] == 0): day = None
-    else: day = datetime.strftime(datetime.fromtimestamp(dataDict["timestamp"]), "%m_%d_%Y")
     if "title" in dataDict: 
         device = dataDict["title"].replace("_", " ")
         title = dataDict["title"].replace("_", " ")
@@ -138,9 +136,20 @@ def responseForInitChart(dataDict, measures=None):
     if 'subs' in dataDict:
         for sub in dataDict["subs"]:
             subs.append({"startTs":sub.start/1000.0, "stopTs":sub.end/1000.0, "text":sub.text})
+    response = {'chart':c, 'labels':subs, 'device': device,'startTs':startTs}
+    # Set timezone
+    if 'tz' in dataDict: 
+        response['timeZone'] = dataDict["tz"]
+        ts = dataDict["timestamp"]
+        if "utc_timestamp" in dataDict: ts = dataDict["utc_timestamp"]
+        date = datetime.fromtimestamp(ts, pytz.UTC).astimezone(pytz.timezone(dataDict["tz"]))
+        response['timeZoneOffset'] = date.utcoffset().total_seconds()/60
 
-    return {'chart':c, 'labels':subs, 'device': device, 'date':day, 'startTs':startTs}
+    # Set day
+    if (dataDict["timestamp"] == 0): response['day'] = None
+    else: response['day'] = datetime.strftime(datetime.fromtimestamp(dataDict["timestamp"]), "%m_%d_%Y")
 
+    return response 
 
 def responseForData(dataDict, measures, startTs, stopTs):
     chartData = {"series":[]}

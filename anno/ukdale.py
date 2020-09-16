@@ -7,6 +7,7 @@ from datasets.UK_DALE import uk_daleLoader as ukdale
 
 import numpy as np 
 from datetime import datetime
+import pytz
 
 from .websocket import wsManager
 from . import chart
@@ -39,6 +40,8 @@ def getTimes(request, house, meter):
 
 def loadData(house, meter, day, samplingrate=1):
     startDate = datetime.strptime(day, "%m_%d_%Y").replace(hour=0, minute=0, second=0, microsecond=0)
+    tz = ukdale.getTimeZone()
+    startDate = tz.localize(startDate)
 
     startTs = startDate.timestamp()
     stopTs = startTs + 60*60*24
@@ -53,6 +56,7 @@ def loadData(house, meter, day, samplingrate=1):
     for m in dataDict["measures"]: 
         data[m] = np.interp(newX, dataDict["ts"], dataDict["data"][m])
     dataDict["data"] = data
+    dataDict["tz"] = tz.zone
     dataDict["timestamp"] = startTs
     dataDict["duration"] = len(data)/samplingrate
     dataDict["samplingrate"] = samplingrate
@@ -77,7 +81,6 @@ def initChart(request, house, meter, day):
     # Generate data response
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['date'] = day.replace("_", "/")
-    response['timeZone'] = "UTC"
     response["filename"] = "house_" + str(house) + "__meter_" + str(meter) + "__" + day + ".mkv"
     return JsonResponse(response)
 

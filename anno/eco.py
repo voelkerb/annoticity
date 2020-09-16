@@ -47,7 +47,8 @@ def loadData(house, meter, day, samplingrate=1):
         dataDict["data"] = dataHp.resample(dataDict["data"], dataDict["samplingrate"], samplingrate)
         dataDict["samplingrate"] = samplingrate
         dataDict["samples"] = len(dataDict["data"])
-
+    dataDict["tz"] = eco.getTimeZone().zone
+    dataDict["tsIsUTC"] = False
     return dataDict
 
 # Register data provider
@@ -70,7 +71,6 @@ def initChart(request, house, meter, day):
     dm.add(sessionID, dataDict)
     # response = dataHp.responseForData(dataDict, measure=measure)
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
-    response['timeZone'] = "Europe/Berlin"
     return JsonResponse(response)
 
 def getData(request, startTs, stopTs):

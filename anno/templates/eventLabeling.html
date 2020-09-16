@@ -17,6 +17,7 @@
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js" type="text/javascript"></script>
     <!-- For datepicker -->
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -79,7 +80,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Date:</span>
                                 </div>
-                                <input class="form-control" id="dateInpFIRED" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                                <input class="form-control" autocomplete="off" id="dateInpFIRED" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
                             <button type="submit" id="applyFIRED" class="btn btn-dark">Apply</button>
                         </div>
@@ -88,8 +89,8 @@
                         The FIRED dataset (2020) covers 52 days electricity recordings of a 79m&sup2; apartment building in Germany.
                     </div> 
                     <div class="flex-row mb-2">
-                        <a href="http://redd.csail.mit.edu">TODO: More info</a>
-                        <a class="ml-3" href="http://redd.csail.mit.edu/kolter-kddsust11.pdf">TODO: Publication</a>
+                        <a target='_blank' href="http://github.com/voelkerb/FIRED_dataset_helper">More info</a>
+                        <a target='_blank' class="ml-3" href="http://buildsys.acm.org/2020/">Publication (TBP)</a>
                     </div> 
                 </div>
                 <!-- REDD Dataset selection -->
@@ -107,7 +108,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Date:</span>
                                 </div>
-                                <input class="form-control" id="dateInpREDD" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                                <input class="form-control" autocomplete="off" id="dateInpREDD" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
                             <button type="submit" id="applyREDD" class="btn btn-dark">Apply</button>
                         </div>
@@ -117,8 +118,8 @@
                         The REDD dataset (2011) covers several weeks electricity recordings of 6 houses in the US.
                     </div> 
                     <div class="flex-row mb-2">
-                        <a href="http://redd.csail.mit.edu">More info</a>
-                        <a class="ml-3" href="http://redd.csail.mit.edu/kolter-kddsust11.pdf">Publication</a>
+                        <a target='_blank' href="http://redd.csail.mit.edu">More info</a>
+                        <a target='_blank' class="ml-3" href="http://redd.csail.mit.edu/kolter-kddsust11.pdf">Publication</a>
                     </div> 
                 </div>
                 <!-- UK-Dale Dataset selection -->
@@ -136,7 +137,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Date:</span>
                                 </div>
-                                <input class="form-control" id="dateInpUKDALE" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                                <input class="form-control" autocomplete="off" id="dateInpUKDALE" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
                             <button type="submit" id="applyUKDALE" class="btn btn-dark">Apply</button>
                         </div>
@@ -146,8 +147,8 @@
                         The UK-Dale dataset (2012-2017) covers multiple years electricity recordings of 5 houses in the UK.
                     </div> 
                     <div class="flex-row mb-2">
-                        <a href="https://data.ukedc.rl.ac.uk/browse/edc/efficiency/residential/EnergyConsumption/Domestic/UK-DALE-2017/ReadMe_DALE-2017.html">More info</a>
-                        <a class="ml-3" href="https://www.doi.org/10.1038/sdata.2015.7">Publication</a>
+                        <a target='_blank' href="https://data.ukedc.rl.ac.uk/browse/edc/efficiency/residential/EnergyConsumption/Domestic/UK-DALE-2017/ReadMe_DALE-2017.html">More info</a>
+                        <a target='_blank' class="ml-3" href="https://www.doi.org/10.1038/sdata.2015.7">Publication</a>
                     </div>  
                 </div>
                 <!-- BLOND Dataset selection -->
@@ -168,7 +169,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Date:</span>
                                 </div>
-                                <input class="form-control" id="dateInpBLOND" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                                <input class="form-control" autocomplete="off" id="dateInpBLOND" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
                             <button type="submit" id="applyBLOND" class="btn btn-dark">Apply</button>
                         </div>
@@ -177,8 +178,8 @@
                         The BLOND dataset (2016-2017) covers high frequency electricity recordings of an office building in Germany.
                     </div> 
                     <div class="flex-row mb-2">
-                        <a href="https://mediatum.ub.tum.de/1375836">More info</a>
-                        <a class="ml-3" href="https://www.doi.org/10.1038/sdata.2018.48">Publication</a>
+                        <a target='_blank' href="https://mediatum.ub.tum.de/1375836">More info</a>
+                        <a target='_blank' class="ml-3" href="https://www.doi.org/10.1038/sdata.2018.48">Publication</a>
                     </div>    
                 </div>
                 <!-- ECO Dataset selection -->
@@ -196,7 +197,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="basic-addon1">Date:</span>
                                 </div>
-                                <input class="form-control" id="dateInpECO" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
+                                <input class="form-control" autocomplete="off" id="dateInpECO" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
                             <button type="submit" id="applyECO" class="btn btn-dark">Apply</button>
                         </div>
@@ -205,8 +206,8 @@
                         The ECO dataset (2012-2013) covers electricity recordings of 6 houses in Switzerland.
                     </div> 
                     <div class="flex-row mb-2">
-                        <a href="https://www.vs.inf.ethz.ch/res/show.html?what=eco-data">More info</a>
-                        <a class="ml-3" href="https://doi.org/10.1145/2674061.2674064">Publication</a>
+                        <a target='_blank' href="https://www.vs.inf.ethz.ch/res/show.html?what=eco-data">More info</a>
+                        <a target='_blank' class="ml-3" href="https://doi.org/10.1145/2674061.2674064">Publication</a>
                     </div>  
                 </div>
                 <!-- Custom file upload -->
@@ -239,9 +240,9 @@
     </select>
 
     <!-- Highcharts display -->
-    <div class="border" id="chart_container" style="min-width: 500px; height: 700px; margin: 0 auto"></div>
-
-    <hr/>
+    <div class="border" id="resizer" style="min-width: 350px; min-height: 300px; height: 300px;">
+        <div id="chart_container" style="min-width: 350px; min-height: 300px; height: 100%;"></div>
+    </div>
     
 
     <!--Accordion wrapper-->
@@ -576,6 +577,22 @@
         </div>
     </div>
     
+    <!-- Leave page Modal -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="unsavedChangesModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+        <div class="modal-dialog modal-dialog-centered">
+           <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5>We do not store any of your data. If you leave, all information will be lost.</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default modalOk" id="ExportModalOk" data-dismiss="modal">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <hr/>
 
     <!-- Alert message if upload went wrong -->
@@ -607,12 +624,12 @@
         var firedInfo = JSON.parse('{{ FIREDInfo|safe }}');
         var blondInfo = JSON.parse('{{ BLONDInfo|safe }}');
         var sliderValues = {
-            "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s"},
-            "postEventWindowLength": {"value": getStoredValue("postEventWindowLength"),"unit":"s"},
-            "votingWindowLength": {"value": getStoredValue("votingWindowLength"),"unit":"s"},
-            "thresMin": {"value": getStoredValue("thresMin"),"unit":"W"},
-            "thresLinearCoeff": {"value": getStoredValue("thresLinearCoeff"),"unit":""},
-            "eventRes": {"value": getStoredValue("eventRes"),"unit":"s"},
+            "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s", "std": 1.0},
+            "postEventWindowLength": {"value": getStoredValue("postEventWindowLength"),"unit":"s", "std": 1.0},
+            "votingWindowLength": {"value": getStoredValue("votingWindowLength"),"unit":"s", "std": 2.0},
+            "thresMin": {"value": getStoredValue("thresMin"),"unit":"W", "std": 5.0},
+            "thresLinearCoeff": {"value": getStoredValue("thresLinearCoeff"),"unit":"", "std": 0.005},
+            "eventRes": {"value": getStoredValue("eventRes"),"unit":"s", "std": 1.0},
         }
         var textLabelsActive = (getStoredValue("textLabelsActive") == 'true');
         var title = "Select a device and time, then click apply.";
@@ -622,12 +639,29 @@
         // Need to be done here, does not work in document ready
         document.getElementById("textLabelsActive").checked = textLabelsActive;
 
+        // User leaves page, warn that things are lost
+        var formSubmitting = false;
+        var setFormSubmitting = function() { formSubmitting = true; };
+        window.onload = function() {
+            window.addEventListener("beforeunload", function (e) {
+                if (formSubmitting) {
+                    return undefined;
+                }
+                var confirmationMessage = 'We are not storing any of your data. '
+                                        + 'If you leave now all work will be lost.';
+                
+                $('#unsavedChangesModal').modal("show");
+                (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+                return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+            });
+        };
         // __________________________________ UI _____________________________________
         // Load slider and checkboxes depending on stored values values
         // Load datepicker and sall stuff to display correct
         $(document).ready(function(){
             // Slider values
             for (var key in sliderValues){
+                if (sliderValues[key]["value"] === null) sliderValues[key]["value"] = sliderValues[key]["std"];
                 let slider = document.getElementById(key + "Slider");
                 if (slider !== null) slider.value = sliderValues[key]["value"];
                 let value = document.getElementById(key + "Slider_value");
@@ -884,13 +918,12 @@
             removeOptionsFromSelect(sel);
             var houseSel = document.getElementById('selREDDHouse');
             var house = Number(houseSel[houseSel.selectedIndex].value);
-            console.log("Sel house: " + house);
             if (house in reddInfo) {
                 let numChannels = reddInfo[house]["channels"].length;
                 for (var i = 0; i < numChannels; i++) {
                     let channel = "channel_" + reddInfo[house]["channels"][i];
                     var niceName = reddInfo[house]["channels"][i] + ": " + reddInfo[house]["mapping"][channel]
-                    addOptionToSelect( sel,  niceName, value=reddInfo[house]["channels"][i]);
+                    addOptionToSelect(sel,  niceName, value=reddInfo[house]["channels"][i]);
                 }
             }
 
@@ -1048,6 +1081,10 @@
             } 
         });
 
+        $('.datepicker').on('click', function(e) {
+            e.preventDefault();
+            $(this).attr("autocomplete", "off");  
+        });
         // Download using ajax iframe
         function ajax_download(url, data, input_name) {
             var $iframe, iframe_doc, iframe_html;
@@ -1577,14 +1614,66 @@
             });
             dataType = "FIRED";
         }
-
         function resetYZoom() {
             console.log("resetYZoom");
             chart.yAxis[0].setExtremes(null, null);
-            resetButton.hide();
+            hideResetButton();
         }
 
         var resetButton = null;
+        var resetButtonShown = false;
+        function hideResetButton() {
+            resetButton.hide();
+            resetButtonShown = false;
+        }
+        function showResetButton() {
+            if (resetButton !== null) {
+                resetButton.hide();
+                resetButton = null;
+            }
+            console.log(chartContainer);
+            resetButton = chart.renderer.button('Reset Y Zoom',chartContainer.offsetWidth-140, 10).attr({
+                    zIndex: 3
+            }).on('click', function () {
+                resetYZoom();
+            }).add();
+            resetButtonShown = true;
+        }
+
+        function redrawResetButton() {
+            if (resetButtonShown) {
+                hideResetButton();
+                showResetButton();
+            }
+        }
+
+        var chartContainer = $('#chart_container')[0];
+        $('#resizer').resizable({
+            // On resize, set the chart size to that of the 
+            // resizer minus padding. If your chart has a lot of data or other
+            // content, the redrawing might be slow. In that case, we recommend 
+            // that you use the 'stop' event instead of 'resize'.
+            resize: function() {
+                // chart.setSize(
+                //     this.offsetWidth, 
+                //     this.offsetHeight,
+                //     false
+                // );
+
+                // if (resetButtonShown) redrawResetButton();
+            },
+            stop: function() {
+                chart.setSize(
+                    this.offsetWidth, 
+                    this.offsetHeight,
+                    false
+                );
+                if (resetButtonShown) redrawResetButton();
+            }
+        });
+        window.addEventListener('resize', redrawResetButton, false)
+
+
         // __________________________________ NEW CHART _____________________________________
         function newChart(data) {
             console.log("ajax success new Chart");
@@ -1595,16 +1684,13 @@
             if ("msg" in data) alert(data["msg"]);
             // Set the datas time zone
             // NOTE: need to be set first
-            if ('timeZone' in data) {
+            var zone = data["timeZone"];
+            if ('timeZoneOffset' in data) {
                 Highcharts.setOptions({
                     global : {
-                        useUTC : data["timeZone"] === "UTC"
-                    },
-                    getTimezoneOffset: function (timestamp) {
-                        var zone = data["timeZone"],
-                            timezoneOffset = -moment.tz(timestamp, zone).utcOffset();
-
-                        return timezoneOffset;
+                        useUTC : true,
+                        timezoneOffset : -1*data["timeZoneOffset"],
+                        // useUTC : true
                     },
                 });
             }
@@ -1627,8 +1713,8 @@
                 }
             };
             // Create the chart
-            var ctx = document.getElementById("chart_container");
-            chart = Highcharts.stockChart(ctx, data['chart'], function (chart) {
+            // var ctx = document.getElementById("chart_container");
+            chart = Highcharts.stockChart(chartContainer, data['chart'], function (chart) {
                 // apply the date pickers
                 setTimeout(function () {
                     $('input.highcharts-range-selector', $(chart.container).parent())
@@ -1638,12 +1724,6 @@
             // Reset anything done so far
             resetStuff();
             
-            resetButton = chart.renderer.button('Reset Y Zoom',chart.chartWidth-140, 10).attr({
-                    zIndex: 3
-            }).on('click', function () {
-                resetYZoom();
-            }).add();
-            resetButton.hide();
 
             if ('title' in data) chart.setTitle(data[title]);
             if ('labels' in data) addLabelsFromServer(data["labels"]);
@@ -1685,6 +1765,7 @@
         // __________________________________ ZOOMED CHART _____________________________________
         function afterSetExtremes(e) {
             // alert(e.trigger);
+            console.log(e.trigger);     
             if (e.trigger !== undefined) {
                 let now = Math.round(new Date().getTime());
                 // if (now - lastUpdate > 200) {
@@ -1701,13 +1782,12 @@
 
                     extY = chart.yAxis[0].getExtremes();
                     console.log(extY);
-                    console.log(e.trigger);
                     chart.resetZoomButton.hide();
-                    if (e.trigger === "zoom" && (chart.yAxis[0].min !== initialYExtremes[0] ||  chart.yAxis[0].min !== initialYExtremes[1])) {
+                    if (e.trigger === "zoom" && (chart.yAxis[0].min !== initialYExtremes[0] || chart.yAxis[0].min !== initialYExtremes[1])) {
                         console.log("zoomedY");
-                        resetButton.show();
+                        showResetButton();
                     } else {
-                        resetButton.hide();
+                        //hideResetButton();
                     }
                 // }
             }
@@ -1949,6 +2029,7 @@
             }
         }
 
+
         // Add a plotline to the chart
         function addPlotLine(ts, pow, label) {
             let theID = 'vertLine_' + String(ts)
@@ -1957,6 +2038,7 @@
             events.push(ts);
             //  Keep array sorted
             events.sort(function(a, b){return a-b});
+
             newlabels = true;
             
             if (textLabelsActive === true) {
@@ -1973,7 +2055,7 @@
                 useHTML:true,
                 text: textForPlotline(label, labelID),
                 verticalAlign: 'top',
-                rotation: 0,
+                // rotation: 0,
                 style: {
                     color: 'green',
                     fontWeight: 'bold'
@@ -1993,7 +2075,7 @@
                         removeLabel(this.options.value);
                     }
                 }
-            })
+            });
         }
 
         // Get a plotline or band object by its ID

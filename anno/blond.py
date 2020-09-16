@@ -37,6 +37,8 @@ def loadData(set, meter, channel, day, samplingrate=1):
         dataDict["data"] = dataHp.resample(dataDict["data"], dataDict["samplingrate"], samplingrate)
         dataDict["samplingrate"] = samplingrate
         dataDict["samples"] = len(dataDict["data"])
+    dataDict["tz"] = bl.getTimeZone().zone
+    dataDict["tsIsUTC"] = False
     return dataDict
 
 # Register data provider

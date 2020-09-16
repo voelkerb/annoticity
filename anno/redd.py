@@ -5,7 +5,8 @@ sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH))
 from datasets.REDD import reddLoader as redd
 
 import numpy as np 
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 
 from .websocket import wsManager
 from . import chart
@@ -26,12 +27,14 @@ def info():
     return reddInfo
 
 def loadData(house, channel, day, samplingrate=1):
+    # Let this be an unaware timestamp object
     startDate = datetime.strptime(day, "%m_%d_%Y").replace(hour=0, minute=0, second=0, microsecond=0)
+    tz = redd.getTimeZone()
+    startDate = tz.localize(startDate)
+    stopDate = startDate+timedelta(days=1)
 
-    startTs = startDate.timestamp()
-    stopTs = startTs + 60*60*24
-    
-    dataDict = redd.loadLowFreqInterval(house, datetime.fromtimestamp(startTs), datetime.fromtimestamp(stopTs), channels=[channel])[0]
+    dataDict = redd.loadLowFreq(house, utcStartTs=startDate.timestamp(), utcStopTs=stopDate.timestamp(), channels=[channel])[0]
+
 
     startTs = float(dataDict["ts"][0])
     stopTs = float(dataDict["ts"][-1])
@@ -40,7 +43,7 @@ def loadData(house, channel, day, samplingrate=1):
     data = np.interp(np.arange(startTs, stopTs, 1/samplingrate), dataDict["ts"], dataDict["data"]["s"])
     dataDict["data"] = np.recarray(len(data), dtype=np.dtype([('s',np.float32)]))
     dataDict["data"]["s"] = data
-    dataDict["timestamp"] = startTs
+    dataDict["tz"] = tz.zone
     dataDict["duration"] = len(data)/samplingrate
     dataDict["samplingrate"] = samplingrate
     return dataDict
@@ -64,7 +67,6 @@ def initChart(request, house, channel, day):
     # Generate data response
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['date'] = day.replace("_", "/")
-    response['timeZone'] = "UTC"
     response["filename"] = "house_" + str(house) + "__channel_" + str(channel) + "__" + day + ".mkv"
     return JsonResponse(response)
 

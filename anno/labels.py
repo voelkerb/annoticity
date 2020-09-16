@@ -4,7 +4,9 @@ import pandas as pd
 import pysubs2
 import numpy as np
 import os
+from datetime import datetime
 from annoticity.settings import PROJECT_ROOT, MEDIA_ROOT, MEDIA_URL
+import subprocess
 
 from django.http import JsonResponse
 
@@ -23,17 +25,25 @@ def labelUpload(request):
             ts = request.POST.get("timestamp")
             if ts is not None: ts = float(ts)
             else: ts = 0
-            fs = OverwriteStorage()
-            filename = fs.save(myfile.name, myfile)
-            path = fs.url(filename)
-            path = os.path.join(PROJECT_ROOT, path[1:])
 
-            lbls, error, warning = load(path, ts=ts)
+            sessionID = request.session.session_key
+            WORKING_FOLDER = os.path.join(MEDIA_ROOT, sessionID)
+            if not os.path.exists(WORKING_FOLDER): os.makedirs(WORKING_FOLDER, exist_ok=True)
+
+            fs = OverwriteStorage(os.path.join(MEDIA_URL, sessionID))
+            # store new file
+            filename = fs.save(myfile.name, myfile)
+
+            filePath = os.path.join(WORKING_FOLDER, filename)
+
+            lbls, error, warning = load(filePath, ts=ts)
 
             if error is not None: response['msg'] = error
             else:
                 response["labels"] = lbls
                 if warning is not None: response["msg"] = warning
+            # Delete file after it has been processed
+            subprocess.check_output(["rm", "-rf", filePath])
     return JsonResponse(response)
 
 

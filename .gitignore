@@ -11,6 +11,9 @@ __pycache__/
 
 data/*
 
+media/
+media/*
+
 **/.DS_Store
 
 # Eagle temporary board and schematic file
