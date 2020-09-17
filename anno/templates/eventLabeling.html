@@ -47,22 +47,22 @@
             <!-- Nav tabs -->
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link {% if navbar == 'FIRED' %}active{% endif %}" href="#FIRED" onclick="return false;">FIRED</a>
+                    <a class="nav-link {% if navbar == 'FIRED' %}active{% endif %}" href="#FIRED" data-value="FIRED" onclick="return false;">FIRED</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if navbar == 'REDD' %}active{% endif %}" href="#REDD" onclick="return false;">REDD</a>
+                    <a class="nav-link {% if navbar == 'REDD' %}active{% endif %}" href="#REDD" data-value="REDD" onclick="return false;">REDD</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if navbar == 'UKDALE' %}active{% endif %}" href="#UKDALE" onclick="return false;">UK-DALE</a>
+                    <a class="nav-link {% if navbar == 'UKDALE' %}active{% endif %}" href="#UKDALE" data-value="UKDALE"  onclick="return false;">UK-DALE</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if navbar == 'BLOND' %}active{% endif %}" href="#BLOND" onclick="return false;">BLOND</a>
+                    <a class="nav-link {% if navbar == 'BLOND' %}active{% endif %}" href="#BLOND" data-value="BLOND"  onclick="return false;">BLOND</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if navbar == 'ECO' %}active{% endif %}" href="#ECO" onclick="return false;">ECO</a>
+                    <a class="nav-link {% if navbar == 'ECO' %}active{% endif %}" href="#ECO" data-value="ECO" onclick="return false;">ECO</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if navbar == 'Custom' %}active{% endif %}" href="#Custom" onclick="return false;">Custom Upload</a>
+                    <a class="nav-link {% if navbar == 'Custom' %}active{% endif %}" href="#Custom" data-value="Custom" onclick="return false;">Custom Upload</a>
                 </li>
             </ul>
 
@@ -82,7 +82,7 @@
                                 </div>
                                 <input class="form-control" autocomplete="off" id="dateInpFIRED" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
-                            <button type="submit" id="applyFIRED" class="btn btn-dark">Apply</button>
+                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
                         </div>
                     </div>   
                     <div class="row m-0">
@@ -110,7 +110,7 @@
                                 </div>
                                 <input class="form-control" autocomplete="off" id="dateInpREDD" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
-                            <button type="submit" id="applyREDD" class="btn btn-dark">Apply</button>
+                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
                         </div>
                     </div>    
                     
@@ -139,7 +139,7 @@
                                 </div>
                                 <input class="form-control" autocomplete="off" id="dateInpUKDALE" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
-                            <button type="submit" id="applyUKDALE" class="btn btn-dark">Apply</button>
+                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
                         </div>
                     </div>   
                     
@@ -171,7 +171,7 @@
                                 </div>
                                 <input class="form-control" autocomplete="off" id="dateInpBLOND" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
-                            <button type="submit" id="applyBLOND" class="btn btn-dark">Apply</button>
+                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
                         </div>
                     </div>    
                     <div class="row m-0">
@@ -199,7 +199,7 @@
                                 </div>
                                 <input class="form-control" autocomplete="off" id="dateInpECO" name="dateInp" placeholder="MM/DD/YYYY" type="text"/>
                             </div>
-                            <button type="submit" id="applyECO" class="btn btn-dark">Apply</button>
+                            <button type="submit" id="apply" class="btn btn-dark">Apply</button>
                         </div>
                     </div>      
                     <div class="row m-0">
@@ -615,14 +615,9 @@
         var chart = null;
         var device = null;
         var date = document.getElementById('dateInpFIRED').value;
-        var dataType = "FIRED";
         var newlabels = false;
         var progressBar;
-        var reddInfo = JSON.parse('{{ REDDInfo|safe }}');
-        var ukdaleInfo = JSON.parse('{{ UKDALEInfo|safe }}');
-        var ecoInfo = JSON.parse('{{ ECOInfo|safe }}');
-        var firedInfo = JSON.parse('{{ FIREDInfo|safe }}');
-        var blondInfo = JSON.parse('{{ BLONDInfo|safe }}');
+
         var sliderValues = {
             "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s", "std": 1.0},
             "postEventWindowLength": {"value": getStoredValue("postEventWindowLength"),"unit":"s", "std": 1.0},
@@ -636,6 +631,39 @@
         var data = [0,0,0,0];
         var modalOpen = false;
         var modalResult = null;
+        var selDataset = "FIRED";
+        var dataType = "FIRED";
+
+        var datasetTimeInputs = {
+            "FIRED": 'dateInpFIRED',
+            "REDD": 'dateInpREDD',
+            "UKDALE": 'dateInpUKDALE',
+            "BLOND": 'dateInpBLOND',
+            "ECO": 'dateInpECO',
+        }
+        var datasetInputs = {
+            "FIRED": {
+                'meter':'selFIREDDev',
+            },
+            "REDD": {
+                'house':'selREDDHouse',
+                'channel':'selREDDChannel',
+            },
+            "UKDALE": {
+                'house':'selUKDALEHouse',
+                'meter':'selUKDALEMeter',
+            },
+            "BLOND": {
+                'set':'selBLONDSet',
+                'meter':'selBLONDMeter',
+                'channel':'selBLONDChannel',
+            },
+            "ECO": {
+                'house':'selECOHouse',
+                'meter':'selECOMeter',
+            }
+        };
+        var datasetInfos = {}
         // Need to be done here, does not work in document ready
         document.getElementById("textLabelsActive").checked = textLabelsActive;
 
@@ -655,6 +683,85 @@
                 return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
             });
         };
+
+        function getSelectionOfDataset(dataset) {
+            var selection = {}
+            var infoBase = datasetInfos[dataset];
+            for (let inputName in datasetInputs[dataset]) {
+                let inputs = datasetInputs[dataset];
+                var sel = document.getElementById(inputs[inputName]);
+                var val = null;
+                if (sel.selectedIndex !== -1) val = sel[sel.selectedIndex].value;
+                selection[inputName] = val;
+            }
+            return selection;
+        }
+
+        function changedDatasetTime() {
+            let selection = getSelectionOfDataset(selDataset);
+            var url = 'data/' + selDataset + '/times/__';
+            for (let sel in selection) {
+                url += "&" + sel + "=" + selection[sel]
+            }
+            url = url.replace("/__&", "/");
+            // selDataset Might change till loadTimes is called
+            let datasetName = selDataset;
+            $.ajax({
+                url: url,
+                success: function (data) {
+                    loadedTimes(datasetName, data);
+                }
+            });
+        }
+
+        function changedDatasetSelect() {
+            if (!(selDataset in datasetInfos)) {
+                progressBar.setText("Getting information...");
+                progressBar.show();
+                var url = 'data/' + selDataset + '/info/';
+                $.ajax({
+                    url: url,
+                    success: function (data) {
+                        datasetInfos[selDataset] = data;
+                        changedDatasetSelect()
+                        progressBar.hide();
+                    }
+                });
+                return;
+            }
+            var infoBase = datasetInfos[selDataset];
+            for (let inputName in datasetInputs[selDataset]) {
+                let inputs = datasetInputs[selDataset];
+                var sel = document.getElementById(inputs[inputName]);
+                var val = null;
+                if (sel.selectedIndex !== -1) val = sel[sel.selectedIndex].value;
+                if (sel !== this) removeOptionsFromSelect(sel);
+                var options = infoBase[inputName];
+                let numOptions = options.length;
+                for (i=0; i<numOptions; i++) {
+                    let option = options[i];
+                    if (i === 0) {
+                        infoBase = options[0];
+                    }
+                    var compVal = option["name"];
+                    if ("value" in option) compVal = option["value"];
+                    if (String(val) === String(compVal)) {
+                        infoBase = option;
+                    }
+                    if (sel !== this) {
+                        addOptionToSelect(sel, option["name"], value=compVal);
+                    }
+                }
+                // Set all others to old selection
+                if (sel !== this && val !== null) {
+                    $('#' + inputs[inputName] + ' option[value=' + String(val) + ']').prop({selected: true});
+                }
+                sel.onchange = null;
+                sel.dispatchEvent(new Event('change'));
+                sel.onchange = changedDatasetSelect;
+            }
+            changedDatasetTime();
+        }
         // __________________________________ UI _____________________________________
         // Load slider and checkboxes depending on stored values values
         // Load datepicker and sall stuff to display correct
@@ -667,103 +774,13 @@
                 let value = document.getElementById(key + "Slider_value");
                 if (value !== null) value.innerHTML = sliderValues[key]["value"] + " " + sliderValues[key]["unit"];
             }
-
-            // Data of FIRED
-            var sel = document.getElementById("selFIREDDev");
-            // Set meters
-            for (let dev in firedInfo) {
-                if (dev != "range") {
-                    addOptionToSelect(sel, firedInfo[dev], value=dev);
-                }
-            }
-            // Set date range
-            var dateStart = new Date(firedInfo["range"][0]*1000);
-            var dateEnd = new Date(firedInfo["range"][1]*1000);
-            var date_input=$('input[id="dateInpFIRED"]'); //our date input has the name "date"
-            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-            date_input.datepicker({
-                format: 'dd/mm/yyyy',
-                minDate: dateStart,
-                maxDate: dateEnd,
-                container: container,
-                todayHighlight: true,
-                autoclose: true,
-            })
-                
-
-            // Data of FIRED
-            var selSet = document.getElementById("selBLONDSet");
-            var selMeter = document.getElementById("selBLONDMeter");
-            // Set meters
-            for (let set in blondInfo) {
-                addOptionToSelect(selSet, set);
-            }
-            selMeter.dispatchEvent(new Event('change'));
-            // Set channels and time depending on current set selection
-            setBLONDMeters();
-            setBLONDChannels();
-            selSet.onchange = setBLONDMeters;
-            selMeter.onchange = setBLONDChannels;
-
-            // Data of REDD
-            // Set House
-            for (let house in reddInfo){
-                addOptionToSelect(document.getElementById("selREDDHouse"), String(house));
-            }
-            // Set channels and time depending on current house selection
-            setREDDChannels();
-            document.getElementById("selREDDHouse").onchange = setREDDChannels;
-
-            var selHouse = document.getElementById("selECOHouse");
-            var selMeter = document.getElementById("selECOMeter");
-            // Data of ECO
-            // Set House
-            for (let house in ecoInfo){
-                addOptionToSelect(selHouse, String(house));
-            }
-            // Set channels and time depending on current house selection
-            setECOMeters();
-            setECOTimes();
-            selHouse.onchange = setECOMeters;
-            selMeter.onchange = setECOTimes;
-
-            var selHouse = document.getElementById("selUKDALEHouse");
-            var selMeter = document.getElementById("selUKDALEMeter");
-            // Set House
-            for (let house in ukdaleInfo){
-                addOptionToSelect(selHouse, String(house));
-            }
-
-            // Set channels and time depending on current house selection
-            setUKDALEMeters();
-            setUKDALETimes();
-            selHouse.onchange = setUKDALEMeters;
-            selMeter.onchange = setUKDALETimes;
+            changedDatasetSelect();
         });
 
-        function setUKDALEMeters() {
-            var meterSel = document.getElementById('selUKDALEMeter');
-            removeOptionsFromSelect(meterSel);
-
-            var houseSel = document.getElementById('selUKDALEHouse');
-            var house = houseSel[houseSel.selectedIndex].value;
-            console.log("Sel UKDale House: " + house);
-            if (ukdaleInfo[house] !== null) {
-                numMeters = ukdaleInfo[house]["meters"].length;
-                for (var i=0; i < numMeters; i++) {
-                    let meter = ukdaleInfo[house]["meters"][i]
-                    var niceName = meter + ": " + ukdaleInfo[house]["mapping"][meter];
-                    addOptionToSelect( meterSel, label=niceName, value=ukdaleInfo[house]["meters"][i]);
-                }
-
-                meterSel.dispatchEvent(new Event('change'));
-                setUKDALETimes();
-            }
-        }
 
         var newTimes = null;
         function checkDate(date) {
-            if (newTimes !== null) {
+            if (newTimes !== null && newTimes !== undefined) {
                 var seconds = date.getTime() / 1000;
                 let rangesLen = newTimes.length;
                 for (var i=0; i<rangesLen; i++) {
@@ -780,9 +797,9 @@
             return [false];
         }
 
-        function loadedTimes(datePickerId, data) {
+        function loadedTimes(dataset, data) {
             newTimes = data["ranges"];
-            console.log(datePickerId + ": " + newTimes);
+            let datePickerId = datasetTimeInputs[dataset]
             var oldDate = document.getElementById(datePickerId).value;
             var startTs = newTimes[0][0]
             var stopTs = newTimes[newTimes.length-1][1]
@@ -793,6 +810,7 @@
 
             var date_input=$('input[id="'+ datePickerId+ '"]'); //our date input has the name "date"
             var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+            console.log()
             console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
         
             date_input.datepicker({
@@ -808,147 +826,6 @@
             else date_input.val("");
 
         }
-
-        function setUKDALETimes() {
-            var houseSel = document.getElementById('selUKDALEHouse');
-            var house = houseSel[houseSel.selectedIndex].value;
-            var meterSel = document.getElementById('selUKDALEMeter');
-            var meter = meterSel[meterSel.selectedIndex].value;
-
-            $.ajax({
-                url: 'data/UKDALE/times/house=' + house + '&meter=' + meter,
-                success: function (data) {
-                    loadedTimes('dateInpUKDALE', data);
-                }
-            });
-
-        }
-
-
-        function setECOTimes() {
-            var meterSel = document.getElementById('selECOMeter');
-            var meter = meterSel[meterSel.selectedIndex].value;
-            var houseSel = document.getElementById('selECOHouse');
-            var house = houseSel[houseSel.selectedIndex].value;
-
-            $.ajax({
-                url: 'data/ECO/times/house=' + house + '&meter=' + meter,
-                success: function (data) {
-                    loadedTimes('dateInpECO', data);
-                }
-            });
-        }
-
-        function setECOMeters() {
-            var meterSel = document.getElementById('selECOMeter');
-            removeOptionsFromSelect(meterSel);
-            var houseSel = document.getElementById('selECOHouse');
-            var house = houseSel[houseSel.selectedIndex].value;
-            console.log("Sel House: " + house);
-            if (ecoInfo[house] !== null) {
-                let numMeters = ecoInfo[house]["meters"].length;
-                for (var i=0; i < numMeters; i++) {
-                    let meter = ecoInfo[house]["meters"][i];
-                    console.log(meter);
-                    let name =  String(meter) + ": " + ecoInfo[house]["mapping"][meter];
-                    console.log(name);
-                    addOptionToSelect( meterSel, name, value=meter);
-                }
-                meterSel.dispatchEvent(new Event('change'));
-                setECOTimes();
-            }
-        }
-
-
-        // Set available BLOND channels and date depending on current house selection
-        function setBLONDChannels() {
-            var meterSel = document.getElementById('selBLONDMeter');
-            var meter = meterSel[meterSel.selectedIndex].value;
-            var setSel = document.getElementById('selBLONDSet');
-            var set = setSel[setSel.selectedIndex].value;
-            var channelSel = document.getElementById('selBLONDChannel');
-            if (set in blondInfo && meter in blondInfo[set]["meters"]) {
-                var channels = blondInfo[set]["meters"][meter];
-                let numChannels = channels.length;
-                removeOptionsFromSelect(channelSel);
-                for (var i=0; i<numChannels; i++) {
-                    addOptionToSelect(channelSel, channels[i]);
-                }
-                document.getElementById('selBLONDChannel').dispatchEvent(new Event('change'));
-            }
-        }
-
-        function setBLONDMeters() {
-            var meterSel = document.getElementById('selBLONDMeter');
-            removeOptionsFromSelect(meterSel);
-
-            var setSel = document.getElementById('selBLONDSet');
-            var set = setSel[setSel.selectedIndex].value;
-            if (set in blondInfo) {
-                for (var meter in blondInfo[set]["meters"]) {
-                    addOptionToSelect( meterSel,  meter);
-                }
-                document.getElementById('selBLONDMeter').dispatchEvent(new Event('change'));
-                var BLONDRange = blondInfo[set]["range"];
-                var dateStart = new Date(BLONDRange[0]*1000);
-                var dateEnd = new Date(BLONDRange[1]*1000);
-
-                // Need to reinit datepicker object 
-                $("#dateInpBLOND").datepicker( "destroy" );
-
-                var date_input=$('input[id="dateInpBLOND"]'); //our date input has the name "date"
-                var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-                console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-            
-                date_input.datepicker({
-                    format: 'dd/mm/yyyy',
-                    minDate: dateStart,
-                    maxDate: dateEnd,
-                    // container: container,
-                    todayHighlight: true,
-                    autoclose: true,
-                })
-                date_input.val("");
-            }
-        }
-
-        // Set available REDD channels and date depending on current house selection
-        function setREDDChannels() {
-            var sel = document.getElementById('selREDDChannel');
-            removeOptionsFromSelect(sel);
-            var houseSel = document.getElementById('selREDDHouse');
-            var house = Number(houseSel[houseSel.selectedIndex].value);
-            if (house in reddInfo) {
-                let numChannels = reddInfo[house]["channels"].length;
-                for (var i = 0; i < numChannels; i++) {
-                    let channel = "channel_" + reddInfo[house]["channels"][i];
-                    var niceName = reddInfo[house]["channels"][i] + ": " + reddInfo[house]["mapping"][channel]
-                    addOptionToSelect(sel,  niceName, value=reddInfo[house]["channels"][i]);
-                }
-            }
-
-            var REDDRange = reddInfo[house]["times"];
-            var dateStart = new Date(REDDRange[0]*1000);
-            var dateEnd = new Date(REDDRange[1]*1000);
-
-            // Need to reinit datepicker object 
-            $("#dateInpREDD").datepicker( "destroy" );
-
-            var date_input=$('input[id="dateInpREDD"]'); //our date input has the name "date"
-            var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-           
-            date_input.datepicker({
-                format: 'dd/mm/yyyy',
-                minDate: dateStart,
-                maxDate: dateEnd,
-                // container: container,
-                todayHighlight: true,
-                autoclose: true,
-            })
-            date_input.val("");
-        }
-
 
         $('#textLabelsActive').change(function () {
             textLabelsActive = this.checked;
@@ -972,8 +849,12 @@
                 $(this).tab('show');
             });
             $('.nav-tabs a').on('shown.bs.tab', function(event){
-                var x = $(event.target).text();         // active tab
+                var x = event.target.getAttribute('data-value');
                 console.log("Changed to: " + x);
+                selDataset = x;
+                if (selDataset != "Custom") {
+                    changedDatasetSelect();
+                }
             });
         });
 
@@ -1485,135 +1366,27 @@
         // Apply the theme
         Highcharts.setOptions(Highcharts.theme);
 
-        // __________________________________ PRESSED APPLY FOR FIRED _____________________________________        
-        $(document).on('click','#applyFIRED', function(){
-            if (unsavedCheck() == false) return
-            var deviceEl = document.getElementById('selFIREDDev');
-            date = document.getElementById('dateInpFIRED').value;
-            device = deviceEl[deviceEl.selectedIndex].value;
-            if (date === "") {
-                alert("Please select a valid date");
-            } else {
-                newFIREDSelected(device, date);
-            }
-        })
+        // __________________________________ PRESSED APPLY  _____________________________________        
+        $(document).on('click','#apply', function(){
+            if (unsavedCheck() == false) return;
+            let selection = getSelectionOfDataset(selDataset);
 
-        // __________________________________ PRESSED APPLY FOR REDD _____________________________________        
-        $(document).on('click','#applyECO', function(){
-            if (unsavedCheck() == false) return
-            var houseSEl = document.getElementById('selECOHouse');
-            house = houseSEl[houseSEl.selectedIndex].value;
-            var meterlSEl = document.getElementById('selECOMeter');
-            meter = meterlSEl[meterlSEl.selectedIndex].value;
-            date = document.getElementById('dateInpECO').value;
-            if (date === "") {
-                alert("Please select a valid date");
-            } else {
-                newECOSelected(house, meter, date);
+            var url = 'data/' + selDataset + '/__';
+            for (let sel in selection) {
+                url += "&" + sel + "=" + selection[sel]
             }
-        })
-        // __________________________________ PRESSED APPLY FOR REDD _____________________________________        
-        $(document).on('click','#applyREDD', function(){
-            if (unsavedCheck() == false) return
-            var houseSEl = document.getElementById('selREDDHouse');
-            house = houseSEl[houseSEl.selectedIndex].value;
-            var channelSEl = document.getElementById('selREDDChannel');
-            channel = channelSEl[channelSEl.selectedIndex].value;
-            date = document.getElementById('dateInpREDD').value;
-            if (date === "") {
-                alert("Please select a valid date");
-            } else {
-                newREDDSelected(house, channel, date);
-            }
-        })
-        // __________________________________ PRESSED APPLY FOR UK-DALE _____________________________________        
-        $(document).on('click','#applyUKDALE', function(){
-            if (unsavedCheck() == false) return
-            var houseSEl = document.getElementById('selUKDALEHouse');
-            house = houseSEl[houseSEl.selectedIndex].value;
-            var meterSEl = document.getElementById('selUKDALEMeter');
-            meter = meterSEl[meterSEl.selectedIndex].value;
-            date = document.getElementById('dateInpUKDALE').value;
-            if (date === "") {
-                alert("Please select a valid date");
-            } else {
-                newUKDALESelected(house, meter, date);
-            }
-        })
-
-        // __________________________________ PRESSED APPLY FOR BLOND _____________________________________        
-        $(document).on('click','#applyBLOND', function(){
-            if (unsavedCheck() == false) return
-            var setSel = document.getElementById('selBLONDSet');
-            set = setSel[setSel.selectedIndex].value;
-            var meterSel = document.getElementById('selBLONDMeter');
-            meter = meterSel[meterSel.selectedIndex].value;
-            var channelSel = document.getElementById('selBLONDChannel');
-            channel = channelSel[channelSel.selectedIndex].value;
-            date = document.getElementById('dateInpBLOND').value;
-            if (date === "") {
-                alert("Please select a valid date");
-            } else {
-                newBLONDSelected(set, meter, channel, date);
-            }
-        })
-
-        // __________________________________ GET NEW REDD _____________________________________
-        function newECOSelected(house, meter, day) {
+            var day = document.getElementById(datasetTimeInputs[selDataset]).value;
+            url = url.replace("/__&", "/") + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_");
             $.ajax({
-                url: "data/ECO/house=" + house + "&meter=" + meter + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
+                url: url,
                 dataType: 'json',
                 xhr: xhrInit,
                 success: newChart,
             });
-            dataType = "ECO";
-        }
+            dataType = selDataset;
+        })
 
-        // __________________________________ GET NEW REDD _____________________________________
-        function newREDDSelected(house, channel, day) {
-            $.ajax({
-                url: "data/REDD/house=" + house + "&channel=" + channel + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
-                dataType: 'json',
-                xhr: xhrInit,
-                success: newChart,
-            });
-            dataType = "REDD";
-        }
-
-        // __________________________________ GET NEW REDD _____________________________________
-        function newUKDALESelected(house, meter, day) {
-            // device = dev;
-            $.ajax({
-                url: "data/UKDALE/house=" + house + "&meter=" + meter + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
-                dataType: 'json',
-                xhr: xhrInit,
-                success: newChart,
-            });
-            dataType = "UKDALE";
-        }
-
-        // __________________________________ GET NEW BLOND _____________________________________
-        function newBLONDSelected(set, meter, channel, day) {
-            $.ajax({
-                url: "data/BLOND/set=" + set + "&meter=" + meter + "&channel=" + channel + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
-                dataType: 'json',
-                xhr: xhrInit,
-                success: newChart,
-            });
-            dataType = "BLOND";
-        }
-
-        // __________________________________ GET NEW FIRED _____________________________________
-        function newFIREDSelected(dev, day) {
-            device = dev;
-            $.ajax({
-                url: "data/FIRED/dev=" + dev + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_"),
-                dataType: 'json',
-                xhr: xhrInit,
-                success: newChart
-            });
-            dataType = "FIRED";
-        }
+        
         function resetYZoom() {
             console.log("resetYZoom");
             chart.yAxis[0].setExtremes(null, null);
@@ -1764,8 +1537,6 @@
         var initialYExtremes = [-1,-1];
         // __________________________________ ZOOMED CHART _____________________________________
         function afterSetExtremes(e) {
-            // alert(e.trigger);
-            console.log(e.trigger);     
             if (e.trigger !== undefined) {
                 let now = Math.round(new Date().getTime());
                 // if (now - lastUpdate > 200) {

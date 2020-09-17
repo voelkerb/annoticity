@@ -23,13 +23,20 @@ eco.BASE_PATH = config('ECO_BASE_PATH')
 
 def info():
     houses = eco.getHouses()
-    meters = eco.loadLabelsJson()
-    ecoInfo = {}
-    for h in houses:
+    ecoInfo = {"house":[{"name":h} for h in houses]}
+    for i,h in enumerate(houses):
         meters = eco.getMeters(h)
-        mapping = {m:eco.getDevice(h, m) for m in meters}
-        ecoInfo[h] = {"meters":meters, "mapping": mapping}
+        ecoInfo["house"][i]["meter"] = [{"name":str(m) + ": " + eco.getDevice(h, m), "value":m} for m in meters]
+
+    # ecoInfo = {}
+    # for h in houses:
+    #     meters = eco.getMeters(h)
+    #     mapping = {m:eco.getDevice(h, m) for m in meters}
+    #     ecoInfo[h] = {"meters":meters, "mapping": mapping}
     return ecoInfo
+
+def getInfo(request):
+    return JsonResponse(info())
 
 def getTimes(request, house, meter):
     h = int(house)

@@ -17,12 +17,24 @@ hp.FIRED_BASE_FOLDER = config('FIRED_BASE_PATH')
 
 
 def info():
-    meters = hp.getMeterList()
     mapping = hp.getDeviceMapping()
-    firedInfo = {k:str(", ".join(mapping[k]["appliances"])).replace("\"", "") for k in mapping}
-    startTs, stopTs = hp.getRecordingRange()
-    firedInfo["range"] = [startTs, stopTs]
+    firedInfo = {"meter":[]}
+    for m in mapping:
+        if "smartmeter" in m: name = "aggregated"
+        else: name = m.lstrip("powermeter") + ": " + str(", ".join(mapping[m]["appliances"])).replace("\"", ""),
+        firedInfo["meter"].append({"name":name, "value":m})
+    # firedInfo = {k:str(", ".join(mapping[k]["appliances"])).replace("\"", "") for k in mapping}
+    # startTs, stopTs = hp.getRecordingRange()
+    # firedInfo["range"] = [startTs, stopTs]
     return firedInfo
+
+def getInfo(request):
+    return JsonResponse(info())
+
+def getTimes(request):
+    startTs, stopTs = hp.getRecordingRange()
+    response = {"ranges":[[startTs, stopTs]]}
+    return JsonResponse(response)
 
 def loadData(meter, day, samplingrate=50):
     startDate = datetime.strptime(day, "%m_%d_%Y")
@@ -33,7 +45,7 @@ def loadData(meter, day, samplingrate=50):
     dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
     dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
     dataDict["tz"] = hp.getTimeZone().zone
-    
+
     return dataDict
 
 # Register data provider

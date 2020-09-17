@@ -26,10 +26,17 @@ ukdale.BASE_PATH = config('UKDALE_BASE_PATH')
 def info():
     houses = ukdale.getHouses()
     mapping = ukdale.loadMapping()
-    ukdaleInfo = {h:{"meters": ukdale.getMeters(h), "mapping": mapping[h]} for h in houses}
+    ukdaleInfo = {"house": [{"name":  int(h.lstrip("building"))} for h in houses]}
+    for i, h in enumerate(houses):
+        meters = ukdale.getMeters(h)
+        ukdaleInfo["house"][i]["meter"] = [{"name": str(m) + ": " + mapping[str(h)][str(m)], "value":m} for m in meters]
+    print(ukdaleInfo)
+    # ukdaleInfo = {h:{"meters": ukdale.getMeters(h), "mapping": mapping[h]} for h in houses}
     
     return ukdaleInfo
 
+def getInfo(request):
+    return JsonResponse(info())
 
 def getTimes(request, house, meter):
     availability = ukdale.loadAvailability()

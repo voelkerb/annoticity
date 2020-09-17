@@ -19,13 +19,26 @@ bl.DOWNLOAD_PATH = os.path.join(bl.BASE_PATH, "tmp")
 
 def info():
     sets = bl.getAvailableSets()
-    blondInfo = {s:{} for s in sets}
-
-    for s in sets:
-        blondInfo[s]["meters"] = {m:bl.getAvailableChannels(m) for m in bl.getAvailableMeters()}
-        start, stop = bl.getAvailableDuration(s)
-        blondInfo[s]["range"] = [start, stop]
+    blondInfo = {"set":[{"name":s} for s in sets]}
+    
+    for i,s in enumerate(sets):
+        meters = bl.getAvailableMeters()
+        blondInfo["set"][i]["meter"] = [{"name": m} for m in meters]
+        for j,m in enumerate(meters):
+            channels = bl.getAvailableChannels(m)
+            blondInfo["set"][i]["meter"][j]["channel"] = [{"name": c} for c in channels]
+        # blondInfo[s]["meters"] = {m:bl.getAvailableChannels(m) for m in bl.getAvailableMeters()}
+        # start, stop = bl.getAvailableDuration(s)
+        # blondInfo[s]["range"] = [[start, stop]]
     return blondInfo
+
+def getInfo(request):
+    return JsonResponse(info())
+
+def getTimes(request, set, meter, channel):
+    start, stop = bl.getAvailableDuration(set)
+    response = {"ranges":[[start, stop]]}
+    return JsonResponse(response)
 
 def loadData(set, meter, channel, day, samplingrate=1):
     print("set: {}, meter: {}, channel: {}, day: {}".format(set, meter, channel, day))

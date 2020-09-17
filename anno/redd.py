@@ -23,8 +23,25 @@ redd.BASE_PATH = config('REDD_BASE_PATH')
 
 def info():
     houses = redd.getAvailableHouses()
-    reddInfo = {h:{"channels": redd.getAvailableChannels(h), "mapping": redd.loadLabels(h), "times":redd.getAvailableDuration(h)} for h in houses}
+    reddInfo = {'house':[{"name":h} for h in houses]}
+    for i,h in enumerate(houses):
+        channels = redd.getAvailableChannels(h)
+        labels = redd.loadLabels(h)
+        print(labels)
+        reddInfo["house"][i]["channel"] = [{"name":str(m) + ": " + labels["channel_"+str(m)], "value":m} for m in channels]
+
+    # reddInfo = {h:{"channels": redd.getAvailableChannels(h), "mapping": redd.loadLabels(h), "times":redd.getAvailableDuration(h)} for h in houses}
     return reddInfo
+
+def getInfo(request):
+    return JsonResponse(info())
+
+def getTimes(request, house, channel):
+    availability = redd.loadAvailability()
+    response = {}
+    if house in availability and channel in availability[house]:
+        response["ranges"] = availability[house][channel]
+    return JsonResponse(response)
 
 def loadData(house, channel, day, samplingrate=1):
     # Let this be an unaware timestamp object
