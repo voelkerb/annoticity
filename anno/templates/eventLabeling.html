@@ -1497,6 +1497,18 @@
             }
         }
 
+        function resizePlot(width, height) {
+            storeValue("chartHeight", height);
+            document.getElementById("chart_container").style.height = String(height) + "px";
+            if (chart != null) {
+                chart.setSize(
+                    width, 
+                    height,
+                    false
+                );
+                if (resetButtonShown) redrawResetButton();
+            }
+        }
         var chartContainer = $('#chart_container')[0];
         $('#resizer').resizable({
             // On resize, set the chart size to that of the 
@@ -1504,25 +1516,10 @@
             // content, the redrawing might be slow. In that case, we recommend 
             // that you use the 'stop' event instead of 'resize'.
             resize: function() {
-                // chart.setSize(
-                //     this.offsetWidth, 
-                //     this.offsetHeight,
-                //     false
-                // );
-
-                // if (resetButtonShown) redrawResetButton();
+                resizePlot(this.offsetWidth, this.offsetHeight);
             },
             stop: function() {
-                storeValue("chartHeight", this.offsetHeight);
-                document.getElementById("chart_container").style.height = String(this.offsetHeight) + "px";
-                if (chart != null) {
-                    chart.setSize(
-                        this.offsetWidth, 
-                        this.offsetHeight,
-                        false
-                    );
-                    if (resetButtonShown) redrawResetButton();
-                }
+                resizePlot(this.offsetWidth, this.offsetHeight);
             }
         });
         window.addEventListener('resize', redrawResetButton, false)
