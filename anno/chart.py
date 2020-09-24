@@ -118,7 +118,7 @@ def responseForInitChart(dataDict, measures=None):
     
     c = get(title, ms)
     if "info" in dataDict and dataDict["info"] is not None:
-        c['subtitle'] = {'text': "Info: " + dataDict["info"]}
+        c['subtitle'] = {'text': str(dataDict["info"])}
     c['yAxis']['startOnTick'] = False
 
 

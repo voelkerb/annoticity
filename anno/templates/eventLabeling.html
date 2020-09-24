@@ -231,7 +231,10 @@
                 </div>
             </div>
         </div>
-
+        <div class="mb-3 mr-0 pr-0 ml-auto align-self-end ">
+            <button class="btn btn-dark disableNoData" id="prevDayButton">Prev Day</button>
+            <button class="btn btn-dark disableNoData" id="nextDayButton">Next Day</button>
+        </div>
     </div>
 
     <!-- Hidden select to get size of content and set selects accordingly -->
@@ -322,33 +325,38 @@
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Pre-Event Window Length: </span>
                                 <input class="slider mr-3" id="preEventWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span id="preEventWindowLengthSlider_value" style="width: 50px;">0</span>
+                                <span id="preEventWindowLengthSlider_value" style="width: 60px;">0</span>
 
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Post-Event Window Length: </span>
                                 <input class="slider mr-3" id="postEventWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span id="postEventWindowLengthSlider_value" style="width: 50px;">0</span>
+                                <span id="postEventWindowLengthSlider_value" style="width: 60px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Voting Window Length: </span>
                                 <input class="slider mr-3" id="votingWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span id="votingWindowLengthSlider_value" style="width: 50px;">0</span>
+                                <span id="votingWindowLengthSlider_value" style="width: 60px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Threshold: </span>
                                 <input class="slider mr-3" id="thresMinSlider" type="range" value="5" min="1" max="30" step="1">
-                                <span id="thresMinSlider_value" style="width: 50px;">0</span>
+                                <span id="thresMinSlider_value" style="width: 60px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Threshold Linear: </span>
                                 <input class="slider mr-3" id="thresLinearCoeffSlider" type="range" value="0.005" min="0.001" max="0.01" step="0.001">
-                                <span id="thresLinearCoeffSlider_value" style="width: 50px;">0</span>
+                                <span id="thresLinearCoeffSlider_value" style="width: 60px;">0</span>
+                            </div>
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">Samplingrate: </span>
+                                <input class="slider mr-3" id="samplingrateSlider" type="range" value="0" min="0" max="8" step="1" oninput="updateSRslider(value)">
+                                <span id="samplingrateSlider_value" style="width: 60px;">0</span>
                             </div>
                         </div>
 
                         <div>
-                            <button type="submit" id="autoLabel" class="btn btn-dark pull-right">Auto Label</button>
+                            <button type="submit" id="autoLabel" class="btn btn-dark pull-right disableNoData">Auto Label</button>
                         </div>
                     </div>
                 </div>
@@ -393,12 +401,12 @@
     <div class="d-flex flex-row align-items-center">
 
         <div class="p-2">
-            <button type="submit" id="removeLabels" class="btn btn-danger pull-right">Remove all Labels</button>
+            <button type="submit" id="removeLabels" class="btn btn-danger pull-right disableNoData">Remove all Labels</button>
         </div>
         
         <!-- Pull export button to the right of the page -->
         <div class="p-2 ml-auto">
-            <button type="submit" id="exportButton" class="btn btn-dark pull-right">Export</button>
+            <button type="submit" id="exportButton" class="btn btn-dark pull-right disableNoData">Export</button>
         </div>
     </div>
 
@@ -469,7 +477,11 @@
                         <div class="input-group-prepend">
                             <label class="form-check-label">Change all with that name:</label>
                         </div>
-                        <input type="checkbox" id="checkChangeAllLabels" data-toggle="toggle" data-size="sm" data-onstyle="success" data-offstyle="outline-danger" >
+                        <div class="btn-group" id="changeLabelsWhich" role="group">
+                            <button type="button" class="btn btn-secondary changeLabelButton" id="changeLabelsPrev" onClick="changeLabelsClicked(this)" value="prev"><i class="fa fa-arrow-left"></i> Till here |</button>
+                            <button type="button" class="btn btn-secondary changeLabelButton" id="changeLabelsAll" onClick="changeLabelsClicked(this)" value="all">All</button>
+                            <button type="button" class="btn btn-secondary changeLabelButton" id="changeLabelsNext" onClick="changeLabelsClicked(this)" value="next">| From here <i class="fa fa-arrow-right"></i> </button>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -753,7 +765,7 @@
                     }
                 }
                 // Set all others to old selection
-                if (sel !== this && val !== null) {
+                if (sel !== this && val != null) {
                     $('#' + inputs[inputName] + ' option[value=' + String(val) + ']').prop({selected: true});
                 }
                 sel.onchange = null;
@@ -770,17 +782,25 @@
             for (var key in sliderValues){
                 if (sliderValues[key]["value"] === null) sliderValues[key]["value"] = sliderValues[key]["std"];
                 let slider = document.getElementById(key + "Slider");
-                if (slider !== null) slider.value = sliderValues[key]["value"];
+                if (slider != null) slider.value = sliderValues[key]["value"];
                 let value = document.getElementById(key + "Slider_value");
-                if (value !== null) value.innerHTML = sliderValues[key]["value"] + " " + sliderValues[key]["unit"];
+                if (value != null) value.innerHTML = sliderValues[key]["value"] + " " + sliderValues[key]["unit"];
             }
             changedDatasetSelect();
-        });
+            // update chart height from stored value
+            let chartHeight = getStoredValue("chartHeight");
+            if (chartHeight === null) chartHeight = 300;
+            document.getElementById("resizer").style.height = String(chartHeight) + "px";
+            document.getElementById("chart_container").style.height = String(chartHeight) + "px";
 
+            //  Update samplingrate slider
+            updateSRslider(Number(getStoredValue("samplingrateSlider")));
+
+        });
 
         var newTimes = null;
         function checkDate(date) {
-            if (newTimes !== null && newTimes !== undefined) {
+            if (newTimes != null) {
                 var seconds = date.getTime() / 1000;
                 let rangesLen = newTimes.length;
                 for (var i=0; i<rangesLen; i++) {
@@ -810,9 +830,7 @@
 
             var date_input=$('input[id="'+ datePickerId+ '"]'); //our date input has the name "date"
             var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-            console.log()
-            console.log(dateStart.getDate() + "/" + (dateStart.getMonth()+1) + "/" + dateStart.getFullYear());
-        
+            
             date_input.datepicker({
                 format: 'dd/mm/yyyy',
                 todayHighlight: true,
@@ -833,7 +851,7 @@
         });
 
         // All sliders  on input store variable as default and set value label with unit
-        $('.slider').on('input', function () {
+        $('.slider:not(#samplingrateSlider)').on('input', function () {
             var id = $(this).attr('id');
             let name = id.replace("Slider", "");
             let output = document.getElementById(id + "_value");
@@ -850,7 +868,7 @@
             });
             $('.nav-tabs a').on('shown.bs.tab', function(event){
                 var x = event.target.getAttribute('data-value');
-                console.log("Changed to: " + x);
+                console.log("Changed to Dataset: " + x);
                 selDataset = x;
                 if (selDataset != "Custom") {
                     changedDatasetSelect();
@@ -860,11 +878,11 @@
 
         // File input change label to selected file
         $(".custom-file-input").on("change", function() {
-            fileName = $(this).val().split("\\").pop();
-            if (fileName.length > 49) {
-                fileName = fileName.substring(0,45) + "...";
+            let myFileName = $(this).val().split("\\").pop();
+            if (myFileName.length > 49) {
+                myFileName = myFileName.substring(0,45) + "...";
             }
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            $(this).siblings(".custom-file-label").addClass("selected").html(myFileName);
         });
 
         // Size of all selects based on dropdown selection
@@ -883,9 +901,7 @@
 
         // Disable download buttons if no data is displayed
         $(document).ready(function(){
-            $("#exportButton").prop("disabled", events.length === 0);
-            $("#autoLabel").prop("disabled", events.length === 0);
-            $("#removeLabels").prop("disabled", events.length === 0);
+            $(".disableNoData").prop("disabled", events.length === 0);
         });
 
         
@@ -996,11 +1012,18 @@
 
         // __________________________________KEYPRESSES_____________________________________
         $(document).keyup(function(e) {
-            // Escape or enter pressed
-            if ((e.keyCode == 13 || e.which == 13)) {
+            // Enter pressed
+            if ((e.keyCode == 13)) {
                 // If a modal is opened, close it
-                if ($("#labelModal").hasClass('show')) $('#labelModalOk').click(); 
-                if ($("#changeLabelModal").hasClass('show')) $('#changeLabelModalOk').click();  
+
+                $(".modal, .show").each(function() {
+                    modalResult = "okay";
+                    // Remove focus of text field
+                    if (document.activeElement) document.activeElement.blur();
+                    $(this).modal('hide');
+                });
+                // if ($("#labelModal").hasClass('show')) $('#labelModalOk').click(); 
+                // if ($("#changeLabelModal").hasClass('show')) $('#changeLabelModalOk').click(); 
             }
 
             // See if active element is a text input
@@ -1020,12 +1043,13 @@
                 // TODO: remove after debugging
                 // Press l to load fridge on specific da
                 if (e.keyCode == 76) {
+                    selDataset = "FIRED"
                     var deviceEl = document.getElementById('selFIREDDev');
                     deviceEl.selectedIndex = 1;
                     device = deviceEl[deviceEl.selectedIndex].value;
                     date = document.getElementById('dateInpFIRED');
                     date.value = "08/04/2020";
-                    newFIREDSelected(device, date.value );
+                    getNewChart(device, date.value );
                 }
             }
         });
@@ -1078,6 +1102,7 @@
             events = [];
             eventInfo = {};
             newlabels = false;
+            reviewIndex = 0;
         }
 
 
@@ -1096,9 +1121,11 @@
         // For each modale, set text focus to first text input here
         $('#labelModal').on('shown.bs.modal', function () {
             $('#textLabelInput').focus();
+            setTimeout(function () { $('#textLabelInput').select(); }, 10);
         })  
         $('#changeLabelModal').on('shown.bs.modal', function () {
             $('#textChangeLabelInput').focus();
+            setTimeout(function () { $('#textChangeLabelInput').select(); }, 10);
         })  
 
         // _________________________________ DOWNLOAD _______________________________________
@@ -1131,14 +1158,13 @@
 
         // Download pressed
         $(document).on('click','#exportButton', function(){
-            if (events.length == 0) {
-                var strconfirm = confirm("You have not added any event, do you want to export anyway?");
-                if (strconfirm == false) {
-                    return;
-                }
-            }
-            console.log("export");
-            // TODO
+            // Check if labels have been added
+            // if (events.length == 0) {
+            //     var strconfirm = confirm("You have not added any event, do you want to export anyway?");
+            //     if (strconfirm == false) {
+            //         return;
+            //     }
+            // }
             $("#exportModal").modal("show");
             $('#exportModal').on('hidden.bs.modal', function (e) {
                 modalOpen = false;
@@ -1147,7 +1173,7 @@
                     let format = formatSel[formatSel.selectedIndex].value;
                     let rangeOnly = document.getElementById("modalExportSelRange").checked;
                     var min = max = -1;
-                    ({min, max} = chart.axes[0].getExtremes());
+                    // ({min, max} = chart.axes[0].getExtremes());
                     if (format === "CSV") {
                         let separatorSel = document.getElementById("modalCSVColumnSep"); 
                         let separator = separatorSel[separatorSel.selectedIndex].value;
@@ -1180,7 +1206,7 @@
 
         // _________________________________ CSV Export _______________________________________
         function exportCSV(separator, header, seconds, range) {
-            let csvContent = "data:text/csv;charset=utf-8,";
+            var csvContent = "data:text/csv;charset=utf-8,";
             // Sort based on timestamps
             var sorted = [];
             var useLabels = false;
@@ -1203,6 +1229,7 @@
             var keys = Object.keys(eventInfo); // or loop over the object to get the array
             // keys will be in any order
             keys.sort(function(a, b){return a-b});
+    
             // keys now will be in wanted order
 
             let min = range[0];
@@ -1213,7 +1240,7 @@
                 if (min !== -1 && ts < min) continue
                 if (max !== -1 && ts > max) continue
                 // let ts = events[key];
-                let row = "";
+                var row = "";
                 if (seconds === true) row += String(round((ts/1000 - startTs),3));
                 else row += String(round(ts/1000,3));
                 row += separator + String(round(eventInfo[ts]["power"],2)); 
@@ -1231,7 +1258,7 @@
             link.setAttribute("download", myFileName);
             document.body.appendChild(link); // Required for FF
             link.click(); // This will download the data file
-            document.body.removeChild(link); // Required for FF
+            // document.body.removeChild(link); // Required for FF
         }
         
 
@@ -1292,12 +1319,29 @@
             dataType = "Upload";
         });
 
-
-
+        function checkVisibleMeasures() {
+            var visibleMeasures = []
+            if (chart != null && chart.series != null) {
+                for(i = 0; i < chart.series.length; i++) {
+                    if (chart.series[i].visible && !chart.series[i].options.id.includes("navigator")) {
+                        visibleMeasures.push(chart.series[i].options.id);
+                    }
+                }
+            }
+            console.log("VisibleMeasures: " + visibleMeasures);
+            return visibleMeasures;
+        }
         // __________________________________________ CHART OPTIONS _____________________________________
         Highcharts.setOptions({
-                boost: { useGPUTranslations: true, enabled : false },
-                plotOptions: { series: { boost: { useGPUTranslations: true, enabled : false }, } },
+            boost: { useGPUTranslations: true, enabled : false },
+            plotOptions: { 
+                series: { 
+                    boost: { 
+                        useGPUTranslations: true, 
+                        enabled : false 
+                    },
+                }, 
+            },   
         });
         Highcharts.theme = {
             chart: {
@@ -1366,9 +1410,41 @@
         // Apply the theme
         Highcharts.setOptions(Highcharts.theme);
 
+        const zeroPad = (num, places) => String(num).padStart(places, '0')
+        
+
+        // __________________________________ PRESSED PrevDay  _____________________________________        
+        $(document).on('click','#prevDayButton', function(){
+            changeDay(direction=-1);
+        });
+        // __________________________________ PRESSED NextDay  _____________________________________        
+        $(document).on('click','#nextDayButton', function(){
+            changeDay(direction=1);
+        });
+
+        function changeDay(direction=1) {
+            let timeSelID = datasetTimeInputs[selDataset];
+            var timeInp = document.getElementById(timeSelID);
+            var date = new Date(timeInp.value);
+            for (var i=0; i < 100; i++) {
+                date.setDate(date.getDate() + direction);
+                if (checkDate(date)[0] === true) {
+                    timeInp.value = zeroPad((date.getMonth() +1),2) + "/" + zeroPad(date.getDate(),2) + "/" + date.getFullYear();
+                    getNewChart();
+                    return;
+                }
+            }   
+            alert("No day available.");
+        }
+
         // __________________________________ PRESSED APPLY  _____________________________________        
         $(document).on('click','#apply', function(){
+            getNewChart();
+        });
+
+        function getNewChart() {
             if (unsavedCheck() == false) return;
+
             let selection = getSelectionOfDataset(selDataset);
 
             var url = 'data/' + selDataset + '/__';
@@ -1384,7 +1460,7 @@
                 success: newChart,
             });
             dataType = selDataset;
-        })
+        }
 
         
         function resetYZoom() {
@@ -1400,17 +1476,18 @@
             resetButtonShown = false;
         }
         function showResetButton() {
-            if (resetButton !== null) {
+            if (resetButton != null) {
                 resetButton.hide();
                 resetButton = null;
             }
-            console.log(chartContainer);
-            resetButton = chart.renderer.button('Reset Y Zoom',chartContainer.offsetWidth-140, 10).attr({
-                    zIndex: 3
-            }).on('click', function () {
-                resetYZoom();
-            }).add();
-            resetButtonShown = true;
+            if (chart != null) {
+                resetButton = chart.renderer.button('Reset Y Zoom',chartContainer.offsetWidth-140, 10).attr({
+                        zIndex: 3
+                }).on('click', function () {
+                    resetYZoom();
+                }).add();
+                resetButtonShown = true;
+            }
         }
 
         function redrawResetButton() {
@@ -1436,12 +1513,15 @@
                 // if (resetButtonShown) redrawResetButton();
             },
             stop: function() {
-                chart.setSize(
-                    this.offsetWidth, 
-                    this.offsetHeight,
-                    false
-                );
-                if (resetButtonShown) redrawResetButton();
+                storeValue("chartHeight", this.offsetHeight);
+                if (chart != null) {
+                    chart.setSize(
+                        this.offsetWidth, 
+                        this.offsetHeight,
+                        false
+                    );
+                    if (resetButtonShown) redrawResetButton();
+                }
             }
         });
         window.addEventListener('resize', redrawResetButton, false)
@@ -1449,11 +1529,17 @@
 
         // __________________________________ NEW CHART _____________________________________
         function newChart(data) {
+            let visibleMeasures = checkVisibleMeasures();
+
             console.log("ajax success new Chart");
             // Enable buttons
-            $("#exportButton").prop("disabled", false);
-            $("#autoLabel").prop("disabled", false);
-            $("#removeLabels").prop("disabled", false);
+            $(".disableNoData").prop("disabled", false);
+            //  If uploaded file, disable these buttons
+            if ("selDataset" == "Upload") {
+                $("prevDayButton").prop("disabled", true);
+                $("nextDayButton").prop("disabled", true);
+            }
+
             if ("msg" in data) alert(data["msg"]);
             // Set the datas time zone
             // NOTE: need to be set first
@@ -1511,6 +1597,21 @@
 
             date = data['date'];
             fileName = data['filename'];
+            
+            // Make the measures from before visible
+            if (chart != null && chart.series != null && visibleMeasures.length > 0) {
+                var oneVisible = false;
+                let numSeries = chart.series.length;
+                for (var i=0; i<numSeries; i++) {
+                    if (!chart.series[i].options.id.includes("navigator")) {
+                        if (!visibleMeasures.includes(chart.series[i].options.id)) chart.series[i].hide();
+                        else oneVisible = true;
+                        
+                    }
+                }
+                if (!oneVisible && numSeries > 0) chart.series[0].show();
+            }
+            
         }
 
         function getURLForTimeSelection(start, stop, measure=null) {
@@ -1535,9 +1636,11 @@
         var lastUpdate = Math.round(new Date().getTime());
         var lastExtremes = [-1, -1];
         var initialYExtremes = [-1,-1];
+        var extremeTrigger = "";
         // __________________________________ ZOOMED CHART _____________________________________
         function afterSetExtremes(e) {
-            if (e.trigger !== undefined) {
+            if (e.trigger != null || extremeTrigger !== "") {
+                extremeTrigger = "";
                 let now = Math.round(new Date().getTime());
                 // if (now - lastUpdate > 200) {
                     const { chart } = e.target;
@@ -1551,14 +1654,9 @@
                     newSelection(startTs, stopTs);
                     lastUpdate = now;
 
-                    extY = chart.yAxis[0].getExtremes();
-                    console.log(extY);
-                    chart.resetZoomButton.hide();
+                    if (chart.resetZoomButton != null) chart.resetZoomButton.hide();
                     if (e.trigger === "zoom" && (chart.yAxis[0].min !== initialYExtremes[0] || chart.yAxis[0].min !== initialYExtremes[1])) {
-                        console.log("zoomedY");
                         showResetButton();
-                    } else {
-                        //hideResetButton();
                     }
                 // }
             }
@@ -1602,9 +1700,34 @@
                 removeLabel(oldLabels[i]);
             }
         });
-        
+
+        var srSliderInfo = {
+            0: {"name":"max", "value":-1},
+            1: {"name":"10 Hz", "value":10},
+            2: {"name":"5 Hz", "value":5},
+            3: {"name":"2 Hz", "value":2},
+            4: {"name":"1 Hz", "value":1},
+            5: {"name":"1/2 Hz", "value":1.0/2.0},
+            6: {"name":"1/3 Hz", "value":1.0/3.0},
+            7: {"name":"1/6 Hz", "value":1.0/6.0},
+            8: {"name":"1/10 Hz", "value":0.1},
+        }
+        function updateSRslider(value) {
+            var value = document.getElementById("samplingrateSlider").value;
+            var srSliderText = document.getElementById("samplingrateSlider_value");
+            var srText = "max";
+            if (value in srSliderInfo) {
+                srText = srSliderInfo[value]["name"];
+            }
+            srSliderText.innerHTML = srText;
+            srSliderVal = value;
+            storeValue("samplingrateSlider", srSliderVal);
+        }
         // __________________________________ AUTO LABEL _____________________________________
         $(document).on('click','#autoLabel', function(){
+            let srSliderVal = document.getElementById("samplingrateSlider").value;
+            var srVal = -1;
+            if (srSliderVal in srSliderInfo) srVal = srSliderInfo[srSliderVal]["value"];
             var data = { 
                 "parameter": {
                     "pre": Number(sliderValues["preEventWindowLength"]["value"]),
@@ -1613,9 +1736,9 @@
                     "thres": Number(sliderValues["thresMin"]["value"]),
                     "linearCoeff": Number(sliderValues["thresLinearCoeff"]["value"]),
                     "minDist": Number(sliderValues["eventRes"]["value"]),
+                    "sr": srVal,
                 }, "filename": fileName, "type": dataType,
             }
-            console.log("Auto Label start");
             progressBar.setText("Processing...");
             progressBar.show();
             progressBar.animate(true);
@@ -1629,7 +1752,6 @@
                 success: function (data) {
                     progressBar.animate(false);
                     progressBar.hide();
-                    console.log("Response from autolabel");
                     if ("msg" in data) alert(data["msg"])
                     if ("labels" in data) {
                         addLabelsFromServer(data["labels"]);
@@ -1652,25 +1774,29 @@
                     return;
                 }
             }
+            let selId = idForCurrentDataSelection();
             for (let i=0; i < numLabels; i++) {
                 let labelEntry = labels[i];
+                var ts = labelEntry[timeStampKey]*1000;
+                let result = checkTSWithingBounds(ts);
+                var index = result[1];
+                // Already exists, lets keep the one which is there
+                if (index > -1) {
+                    continue
+                    // Or remove them
+                    // removeLabel(tsOld);
+                }
                 var label = "";
                 if (textLabelsActive) {
                     label = "unknown";
-                    if (labelKey !== null && labelKey in labelEntry) label = labelEntry[labelKey];
-                }
-                ts = labelEntry[timeStampKey]*1000;
-                let result = checkTSWithingBounds(ts);
-                var tsOld = result[0];
-                var index = result[1];
-                // Already exists, lets delete
-                if (index > -1) {
-                    console.log("Must remove old label before");
-                    removeLabel(tsOld);
+                    if (labelKey != null && labelKey in labelEntry) label = labelEntry[labelKey];
+                    if (selId in labelMapping && label in labelMapping[selId]) {
+                        label = labelMapping[selId][label];
+                    }
                 }
                 addPlotLine(ts, 0, label);
-                newlabels = false;
             }
+            newlabels = false;
         }
 
         // Check if another event is within eventresolution bounds in the neighborhoud
@@ -1685,8 +1811,8 @@
                 if (min < events[i] && events[i] < max) {
                     index = i;
                     let distance = (ts-events[i])/1000;
-                    console.log("Found near by entry @" + round(events[i]/1000,3));
-                    console.log("distance: " + round(distance,3));
+                    // console.log("Found near by entry @" + round(events[i]/1000,3));
+                    // console.log("distance: " + round(distance,3));
                     tsNew = events[i];
                     break;
                 }
@@ -1710,32 +1836,31 @@
                 removeLabel(ts);
             } else {
                 console.log("Add");   
-                var label = "";
                 
                 if (textLabelsActive === true) {
                     document.getElementById('textLabelInput').value = "";
 
                     $("#labelModal").modal("show");
+                    // Thats a bit nasty, as we bind and unbind, but otherwise, we would had to use global variables
+                    // for ts and selPower. NOTE: maybe there is a better way
                     $('#labelModal').on('hidden.bs.modal', function (e) {
                         modalOpen = false;
                         if (modalResult === "okay") {
                             var text = document.getElementById('textLabelInput').value;
                             var sel = document.getElementById('selectLabelInput');
-                            label = "unknown";
+                            var label = "unknown";
                             // If sth selected 
                             if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
                             if (text !== "") label = text;
     
                             addPlotLine(ts, selPower, label);
-                            // }
-                        } else {
-                            console.log("Modal func cancel");
-                        }
+                        } 
                         modalResult = null;
                         // Important to unbind the method now
                         $("#labelModal").unbind('hidden.bs.modal');
                     });
                     return;
+                // Add without label
                 } else {
                     addPlotLine(ts, selPower, null);
                 }
@@ -1765,9 +1890,7 @@
 
         // Get the bare label from an html plotline label
         function textOfPlotlineBand(plotLB) {
-            console.log(plotLB);
             var text = plotLB.options.label.text;
-            console.log(text);
             if (text.includes("<div")) {
                 text = text.split(">")[1].split("<")[0]
             }
@@ -1859,6 +1982,30 @@
             return null;
         }
 
+
+        function changeLabelsSelection() {
+            var sel = "this";
+            $(".changeLabelButton").each(function() {
+                var btn = $(this)[ 0 ];
+                if (btn.classList.contains("btn-danger")) {
+                    sel = btn.value;
+                }
+            });
+            return sel
+        }
+
+        function changeLabelsClicked(btn) {
+            let wasActive = btn.classList.contains("btn-danger");
+            // disable all others
+            $(".changeLabelButton").each(function() {
+                var btn = $(this)[ 0 ];
+                btn.className = "btn btn-secondary changeLabelButton";
+            });
+            if (wasActive) btn.className = "btn btn-secondary changeLabelButton";
+            else btn.className = "btn btn-danger active changeLabelButton";
+
+        }
+
         // Clicked on the label to change it
         // This is the current item we are working on
         var currentPlotline = null;
@@ -1876,7 +2023,6 @@
             }
             // Get the current text of the plotline and set the textfield
             var currentText = textOfPlotlineBand(currentPlotline);
-            console.log("currentText: " + currentText);
             document.getElementById('textChangeLabelInput').value = currentText;
             document.getElementById('selectChangeLabelInput').selectedIndex = 0;
             // Show modal
@@ -1888,21 +2034,20 @@
                     // Get text entry 
                     var text = document.getElementById('textChangeLabelInput').value;
                     var sel = document.getElementById('selectChangeLabelInput');
-                    var changeAll = document.getElementById('checkChangeAllLabels').checked;
+                    var changeAll = changeLabelsSelection();
                     label = "unknown";
                     // If sth selected 
                     if (sel.selectedIndex > -1) label = sel[sel.selectedIndex].value;
                     var currentText = textOfPlotlineBand(currentPlotline);
-                    console.log("oldText: " + currentText);
                     if (text !== currentText) label = text;
-                    console.log("NewText: " + label);
-                    if (changeAll === true) {
-                        changeAllLabels(currentText, label);
-                    } else {
+                    console.log("Change from: \"" + currentText + "\" to \"" + label + "\"");
+                    if (changeAll === "this") {
                         changeLabel(currentPlotline, label);
+                    } else {
+                        console.log(changeAll);
+                        changeAllLabels(currentText, label, redraw=true, which=changeAll, from=Number(currentPlotline.options.value));
                     }
                 } else {
-                    console.log("Modal func cancel");
                 }
                 modalResult = null;
                 // Important to unbind the method now
@@ -1915,9 +2060,8 @@
             var ts = Number(plotline.options.value);
             eventInfo[ts]["label"] = label;
             addLabelToEventSelects(label);
-            text = textForPlotline(label, plotline.id),
-            console.log(plotline);
-            if (plotline.label !== undefined) {
+            text = textForPlotline(label, plotline.id);
+            if (plotline.label != null) {
                 plotline.label.attr({
                     text: text
                 });
@@ -1926,13 +2070,38 @@
             if (redraw) chart.xAxis[0].redraw();
         }
 
+        function idForCurrentDataSelection() {
+            if (selDataset === "Upload") return selDataset;
+            var selection = selDataset;
+            var infoBase = datasetInfos[selDataset];
+            for (let inputName in datasetInputs[selDataset]) {
+                let inputs = datasetInputs[selDataset];
+                var sel = document.getElementById(inputs[inputName]);
+                var val = null;
+                if (sel.selectedIndex !== -1) val = sel[sel.selectedIndex].value;
+                selection += "_" + val;
+            }
+        }
+        var labelMapping = {}
         // Change all labels with the given name
-        function changeAllLabels(oldText, newText, redraw=true) {
+        function changeAllLabels(oldText, newText, redraw=true, which="all", from=0) {
+            //  Look if this is a label from the server
+            if (oldText.length > 2 && oldText.substring(0, 1) === "S" && 
+                    oldText.substring(1, 2).match(/\d+/g) != null) {
+                // console.log("changed: " + oldText + " to " + newText + ". We will know the next time.");
+                // Store mapping to new value for next day etc
+                let selId = idForCurrentDataSelection();
+                if (!(selId in labelMapping)) labelMapping[selId] = {};
+                labelMapping[selId][oldText] = newText;
+            }
             const oldPlotlines = [...chart.xAxis[0].plotLinesAndBands];
             let numLines = oldPlotlines.length;
             for (var j = 0; j < numLines; j++) {
                 var text = textOfPlotlineBand(oldPlotlines[j]);
                 if (text === oldText) {
+                    let ts = Number(oldPlotlines[j].options.value);
+                    if (which === "prev" && ts > from) continue;
+                    if (which === "next" && ts < from) continue;
                     changeLabel(oldPlotlines[j], newText, redraw=false);
                 }
             }
@@ -1941,49 +2110,50 @@
 
         // _______________________________REVIEW____________________________________________
         
-        var index = 0;
+        var reviewIndex = 0;
         function reviewRewindPress() {
-            index = 0;
-            reviewEntryWithIndex(index);
+            reviewIndex = 0;
+            reviewEntryWithIndex(reviewIndex);
         }
         
         function reviewBackPress() {
-            index -= 1;
-            if (index < 0) {
-                index = 0;
+            reviewIndex -= 1;
+            if (reviewIndex < 0) {
+                reviewIndex = 0;
                 if (events.length > 0) {
                     alert("This is the first event");
                 }
             }
-            reviewEntryWithIndex(index);
+            reviewEntryWithIndex(reviewIndex);
         }
         
         function reviewForwardPress() {
-            index += 1;
-            if (index >= events.length) {
-                index = events.length-1;
+            reviewIndex += 1;
+            if (reviewIndex >= events.length) {
+                reviewIndex = events.length-1;
                 if (events.length > 0) {
                     alert("This is the last event");
                 }
             }
-            if (index < 0) index = 0;
-            reviewEntryWithIndex(index);
+            if (reviewIndex < 0) reviewIndex = 0;
+            reviewEntryWithIndex(reviewIndex);
         }
 
         function reviewEndPress() {
-            index = events.length-1;
-            reviewEntryWithIndex(index);
+            reviewIndex = events.length-1;
+            reviewEntryWithIndex(reviewIndex);
         }
 
         function reviewEntryWithIndex(i) {
             if (events.length > i && i >= 0) {
-                reviewEntry(events[index]);
+                reviewEntry(events[reviewIndex]);
             }
         }
 
         function reviewEntry(ts) {
             let xMin = ts-60*1000;
             let xMax = ts+60*1000;
+            extremeTrigger = "code";
 		    chart.xAxis[0].setExtremes(xMin,xMax);	
         }
         
@@ -2026,12 +2196,12 @@
         function removeOptionFromSelect(sel, name=null, value=null) {
             var i, L = sel.options.length - 1;
             // Add options to selections
-            if (name !== null) {
+            if (name != null) {
                 for(i = L; i >= 0; i--) {
                     if (name === sel[i].innerHTML) sel.remove(i);
                 }
             }
-            if (value !== null) {
+            if (value != null) {
                 for(i = L; i >= 0; i--) {
                     if (value === sel[i].value) sel.remove(i);
                 }
@@ -2042,7 +2212,7 @@
             // Add options to selections
             var opt = document.createElement('option');
             opt.appendChild( document.createTextNode(labelName) );
-            if (value !== null) opt.value = value;
+            if (value != null) opt.value = value;
             sel.appendChild(opt);
         }
 

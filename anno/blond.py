@@ -72,6 +72,7 @@ def initChart(request, set, meter, channel, day):
 
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['timeZone'] = "Europe/Berlin"
+    response['filename'] = fp
 
     return JsonResponse(response)
 

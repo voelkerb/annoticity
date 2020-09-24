@@ -88,7 +88,7 @@ def initChart(request, house, meter, day):
     # Generate data response
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['date'] = day.replace("_", "/")
-    response["filename"] = "house_" + str(house) + "__meter_" + str(meter) + "__" + day + ".mkv"
+    response["filename"] = fp
     return JsonResponse(response)
 
 def getData(request, startTs, stopTs):

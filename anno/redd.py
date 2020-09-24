@@ -84,7 +84,7 @@ def initChart(request, house, channel, day):
     # Generate data response
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['date'] = day.replace("_", "/")
-    response["filename"] = "house_" + str(house) + "__channel_" + str(channel) + "__" + day + ".mkv"
+    response["filename"] = fp
     return JsonResponse(response)
 
 def getData(request, startTs, stopTs):

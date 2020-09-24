@@ -74,6 +74,7 @@ def initChart(request, house, meter, day):
     fp = "house_" + str(house) + "__" + "meter" + str(meter) + "__" + day + ".mkv"
     request.session["dataInfo"] = {"type":"eco", "filePath": fp, "args": (int(house), int(meter), day)}
 
+    response["filename"] = fp
     # add data to dataManager
     dm.add(sessionID, dataDict)
     # response = dataHp.responseForData(dataDict, measure=measure)

@@ -168,6 +168,15 @@ def autoLabel(request):
         # print(power)
         sr = 50
 
+    newSr = None
+    if "sr" in parameter: newSr = float(parameter["sr"])
+    if newSr != None and newSr != -1:
+        wsManager.sendStatus(sessionID, text="Resampling to "+ str(round(newSr, 2)) + "Hz...", percent=17)
+        power = dataHp.resample(power, sr, newSr) 
+        print(power)
+        sr = newSr
+
+
     thres = 5.0
     if "thres" in parameter: thres = float(parameter["thres"])
     thres = max(thres, 0.1)

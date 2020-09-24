@@ -33,7 +33,8 @@ def getInfo(request):
 
 def getTimes(request):
     startTs, stopTs = hp.getRecordingRange()
-    response = {"ranges":[[startTs, stopTs]]}
+    # Nasti hack to avoid next day if end time is 0:00:0
+    response = {"ranges":[[startTs, stopTs-1]]}
     return JsonResponse(response)
 
 def loadData(meter, day, samplingrate=50):
@@ -43,6 +44,14 @@ def loadData(meter, day, samplingrate=50):
 
     # Load once in best resolution and downsample later on
     dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+    appliances = hp.getApplianceList(meter, startTs=startTs, stopTs=stopTs)
+    devInfo = hp.getDeviceInfo()
+    strings = []
+    for a in appliances:
+        string = a
+        if a in devInfo: string += " ({} - {})".format(str(devInfo[a]["brand"]), str(devInfo[a]["model"]))
+        strings.append(string)
+    dataDict["info"] = ", ".join(strings)
     dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
     dataDict["tz"] = hp.getTimeZone().zone
 
@@ -61,15 +70,16 @@ def initChart(request, meter, day):
     else: filePath = None
 
     samplingrate = 2/60
+    # samplingrate = 5
     # Load once in best resolution and downsample later on
     dataDict = loadData(meter, day, samplingrate=samplingrate)
 
     # Set global session data
     # request.session["dataInfo"] = {"type":"fired", "meter": meter, "day": day, "filePath":filePath}
     request.session["dataInfo"] = {"type":"fired", "filePath": filePath, "args": (meter, day)}
-    
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['timeZone'] = "Europe/Berlin"
+    response["filename"] = os.path.basename(filePath)
 
     return JsonResponse(response)
 
