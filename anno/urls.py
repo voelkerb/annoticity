@@ -16,6 +16,7 @@ from . import fileDownloader
 urlpatterns = [
     path('', views.index, name='index'),
     # url(r'', views.index, name='index'),
+    path('data/FIRED/highFreq/startTs=<str:startTsStr>&stopTs=<str:stopTsStr>', fired.getHighFreqData, name='getHighFreqData'),
     path('data/FIRED/startTs=<int:startTs>&stopTs=<int:stopTs>', fired.getData, name='getData'),
     path('data/FIRED/meter=<str:meter>&day=<str:day>', fired.initChart, name='initChart'),
     re_path('data/FIRED/times/*', fired.getTimes, name='getTimes'), 

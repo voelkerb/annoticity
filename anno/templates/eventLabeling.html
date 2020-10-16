@@ -86,7 +86,7 @@
                         </div>
                     </div>   
                     <div class="row m-0">
-                        The FIRED dataset (2020) covers 52 days electricity recordings of a 79m&sup2; apartment building in Germany.
+                        The FIRED dataset (2020) covers 101 days electricity recordings of a 79m&sup2; apartment building in Germany.
                     </div> 
                     <div class="flex-row mb-2">
                         <a target='_blank' href="http://github.com/voelkerb/FIRED_dataset_helper">More info</a>
@@ -384,6 +384,10 @@
                       <i class="fa fa-backward"></i>
                     </button>
                     
+                    <button class="btn btn-outline-dark" type="button" id="button_highfreq" class="btn" onclick='verifyHighFreq()'>
+                        Check in high frequency data
+                    </button> 
+
                     <button class="btn btn-outline-dark" type="button" id="button_fw" class="btn" onclick='reviewForwardPress()'>
                       <i class="fa fa-forward"></i>
                     </button>
@@ -391,7 +395,7 @@
                     <button class="btn btn-outline-dark" type="button" id="button_ffw" class="btn" onclick='reviewEndPress()'>
                       <i class="fa fa-fast-forward"></i>
                     </button>    
-                  </div>
+                  </div>  
             </div>
         </div>
     </div>
@@ -607,6 +611,22 @@
     </div>
     <hr/>
 
+    <!-- Modal -->
+    <div class="modal fade" id="eventsTooCloseModal" tabindex="-10" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+        <div class="modal-dialog modal-dialog-centered">
+           <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 style="display: inline">Your event resolution <h5 id="eventResolution" style="display: inline">() </h5><h5 style="display: inline">does not allow to add labels this close to one another. Remove the previous Label or decrease event resolution.</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default modalOk" id="ExportModalOk" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+
     <!-- Alert message if upload went wrong -->
     {% if message %}
     <script>
@@ -629,6 +649,8 @@
         var date = document.getElementById('dateInpFIRED').value;
         var newlabels = false;
         var progressBar;
+
+        let MAX_HIGH_FREQ_LEN = 10000;
 
         var sliderValues = {
             "preEventWindowLength": {"value": getStoredValue("preEventWindowLength"), "unit":"s", "std": 1.0},
@@ -1317,7 +1339,19 @@
                 processData: false
             });
             dataType = "Upload";
+            onNewChart();
         });
+
+        function onNewChart() {
+            if (dataType === "FIRED") {
+                $("#button_highfreq").show();
+                $("#button_highfreq").html('Review in high frequency data');
+                highFreqModePossible = true;
+            } else {
+                $("#button_highfreq").hide();
+                highFreqModePossible = false;
+            }
+        }
 
         function checkVisibleMeasures() {
             var visibleMeasures = []
@@ -1350,7 +1384,7 @@
             scrollbar: { enabled: false },
             credits: { enabled: false },
             rangeSelector: {
-                selected: 2,
+                selected: 4,
                 enabled: true,
                 buttonTheme: { // styles for the buttons
                     fill: 'none',
@@ -1360,9 +1394,13 @@
                 },
                 inputEnabled: false, // it supports only days
                 buttons: [{
+                    type: 'second',
+                    count: 10,
+                    text: '10s'
+                }, {
                     type: 'minute',
                     count: 1,
-                    text: '1m'
+                    text: '1h'
                 }, {
                     type: 'hour',
                     count: 1,
@@ -1384,7 +1422,7 @@
                     // afterSetExtremes : afterSetExtremes
                 },
                 lineWidth: 2.0,
-                minRange: 1000, // one Second,
+                minRange: 100, // one Second,
                 lineColor: "#474747",
             },
             plotOptions:{
@@ -1409,6 +1447,21 @@
         };
         // Apply the theme
         Highcharts.setOptions(Highcharts.theme);
+        // Zoom with shift key
+        (function(H) {
+        H.wrap(
+            H.Pointer.prototype,
+            'dragStart',
+            function(proceed, event) {
+                const zoomKey = this.chart.options.chart.zoomKey && this.chart.options.chart.zoomKey + 'Key';
+                const panKey = this.chart.options.chart.zoomKey && this.chart.options.chart.panKey + 'Key';
+
+                if (event[zoomKey] || event[panKey]) {
+                    proceed.call(this, event);
+                }
+            }
+        );
+        })(Highcharts);
 
         const zeroPad = (num, places) => String(num).padStart(places, '0')
         
@@ -1460,9 +1513,10 @@
                 success: newChart,
             });
             dataType = selDataset;
+            onNewChart();
         }
 
-        
+
         function resetYZoom() {
             console.log("resetYZoom");
             chart.yAxis[0].setExtremes(null, null);
@@ -1472,7 +1526,7 @@
         var resetButton = null;
         var resetButtonShown = false;
         function hideResetButton() {
-            resetButton.hide();
+            if (resetButton != null) resetButton.hide();
             resetButtonShown = false;
         }
         function showResetButton() {
@@ -1514,7 +1568,7 @@
             // On resize, set the chart size to that of the 
             // resizer minus padding. If your chart has a lot of data or other
             // content, the redrawing might be slow. In that case, we recommend 
-            // that you use the 'stop' event instead of 'resize'.
+            // that you use the 'stop' evenct instead of 'resize'.
             resize: function() {
                 resizePlot(this.offsetWidth, this.offsetHeight);
             },
@@ -1569,6 +1623,7 @@
                     }
                 }
             };
+            
             // Create the chart
             // var ctx = document.getElementById("chart_container");
             chart = Highcharts.stockChart(chartContainer, data['chart'], function (chart) {
@@ -1585,13 +1640,9 @@
             if ('title' in data) chart.setTitle(data[title]);
             if ('labels' in data) addLabelsFromServer(data["labels"]);
 
-            // Set this fix forever
-            chart.xAxis[0].update({
-                min: chart.xAxis[0].min,
-                max: chart.xAxis[0].max,
-            });
-            initialYExtremes[0] = chart.xAxis[0].min;
-            initialYExtremes[1] = chart.xAxis[0].max;
+            
+            initialYExtremes[0] = chart.yAxis[0].min;
+            initialYExtremes[1] = chart.yAxis[0].max;
 
             date = data['date'];
             fileName = data['filename'];
@@ -1601,7 +1652,7 @@
                 var oneVisible = false;
                 let numSeries = chart.series.length;
                 for (var i=0; i<numSeries; i++) {
-                    if (!chart.series[i].options.id.includes("navigator")) {
+                    if (!chart.series[i].name.includes("Navigator")) {
                         if (!visibleMeasures.includes(chart.series[i].options.id)) chart.series[i].hide();
                         else oneVisible = true;
                         
@@ -1609,11 +1660,23 @@
                 }
                 if (!oneVisible && numSeries > 0) chart.series[0].show();
             }
-            
+
+            // This fake series enables panning for dynamic data
+            var fakeData = [[chart.xAxis[0].min, 0], [chart.xAxis[0].max, 0]];
+            chart.addSeries({                        
+                name: "fake",
+                id: "fake",
+                data: fakeData,
+                color: 'rgba(0,0,0,0)',
+                enableMouseTracking: false,
+                showInLegend: false
+            }, true);
         }
+
 
         function getURLForTimeSelection(start, stop, measure=null) {
             var url = "data/<dataType>/startTs=" + Math.round(start) + "&stopTs=" + Math.round(stop);
+            if (highFreqMode) url = "data/<dataType>/highFreq/startTs=" + start.toString().replace(".", "_") + "&stopTs=" + stop.toString().replace(".", "_");
             url = url.replaceAll("<dataType>", dataType);
             return url;
         }
@@ -1630,6 +1693,27 @@
             });
         }
 
+        var panRequest = 0;
+        function panUpdate() {
+            panRequest -= 1;
+            if (panRequest != 0) return;
+            chart.hideLoading();
+            console.log("heurika");
+
+            ({min, max} = chart.axes[0].getExtremes());
+            var stopTs = Math.max(0, Math.round(max)/1000);
+            var startTs = Math.max(0, Math.round(min)/1000);
+            console.log("newPanRange " + startTs + "->" + stopTs * 1000);
+            newSelection(startTs, stopTs);
+        }
+            
+        function schedulePanUpdate() {
+            if (panRequest == 0) {
+                chart.showLoading("Waiting for pan finish....");
+            }
+            panRequest += 1;
+            setTimeout(panUpdate, 500);
+        }
 
         var lastUpdate = Math.round(new Date().getTime());
         var lastExtremes = [-1, -1];
@@ -1637,25 +1721,40 @@
         var extremeTrigger = "";
         // __________________________________ ZOOMED CHART _____________________________________
         function afterSetExtremes(e) {
+            console.log("afterSetExtremes");
             if (e.trigger != null || extremeTrigger !== "") {
-                extremeTrigger = "";
-                let now = Math.round(new Date().getTime());
+                console.log(e.trigger);
+                if (e.trigger === "pan") {
+                    schedulePanUpdate();
+                    return;
+                }
+                // let now = Math.round(new Date().getTime());
                 // if (now - lastUpdate > 200) {
-                    const { chart } = e.target;
-                    stopTs = Math.max(0, Math.round(e.max/1000));
-                    startTs = Math.max(0, Math.round(e.min/1000));
-                    // Return on same extremes
-                    if (Math.abs(lastExtremes[0]-startTs) < 1 && Math.abs(lastExtremes[1]-stopTs) < 1) return;
-                    console.log("afterSetExtremes " + stopTs + "->" + startTs);
-                    lastExtremes[0] = startTs;
-                    lastExtremes[1] = stopTs;
-                    newSelection(startTs, stopTs);
-                    lastUpdate = now;
+                const { chart } = e.target;
+                var stopTs = Math.max(0, Math.round(e.max)/1000);
+                var startTs = Math.max(0, Math.round(e.min)/1000);
+                
+                // Return on same extremes
+                if (extremeTrigger !== "code" && Math.abs(lastExtremes[0]-startTs) < 0.1 && Math.abs(lastExtremes[1]-stopTs) < 0.1) return;
+                // Switch off high freq mode, if duration too long
+                var duration = stopTs - startTs;
+                if (!highFreqMode && duration < 1.0) stopTs = startTs + 1.0;
+                if (highFreqMode && duration > (MAX_HIGH_FREQ_LEN+1000)/1000) {
+                    switchHighFreqMode(false);
+                }
+                
+                // Set new range
+                console.log("newRange " + stopTs + "->" + startTs);
+                lastExtremes[0] = startTs;
+                lastExtremes[1] = stopTs;
+                newSelection(startTs, stopTs);
+                // lastUpdate = now;
 
-                    if (chart.resetZoomButton != null) chart.resetZoomButton.hide();
-                    if (e.trigger === "zoom" && (chart.yAxis[0].min !== initialYExtremes[0] || chart.yAxis[0].min !== initialYExtremes[1])) {
-                        showResetButton();
-                    }
+                extremeTrigger = "";
+                if (chart.resetZoomButton != null) chart.resetZoomButton.hide();
+                if (e.trigger === "zoom" && (chart.yAxis[0].min !== initialYExtremes[0] || chart.yAxis[0].min !== initialYExtremes[1])) {
+                    showResetButton();
+                }
                 // }
             }
         }
@@ -1664,24 +1763,31 @@
         function newChartData(data) {
             console.log("ajax success newChartData");
 
-            var numSeries = data['series'].length;
-            var numSeries2 = chart.series.length;
-
-            for (var i = 0; i < numSeries; i++) {
-                series = data['series'][i]['data'];
-                startTs = data['series'][i]['startTs'];
-                interval = data['series'][i]['interval'];
-                id = data['series'][i]['id'];
-                for (var j = 0; j < numSeries2; j++) {
-                    if (chart.series[j].options.id == id) {
-                        chart.series[j].options.pointStart = startTs*1000;
-                        chart.series[j].options.pointInterval = interval*1000;
-                        // chart.series[j].isDirty = true;
-                        chart.series[j].setData(series);
+            if ('series' in data) {
+                var numSeries = data['series'].length;
+                var numSeries2 = chart.series.length;
+                var found = false
+                for (var i = 0; i < numSeries; i++) {
+                    series = data['series'][i]['data'];
+                    startTs = data['series'][i]['startTs'];
+                    interval = data['series'][i]['interval'];
+                    id = data['series'][i]['id'];
+                    var found = false;
+                    for (var j = 0; j < numSeries2; j++) {
+                        if (chart.series[j].options.id == id) {
+                            chart.series[j].options.pointStart = startTs*1000;
+                            chart.series[j].options.pointInterval = interval*1000;
+                            // chart.series[j].isDirty = true;
+                            chart.series[j].setData(series);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        chart.addSeries(data['series'][i], true);
                     }
                 }
-                
-            }
+            } 
             chart.hideLoading();
         }
       
@@ -1830,8 +1936,12 @@
             let theID = 'vertLine_'+String(ts)
             // Already exists, lets delete
             if (index > -1) {
-                console.log("remove");
-                removeLabel(ts);
+                // 
+                let eventResolution = Number(sliderValues["eventRes"]["value"]);
+                console.log("too close to old event");
+                $("#eventResolution").html("(" + eventResolution + "s) ")
+                $('#eventsTooCloseModal').modal("show");
+                // removeLabel(ts);
             } else {
                 console.log("Add");   
                 
@@ -1953,8 +2063,7 @@
                     fontWeight: 'bold'
                 },
             };
-
-            chart.xAxis[0].addPlotLine({ // mark the weekend
+            var pltLine = { // mark the weekend
                 color: 'green',
                 width: 3,
                 zIndex: 10,
@@ -1962,13 +2071,56 @@
                 id: theID,
                 label: labelInf,
                 events: {
-                    // Remove on click on it
+                    mousedown: function(e) {
+                        chart.clickX = e.pageX;
+                        chart.activePlotLine = this;
+                        console.log("mouse down");
+                        chart.update({chart: {zoomType: null}})
+                    },
                     click: function(e) {
-                        removeLabel(this.options.value);
+                        if(dbDetection) {
+                            removeLabel(this.options.value);
+                            dbDetection = false;
+                        } else {
+                            dbDetection = true;
+                            setTimeout(function() {
+                                dbDetection = false;
+                            }, 500); 
+                        }
                     }
                 }
-            });
+            }
+            chart.xAxis[0].addPlotLine(pltLine);
+
         }
+        var dbDetection = false;
+        document.getElementById("chart_container")
+            .addEventListener(
+                'mousemove',
+                function(e) {
+                    if (chart == null) return 
+                    if (chart.activePlotLine) {
+                        chart.activePlotLine.svgElem.translate(e.pageX - chart.clickX, 0);
+                    }
+                }
+            );
+
+        document.addEventListener(
+            'mouseup',
+            function(e) {
+                if (chart == null) return;
+                if (chart.activePlotLine) {
+                    var newVal = chart.xAxis[0].toValue(e.pageX - chart.clickX) - chart.xAxis[0].toValue(0) + chart.activePlotLine.options.value;
+                    var pltLine = chart.activePlotLine;
+                    var text = textOfPlotlineBand(pltLine);
+                    // remove old pltline
+                    removeLabel(chart.activePlotLine.options.value);
+                    addPlotLine(newVal, 0, text);
+                    chart.activePlotLine = null;
+                }
+                chart.update({chart: {zoomType: 'xy'}})
+            }
+        );
 
         // Get a plotline or band object by its ID
         function plotLineBandByID(id) {
@@ -2106,8 +2258,73 @@
             if (redraw) chart.xAxis[0].redraw();
         }
 
+        var lastVisible = [];
+        var lastPresent = [];
+        var highFreqMode = false;
+        var highFreqModePossible = false;
+        function switchHighFreqMode(on) {
+            if (chart == null || chart.series == null || !highFreqModePossible) return
+            if (!on) {
+                highFreqMode = false;
+                $("#button_highfreq").html('Review in high frequency data');
+                // Enable navigator
+                chart.update({ navigator: { enabled: true } });
+                // Show previous acitve series again
+                var numSeries = chart.series.length;
+                for (var i=numSeries-1; i>=0; i--) {
+                    if (!chart.series[i].name.includes("Navigator") && !chart.series[i].name.includes("fake")) {
+                        if (!lastPresent.includes(chart.series[i].options.id)) {
+                            chart.series[i].remove();
+                            continue;
+                        }
+                        if (!lastVisible.includes(chart.series[i].options.id)) chart.series[i].hide();
+                        else chart.series[i].show();
+                    }
+                }
+            } else {
+                // Enable high freq mode
+                highFreqMode = true;
+
+                $("#button_highfreq").html('Review in low frequency data');
+                // Disable navigator
+                // chart.update({ navigator: { enabled: false } });
+                // Store last selection
+                lastVisible = checkVisibleMeasures();
+                // Store available measures and Hide all series 
+                lastPresent = [];
+                var numSeries = chart.series.length;
+                for (var i=0; i<numSeries; i++) {
+                    if (!chart.series[i].name.includes("Navigator") && !chart.series[i].name.includes("fake")) {
+                        lastPresent.push(chart.series[i].options.id);
+                        chart.series[i].update({visible: false});
+                    }
+                } 
+            }
+        }
+
         // _______________________________REVIEW____________________________________________
-        
+        function verifyHighFreq() {
+            if (chart == null || chart.series == null || !highFreqModePossible) return;
+            // Toggle high frequency mode
+            switchHighFreqMode(!highFreqMode);
+
+            ({min, max} = chart.axes[0].getExtremes());
+            var nMin = min;
+            var nMax = max;
+            var duration = nMax-nMin;
+            if (duration > MAX_HIGH_FREQ_LEN) {
+                var middle = min + (max-min)/2;
+                nMin = middle-MAX_HIGH_FREQ_LEN/2.0;
+                nMax = middle+MAX_HIGH_FREQ_LEN/2.0;
+            }
+            extremeTrigger = "code";
+            console.log("min: " +  nMin + "->" + nMax);
+		    chart.xAxis[0].setExtremes(nMin-0.1,nMax-0.1);	
+            // reviewEntryWithIndex(reviewIndex);
+            resetYZoom();
+        }
+
+
         var reviewIndex = 0;
         function reviewRewindPress() {
             reviewIndex = 0;
@@ -2149,9 +2366,13 @@
         }
 
         function reviewEntry(ts) {
-            let xMin = ts-60*1000;
-            let xMax = ts+60*1000;
+            var timespan = 60*1000;
+            if (highFreqMode) timespan = 2*1000;
+            
+            let xMin = ts-timespan/2;
+            let xMax = ts+timespan/2;
             extremeTrigger = "code";
+            console.log("min: " +  xMin + "->" + xMax);
 		    chart.xAxis[0].setExtremes(xMin,xMax);	
         }
         

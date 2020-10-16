@@ -6,7 +6,7 @@ import pytz
 def get(title, measures):
     chart = {
         # 'colors': ["rgba(235, 162, 59, 1)", "#c1a374"],
-        'chart': {'type': 'area', 'zoomType': 'xy', 'resetZoomEnabled':False, 'animation': False, 'spacingTop': 5},
+        'chart': {'type': 'area', 'zoomType': 'xy', 'panning': {'enabled': True, 'type':'x', 'key':'alt'}, 'panKey':'alt', 'zoomKey': 'shift', 'resetZoomEnabled':False, 'animation': False, 'spacingTop': 5},
         'boost': { 'useGPUTranslations': True, 'enabled' : False },
         'navigator' : {
             'adaptToUpdatedData': False,
@@ -64,8 +64,10 @@ def get(title, measures):
     }
     for m in measures:
         measureText, unit = getMeasureUnit(m)
+        lt = getLineType(m)
         series = {
             'name': measureText,
+            'type': lt,
             'color': '#0066FF',
             'dataGrouping': { 'enabled': False },
             'showInNavigator': True,
@@ -77,13 +79,13 @@ def get(title, measures):
     return chart
 
 
-measureTexts = {"p":{"name":"Active Power", "axis":"Power", "unit":"W", "color":"#CD1C09"}, 
-                "q":{"name":"Reactive Power", "axis":"Power", "unit":"var", "color": "#0079C0"}, 
-                "s":{"name":"Apparent Power", "axis":"Power", "unit":"VA", "color": "#E59D01"},
-                "v":{"name":"Voltage", "axis":"Voltage", "unit":"V", "color": "#00CC2B"},
-                "i":{"name":"Current", "axis":"Current","unit":"A", "color": "#00A1FF"},
-                "v_rms":{"name":"RMS Voltage", "axis":"Voltage", "unit":"V", "color": "#00CC2B"},
-                "i_rms":{"name":"RMS Current", "axis":"Current", "unit":"A", "color": "#00A1FF"},
+measureTexts = {"p":{"name":"Active Power", "axis":"Power", "unit":"W", "color":"#CD1C09", "lt":"area"}, 
+                "q":{"name":"Reactive Power", "axis":"Power", "unit":"var", "color": "#0079C0", "lt":"area"}, 
+                "s":{"name":"Apparent Power", "axis":"Power", "unit":"VA", "color": "#E59D01", "lt":"area"},
+                "v":{"name":"Voltage", "axis":"Voltage", "unit":"V", "color": "#00CC2B", "lt":"line"},
+                "i":{"name":"Current", "axis":"Current","unit":"A", "color": "#00A1FF", "lt":"line"},
+                "v_rms":{"name":"RMS Voltage", "axis":"Voltage", "unit":"V", "color": "#00CC2B", "lt":"line"},
+                "i_rms":{"name":"RMS Current", "axis":"Current", "unit":"A", "color": "#00A1FF", "lt":"line"},
                 }
 
 def getColor(measure):
@@ -151,6 +153,33 @@ def responseForInitChart(dataDict, measures=None):
 
     return response 
 
+def responseForNewData(dataDict, measures, startTs, stopTs):
+    chartData = {"series":[]}
+
+    duration = stopTs - startTs
+    for m in measures:
+
+        measureText, unit = getMeasureUnit(m)
+        series = {
+            'name': measureText,
+            'type': getLineType(m),
+            'color': '#0066FF', # default color
+            'dataGrouping': { 'enabled': False },
+            'showInNavigator': True,
+            'tooltip': { 'valueSuffix': " " + unit }, 
+        }
+        color = getColor(m)
+        if color is not None: series['color'] = color
+        samplingrate = min(dataDict["samplingrate"], dataHp.srBasedOnDur(duration, m))
+        data = dataHp.resample(dataDict["data"][m], dataDict["samplingrate"], samplingrate) 
+        timestamps = np.linspace(startTs*1000, stopTs*1000, len(data))
+        data = [[t, float(d)] for d,t in zip(data, timestamps)]
+        series["data"] = data
+        series["id"] = m
+        chartData['series'].append(series)
+    return chartData
+
+    
 def responseForData(dataDict, measures, startTs, stopTs):
     chartData = {"series":[]}
 
@@ -174,6 +203,13 @@ def getAxisTitles(measures):
                 texts.append(measureTexts[measure.split("_l")[0]]["axis"])
     if len(texts) > 0: return ", ".join(texts)
     else: return "Unknown"
+
+
+def getLineType(measure):
+    lt = "area"
+    if measure.split("_l")[0] in measureTexts:
+        lt = measureTexts[measure.split("_l")[0]]["lt"]
+    return lt
 
 def getMeasureUnit(measure):
     measureText = "Unknown"

@@ -24,6 +24,7 @@ ukdale.BASE_PATH = config('UKDALE_BASE_PATH')
 
 
 def info():
+    if not os.path.exists(ukdale.BASE_PATH): return {}
     houses = ukdale.getHouses()
     mapping = ukdale.loadMapping()
     ukdaleInfo = {"house": [{"name":  int(h.lstrip("building"))} for h in houses]}

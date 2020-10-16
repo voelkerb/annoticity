@@ -22,6 +22,7 @@ from .powerData import dataManager as dm
 eco.BASE_PATH = config('ECO_BASE_PATH')
 
 def info():
+    if not os.path.exists(eco.BASE_PATH): return {}
     houses = eco.getHouses()
     ecoInfo = {"house":[{"name":h} for h in houses]}
     for i,h in enumerate(houses):

@@ -97,3 +97,19 @@ def getData(request, startTs, stopTs):
         chartData = chart.responseForData(dataDict, dataDict["measures"], startTs, stopTs)
     
     return JsonResponse(chartData)
+
+def getHighFreqData(request, startTsStr, stopTsStr):
+    chartData = {}
+    dataInfo = request.session.get("dataInfo", None)
+    startTs = float(startTsStr.replace("_", "."))
+    stopTs = float(stopTsStr.replace("_", "."))
+    if dataInfo is not None:
+        meter = dataInfo["args"][0]
+        print("SelectionHigh: " + hp.time_format_ymdhms(startTs) + "->" + hp.time_format_ymdhms(stopTs))
+        duration = stopTs - startTs
+
+        samplingrate = min(4000, dataHp.srBasedOnDur(duration, "i"))
+        dataDict = hp.getMeterVI(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+        dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
+        chartData = chart.responseForNewData(dataDict, dataDict["measures"], startTs, stopTs)
+    return JsonResponse(chartData)
