@@ -54,6 +54,7 @@ def getTimes(request, house, meter):
             startTs = startTs + date.utcoffset().total_seconds()
             stopTs = stopTs + date.utcoffset().total_seconds()
             newRanges.append([startTs, stopTs])
+        response["ranges"] = newRanges
 
     return JsonResponse(response)
 
