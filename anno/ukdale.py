@@ -31,7 +31,6 @@ def info():
     for i, h in enumerate(houses):
         meters = ukdale.getMeters(h)
         ukdaleInfo["house"][i]["meter"] = [{"name": str(m) + ": " + mapping[str(h)][str(m)], "value":m} for m in meters]
-    print(ukdaleInfo)
     # ukdaleInfo = {h:{"meters": ukdale.getMeters(h), "mapping": mapping[h]} for h in houses}
     
     return ukdaleInfo
@@ -44,6 +43,18 @@ def getTimes(request, house, meter):
     response = {}
     if house in availability and meter in availability[house]:
         response["ranges"] = availability[house][meter]
+
+        # Map this to timezone unaware UTC Stuff
+        # -> E.g. if it was 0-24 it is mapped to 0-24 on this day as utc timestamps   
+        newRanges = []
+        for r in response["ranges"]:
+            startTs = r[0]
+            stopTs = r[1]
+            date = datetime.fromtimestamp(startTs, pytz.UTC).astimezone(ukdale.getTimeZone())
+            startTs = startTs + date.utcoffset().total_seconds()
+            stopTs = stopTs + date.utcoffset().total_seconds()
+            newRanges.append([startTs, stopTs])
+
     return JsonResponse(response)
 
 def loadData(house, meter, day, samplingrate=1):

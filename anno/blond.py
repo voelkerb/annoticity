@@ -1,5 +1,6 @@
 from datetime import datetime
 import numpy as np
+import pytz
 from . import chart
 from . import data as dataHp
 from .powerData import dataManager as dm
@@ -36,8 +37,15 @@ def getInfo(request):
     return JsonResponse(info())
 
 def getTimes(request, set, meter, channel):
-    start, stop = bl.getAvailableDuration(set)
-    response = {"ranges":[[start, stop]]}
+    startTs, stopTs = bl.getAvailableDuration(set)
+
+    # Map this to timezone unaware UTC Stuff
+    # -> E.g. if it was 0-24 it is mapped to 0-24 on this day as utc timestamps
+    date = datetime.fromtimestamp(startTs, pytz.UTC).astimezone(bl.getTimeZone())
+    startTs = startTs + date.utcoffset().total_seconds()
+    stopTs = stopTs + date.utcoffset().total_seconds()
+
+    response = {"ranges":[[startTs, stopTs]]}
     return JsonResponse(response)
 
 def loadData(set, meter, channel, day, samplingrate=1):

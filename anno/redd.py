@@ -27,7 +27,6 @@ def info():
     for i,h in enumerate(houses):
         channels = redd.getAvailableChannels(h)
         labels = redd.loadLabels(h)
-        print(labels)
         reddInfo["house"][i]["channel"] = [{"name":str(m) + ": " + labels["channel_"+str(m)], "value":m} for m in channels]
 
     # reddInfo = {h:{"channels": redd.getAvailableChannels(h), "mapping": redd.loadLabels(h), "times":redd.getAvailableDuration(h)} for h in houses}
@@ -41,6 +40,20 @@ def getTimes(request, house, channel):
     response = {}
     if house in availability and channel in availability[house]:
         response["ranges"] = availability[house][channel]
+
+        # Map this to timezone unaware UTC Stuff
+        # -> E.g. if it was 0-24 it is mapped to 0-24 on this day as utc timestamps   
+        newRanges = []
+        for r in response["ranges"]:
+            startTs = r[0]
+            stopTs = r[1]
+            date = datetime.fromtimestamp(startTs, pytz.UTC).astimezone(redd.getTimeZone())
+            startTs = startTs + date.utcoffset().total_seconds()
+            stopTs = stopTs + date.utcoffset().total_seconds()
+            newRanges.append([startTs, stopTs])
+
+        response["ranges"] = newRanges
+
     return JsonResponse(response)
 
 def loadData(house, channel, day, samplingrate=1):

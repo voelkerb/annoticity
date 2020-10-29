@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 import numpy as np
 from . import chart
 from . import data as dataHp
@@ -33,6 +34,13 @@ def getInfo(request):
 
 def getTimes(request):
     startTs, stopTs = hp.getRecordingRange()
+
+    # Map this to timezone unaware UTC Stuff
+    # -> E.g. if it was 0-24 it is mapped to 0-24 on this day as utc timestamps
+    date = datetime.fromtimestamp(startTs, pytz.UTC).astimezone(hp.getTimeZone())
+    startTs = startTs + date.utcoffset().total_seconds()
+    stopTs = stopTs + date.utcoffset().total_seconds()
+    
     # Nasti hack to avoid next day if end time is 0:00:0
     response = {"ranges":[[startTs, stopTs-1]]}
     return JsonResponse(response)

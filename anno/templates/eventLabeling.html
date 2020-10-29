@@ -735,6 +735,7 @@
             let selection = getSelectionOfDataset(selDataset);
             var url = 'data/' + selDataset + '/times/__';
             for (let sel in selection) {
+                if (selection[sel] == null) return
                 url += "&" + sel + "=" + selection[sel]
             }
             url = url.replace("/__&", "/");
@@ -770,6 +771,7 @@
                 var val = null;
                 if (sel.selectedIndex !== -1) val = sel[sel.selectedIndex].value;
                 if (sel !== this) removeOptionsFromSelect(sel);
+                if (!(inputName in infoBase)) continue;
                 var options = infoBase[inputName];
                 let numOptions = options.length;
                 for (i=0; i<numOptions; i++) {
@@ -821,15 +823,25 @@
         });
 
         var newTimes = null;
+
+        var dt = new Date();
+        var tz = dt.getTimezoneOffset(); 
+        
         function checkDate(date) {
-            if (newTimes != null) {
-                var seconds = date.getTime() / 1000;
+            if (newTimes != null && date != null) {
+                // date is tz aware. Make it timezone unaware by mapping it to same time in utc (same as range data)
+                var dateString = String(date).split(' ').slice(0, 5).join(' ') + " GMT+0000";
+                // Get timestamp from thi date
+                var utc = new Date(dateString);
+                var seconds = utc.getTime() / 1000;
+
+                // Brainf+** with timestamps
+                // date is timezone dependent, startTs is unaware just showing the date and time
                 let rangesLen = newTimes.length;
                 for (var i=0; i<rangesLen; i++) {
-                    let startTs = newTimes[i][0];
-                    var sdate = new Date(startTs*1000);
-                    sdate.setHours(0, 0, 0, 0);
-                    startTs = sdate.getTime() / 1000;
+                    // round to full day as we want to make the date available
+                    // even if only one small portion of data is available for the date
+                    let startTs = Math.floor(newTimes[i][0]/(24*60*60))*(24*60*60);
                     let stopTs = newTimes[i][1];
                     if (startTs <= seconds && seconds <= stopTs) return [true];
                     // Should make it faster
@@ -845,8 +857,8 @@
             var oldDate = document.getElementById(datePickerId).value;
             var startTs = newTimes[0][0]
             var stopTs = newTimes[newTimes.length-1][1]
-            var dateStart = new Date(startTs*1000);
-            var dateEnd = new Date(stopTs*1000);
+            var dateStart = new Date(startTs*1000+tz*60*1000);
+            var dateEnd = new Date(stopTs*1000+tz*60*1000);
             // Need to reinit datepicker object 
             $("#" + datePickerId).datepicker( "destroy" );
 
@@ -862,7 +874,8 @@
                 minDate: dateStart,
                 maxDate: dateEnd,
             });
-            if (checkDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
+            if (oldDate != null && oldDate !== "" && !oldDate.contains("MM/DD") 
+                && checkDate(new Date(oldDate))[0] === true) date_input.val(oldDate);
             else date_input.val("");
 
         }
@@ -2207,7 +2220,6 @@
                     if (changeAll === "this") {
                         changeLabel(currentPlotline, label);
                     } else {
-                        console.log(changeAll);
                         changeAllLabels(currentText, label, redraw=true, which=changeAll, from=Number(currentPlotline.options.value));
                     }
                 } else {

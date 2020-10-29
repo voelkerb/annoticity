@@ -45,6 +45,18 @@ def getTimes(request, house, meter):
     availability = eco.getTimeRange(h, m)
     response = {}
     response["ranges"] = availability
+
+    # Map this to timezone unaware UTC Stuff
+    # -> E.g. if it was 0-24 it is mapped to 0-24 on this day as utc timestamps   
+    newRanges = []
+    for r in response["ranges"]:
+        startTs = r[0]
+        stopTs = r[1]
+        date = datetime.fromtimestamp(startTs, pytz.UTC).astimezone(eco.getTimeZone())
+        startTs = startTs + date.utcoffset().total_seconds()
+        stopTs = stopTs + date.utcoffset().total_seconds()
+        newRanges.append([startTs, stopTs])
+    
     return JsonResponse(response)
 
 def loadData(house, meter, day, samplingrate=1):
