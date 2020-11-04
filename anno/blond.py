@@ -52,8 +52,12 @@ def loadData(set, meter, channel, day, samplingrate=1):
     print("set: {}, meter: {}, channel: {}, day: {}".format(set, meter, channel, day))
     startDate = datetime.strptime(day, "%m_%d_%Y")
     dataDict = bl.load(set, meter, startDate, channels=[channel])
+
     if len(dataDict) > 0: dataDict = dataDict[0]
     else: return None
+
+    devices = bl.shortDeviceList(meter, channel, dataDict["timestamp"], dataDict["timestamp"]+dataDict["duration"])
+    if len(devices) > 0: dataDict["info"] = ", ".join(devices)
     if samplingrate != dataDict["samplingrate"]:
         dataDict["data"] = dataHp.resample(dataDict["data"], dataDict["samplingrate"], samplingrate)
         dataDict["samplingrate"] = samplingrate
