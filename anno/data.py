@@ -14,11 +14,12 @@ import MKV.mkv as mkv
 def resample(data, inRate, outRate):
     if inRate == outRate: return data
     resampleFac = inRate/outRate
+    # print("Resample:" +  str(data.__name__))
     # NOTE: This is done for each measure
     # TODO: Maybe we can make this quicker somehow
     oldX = np.arange(0, len(data))
     newX = np.arange(0, len(data), resampleFac)
-    if isinstance(data, np.record):
+    if isinstance(data, (np.record,np.recarray)):
         data2 = np.zeros(len(newX), dtype=data.dtype)
         for measure in data.dtype.names:
             data2[measure] = np.float32(np.interp(newX, oldX, data[measure]))
@@ -45,8 +46,9 @@ def srBasedOnDur(dur, measure):
         if dur > 200: samplingrate = 0.1
         if dur > 10: samplingrate = 1
         elif dur > 5: samplingrate = 1000
-        elif dur > 2: samplingrate = 1000
-        else: samplingrate = 2000
+        elif dur > 2: samplingrate = 2000
+        elif dur > 1: samplingrate = 4000
+        else: samplingrate = 50000
     return samplingrate
 
 def getMeasure(availMeas, selection):

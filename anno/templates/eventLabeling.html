@@ -1356,7 +1356,7 @@
         });
 
         function onNewChart() {
-            if (dataType === "FIRED") {
+            if (["FIRED", "BLOND"].indexOf(dataType) > -1) {
                 $("#button_highfreq").show();
                 $("#button_highfreq").html('Review in high frequency data');
                 highFreqModePossible = true;
@@ -1413,7 +1413,7 @@
                 }, {
                     type: 'minute',
                     count: 1,
-                    text: '1h'
+                    text: '1m'
                 }, {
                     type: 'hour',
                     count: 1,

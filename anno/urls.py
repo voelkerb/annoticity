@@ -22,6 +22,7 @@ urlpatterns = [
     re_path('data/FIRED/times/*', fired.getTimes, name='getTimes'), 
     path('data/FIRED/info/', fired.getInfo, name='getInfo'),
 
+    path('data/BLOND/highFreq/startTs=<str:startTsStr>&stopTs=<str:stopTsStr>', blond.getHighFreqData, name='getHighFreqData'),
     path('data/BLOND/startTs=<int:startTs>&stopTs=<int:stopTs>', blond.getData, name='getData'),
     path('data/BLOND/set=<str:set>&meter=<str:meter>&channel=<str:channel>&day=<str:day>', blond.initChart, name='initChart'),
     path('data/BLOND/times/set=<str:set>&meter=<str:meter>&channel=<str:channel>', blond.getTimes, name='getTimes'), 
