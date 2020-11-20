@@ -66,6 +66,7 @@ def loadData(house, channel, day, samplingrate=1):
     dataDict = redd.loadLowFreq(house, utcStartTs=startDate.timestamp(), utcStopTs=stopDate.timestamp(), channels=[channel])[0]
 
 
+    # TODO: make this work wit timestamps from original data
     startTs = float(dataDict["ts"][0])
     stopTs = float(dataDict["ts"][-1])
     
@@ -74,8 +75,10 @@ def loadData(house, channel, day, samplingrate=1):
     dataDict["data"] = np.recarray(len(data), dtype=np.dtype([('s',np.float32)]))
     dataDict["data"]["s"] = data
     dataDict["tz"] = tz.zone
+    dataDict["duration"] = stopTs-startTs
     dataDict["duration"] = len(data)/samplingrate
     dataDict["samplingrate"] = samplingrate
+    del dataDict["ts"]
     return dataDict
 
 # Register data provider
@@ -115,6 +118,13 @@ def getData(request, startTs, stopTs):
 
         dataDictCopy = dict((k,v) for k,v in dataDict.items() if k != "data")
         
+        # TODO: make this work wit timestamps from original data
+        # indices = np.where((dataDict["ts"] > startTs) & (dataDict["ts"] < stopTs))[0]
+        # dataDictCopy["data"] = dataDict["data"][indices]
+        # dataDictCopy["ts"] = dataDict["ts"][indices]
+        # startTs = dataDictCopy["ts"][0]
+        # stopTs = dataDictCopy["ts"][-1]
+
         startSample = int((startTs - dataDict["timestamp"])*dataDict["samplingrate"])
         stopSample = int((stopTs - dataDict["timestamp"])*dataDict["samplingrate"])
 

@@ -89,8 +89,8 @@ measureTexts = {"p":{"name":"Active Power", "axis":"Power", "unit":"W", "color":
                 }
 
 def getColor(measure):
-    if measure.split("_l")[0] in measureTexts:
-        return measureTexts[measure.split("_l")[0]]["color"]
+    if measure.lower().split("_l")[0] in measureTexts:
+        return measureTexts[measure.lower().split("_l")[0]]["color"]
     return None
 
 
@@ -126,8 +126,7 @@ def responseForInitChart(dataDict, measures=None):
 
     for i, m in enumerate(ms):
         samplingrate = min(dataDict["samplingrate"], dataHp.srBasedOnDur(duration, m))
-        data = dataHp.resample(dataDict["data"][m], dataDict["samplingrate"], samplingrate) 
-        timestamps = np.linspace(startTs*1000, stopTs*1000, len(data))
+        data, timestamps = dataHp.resampleDict(dataDict, m, samplingrate, forceEvenRate=False)
         data = [[t, float(d)] for d,t in zip(data, timestamps)]
         c['series'][i]['data'] = data
         c['series'][i]['id'] = m
@@ -171,8 +170,7 @@ def responseForNewData(dataDict, measures, startTs, stopTs):
         color = getColor(m)
         if color is not None: series['color'] = color
         samplingrate = min(dataDict["samplingrate"], dataHp.srBasedOnDur(duration, m))
-        data = dataHp.resample(dataDict["data"][m], dataDict["samplingrate"], samplingrate) 
-        timestamps = np.linspace(startTs*1000, stopTs*1000, len(data))
+        data, timestamps = dataHp.resampleDict(dataDict, m, samplingrate, forceEvenRate=False)
         data = [[t, float(d)] for d,t in zip(data, timestamps)]
         series["data"] = data
         series["id"] = m
@@ -186,8 +184,7 @@ def responseForData(dataDict, measures, startTs, stopTs):
     duration = stopTs - startTs
     for m in measures:
         samplingrate = min(dataDict["samplingrate"], dataHp.srBasedOnDur(duration, m))
-        data = dataHp.resample(dataDict["data"][m], dataDict["samplingrate"], samplingrate) 
-        timestamps = np.linspace(startTs*1000, stopTs*1000, len(data))
+        data, timestamps = dataHp.resampleDict(dataDict, m, samplingrate, forceEvenRate=False)
         data = [[t, float(d)] for d,t in zip(data, timestamps)]
         c = {"data": data, "id": m, "pointStart":startTs*1000, "pointInterval":(1/samplingrate)*1000}
 
@@ -198,9 +195,10 @@ def responseForData(dataDict, measures, startTs, stopTs):
 def getAxisTitles(measures):
     texts = []
     for measure in measures:
-        if measure.split("_l")[0] in measureTexts:
-            if measureTexts[measure.split("_l")[0]]["axis"] not in texts:
-                texts.append(measureTexts[measure.split("_l")[0]]["axis"])
+        if measure.lower().split("_l")[0] in measureTexts:
+            if measureTexts[measure.lower().split("_l")[0]]["axis"] not in texts:
+                print(measure.lower().split("_l")[0])
+                texts.append(measureTexts[measure.lower().split("_l")[0]]["axis"])
     if len(texts) > 0: return ", ".join(texts)
     else: return "Unknown"
 
@@ -214,8 +212,8 @@ def getLineType(measure):
 def getMeasureUnit(measure):
     measureText = "Unknown"
     unit = ""
-    if measure.split("_l")[0] in measureTexts:
-        measureText = measureTexts[measure.split("_l")[0]]["name"]
-        if len(measure.split("_l")) > 1: measureText += " L" + measure.split("_l")[-1]
-        unit = measureTexts[measure.split("_l")[0]]["unit"]
+    if measure.lower().split("_l")[0] in measureTexts:
+        measureText = measureTexts[measure.lower().split("_l")[0]]["name"]
+        if len(measure.lower().split("_l")) > 1: measureText += " L" + measure.lower().split("_l")[-1]
+        unit = measureTexts[measure.lower().split("_l")[0]]["unit"]
     return measureText, unit

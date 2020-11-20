@@ -80,6 +80,7 @@ def loadData(house, meter, day, samplingrate=1):
     dataDict["timestamp"] = startTs
     dataDict["duration"] = len(data)/samplingrate
     dataDict["samplingrate"] = samplingrate
+    del dataDict["ts"]
     return dataDict
 
 # Register data provider
@@ -118,7 +119,7 @@ def getData(request, startTs, stopTs):
             stopTs = startTs + duration
         
         dataDictCopy = dict((k,v) for k,v in dataDict.items() if k != "data")
-
+        # TODO: MAKE THIS WORK WITH original timestamps
         startSample = int((startTs-dataDict["timestamp"])*dataDict["samplingrate"])
         startSample = max(0, startSample)
         stopSample = int((stopTs-dataDict["timestamp"])*dataDict["samplingrate"])

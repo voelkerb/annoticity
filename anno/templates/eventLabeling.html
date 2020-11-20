@@ -218,7 +218,7 @@
                             <div class="input-group">
                                 <div class="custom-file" style="min-width: 500px;">
                                     <input type="text" hidden class="custom-text-input" id="hiddenText" name="type" value="MKVUpload">
-                                    <input type="file" accept=".mkv" class="custom-file-input" id="inputGroupFile01"
+                                    <input type="file" accept=".mkv,.csv" class="custom-file-input" id="inputGroupFile01"
                                         aria-describedby="inputGroupFileAddon01" name="uploadedFile">
                                     <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
                                 </div>
@@ -1783,7 +1783,7 @@
                     for (var j = 0; j < numSeries2; j++) {
                         if (chart.series[j].options.id == id) {
                             chart.series[j].options.pointStart = startTs*1000;
-                            chart.series[j].options.pointInterval = interval*1000;
+                            // chart.series[j].options.pointInterval = interval*1000;
                             // chart.series[j].isDirty = true;
                             chart.series[j].setData(series);
                             found = true;

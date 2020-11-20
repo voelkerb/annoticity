@@ -30,9 +30,11 @@ def dataUpload(request):
         else:
             myfile = request.FILES['uploadedFile']
             filename = myfile.name
-            
+            if not request.session.session_key:
+                request.session.save()
             sessionID = request.session.session_key
-
+            print(MEDIA_ROOT)
+            print(sessionID)
             WORKING_FOLDER = os.path.join(MEDIA_ROOT, sessionID)
             if not os.path.exists(WORKING_FOLDER): os.makedirs(WORKING_FOLDER, exist_ok=True)
 
@@ -81,19 +83,24 @@ def getData(request, startTs, stopTs):
     dataDict = dm.get(request.session.session_key)
 
     if dataDict is not None:
-        duration = stopTs - startTs
-
         dataDictCopy = dict((k,v) for k,v in dataDict.items() if k != "data")
 
-        startSample = int((startTs-dataDict["timestamp"])*dataDict["samplingrate"])
-        startSample = max(0, startSample)
-        stopSample = int((stopTs-dataDict["timestamp"])*dataDict["samplingrate"])
-        stopSample = min(len(dataDict["data"]), stopSample)
-        dataDictCopy["data"] = dataDict["data"][startSample:stopSample]
-
+        if "ts" in dataDict:
+            indices = np.where((dataDict["ts"] > startTs) & (dataDict["ts"] < stopTs))[0]
+            dataDictCopy["data"] = dataDict["data"][indices]
+            dataDictCopy["ts"] = dataDict["ts"][indices]
+            startTs = dataDictCopy["ts"][0]
+            stopTs = dataDictCopy["ts"][-1]
+        else:
+            startSample = int((startTs-dataDict["timestamp"])*dataDict["samplingrate"])
+            startSample = max(0, startSample)
+            stopSample = int((stopTs-dataDict["timestamp"])*dataDict["samplingrate"])
+            stopSample = min(len(dataDict["data"]), stopSample)
+            dataDictCopy["data"] = dataDict["data"][startSample:stopSample]
         startTs = max(dataDictCopy["timestamp"], startTs)
         stopTs = min(dataDictCopy["timestamp"]+dataDictCopy["duration"], stopTs)
-
+        dataDictCopy["timestamp"] = startTs
+        dataDictCopy["duration"] = stopTs-startTs
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
 
     return JsonResponse(chartData)

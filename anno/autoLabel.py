@@ -10,30 +10,9 @@ from . import data as dataHp
 import json
 
 import numpy as np
-from filter.bilateral import bilateral
 
 from django.http import JsonResponse
 
-
-def getSteadyStateIndex(data, minSteadyIndex, threshold):
-    start = 0
-    startIndex = -1
-    chunkSize = 10
-    index = chunkSize
-
-    filteredData = bilateral(np.array(data[chunkSize:]), sSpatial=3, sIntensity=10)
-    for i in range(len(filteredData)-25):
-        split = filteredData[i:i+25]
-        std = np.abs(np.std(split))
-        mean = np.mean(split)
-
-        match = True
-        for p in split:
-            if abs(p-mean) > max(0.01*p, 1): match = False
-        if match: return i + chunkSize
-        index += chunkSize
-    index = None
-    return index
 
 def indicesInDoubleArray(array2, value, thres):
     index1 = -1
@@ -148,13 +127,14 @@ def autoLabel(request):
 
     usableKeys = list(set(usablePower) & set(dataDict["measures"]))
     if len(usableKeys) < 1: 
-        if "v" in dataDic["measures"] and "i" in dataDict["measures"]:
+        if "v" in dataDict["measures"] and "i" in dataDict["measures"]:
             pass
             p,q,s = calcPowers(dataDict["data"]["v"], dataDict["data"]["i"], dataDict["samplingrate"])
             power = s
             response["msg"] = "Calculated apparent power using Current and Voltage"
         else:
-            response["msg"] = "Could not find power, or voltage and current in data."
+            response["msg"] = "Could not find power, or voltage and current in data. Name it as \"p\",\"s\" or \"v\",\"i\".\n"
+            response["msg"] += "If you have electricity data of multiple supply legs, name it as \"<measure>_l1\", \"<measure>_l2\", ... accordingly."
             return JsonResponse(response)
     else:
         power = list(dataDict["data"][sorted(usableKeys)[-1]])
@@ -164,16 +144,18 @@ def autoLabel(request):
     # We only do this at a max samplingrate of 50 Hz
     if sr > 50:
         wsManager.sendStatus(sessionID, text="Resampling to 50Hz...", percent=15)
-        power = dataHp.resample(power, sr, 50) 
+        power, timestamps = dataHp.resampleDict(dataDict, sorted(usableKeys)[-1], 50, forceEvenRate=True)
+        #power = dataHp.resample(power, sr, 50) 
         # print(power)
         sr = 50
 
     newSr = None
     if "sr" in parameter: newSr = float(parameter["sr"])
-    if newSr != None and newSr != -1:
+    if newSr != None and newSr != -1 or "ts" in dataDict:
+        if "ts" in dataDict and newSr is None: newSr = max(1/3.0, dataDict["samplingrate"])
         wsManager.sendStatus(sessionID, text="Resampling to "+ str(round(newSr, 2)) + "Hz...", percent=17)
-        power = dataHp.resample(power, sr, newSr) 
-        print(power)
+        power, timestamps = dataHp.resampleDict(dataDict, sorted(usableKeys)[-1], newSr, forceEvenRate=True)
+        #power = dataHp.resample(power, sr, newSr) 
         sr = newSr
 
 
