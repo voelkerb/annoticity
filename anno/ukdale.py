@@ -129,6 +129,9 @@ def getData(request, startTs, stopTs):
         startTs = max(dataDictCopy["timestamp"], startTs)
         stopTs = min(dataDictCopy["timestamp"]+dataDictCopy["duration"], stopTs)
 
+        dataDictCopy["timestamp"] = startTs
+        dataDictCopy["duration"] = stopTs-startTs
+        
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
         
     return JsonResponse(chartData)

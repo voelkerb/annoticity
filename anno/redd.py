@@ -20,6 +20,7 @@ from .powerData import dataManager as dm
 
 redd.BASE_PATH = config('REDD_BASE_PATH')
 
+VERBOSE = True
 
 def info():
     houses = redd.getAvailableHouses()
@@ -63,22 +64,29 @@ def loadData(house, channel, day, samplingrate=1):
     startDate = tz.localize(startDate)
     stopDate = startDate+timedelta(days=1)
 
+    if VERBOSE:
+        tz = redd.getTimeZone()
+        print("REDD - {} - {} - {}: {}->{}".format(
+                house,channel,samplingrate,startDate,stopDate))
     dataDict = redd.loadLowFreq(house, utcStartTs=startDate.timestamp(), utcStopTs=stopDate.timestamp(), channels=[channel])[0]
 
 
     # TODO: make this work wit timestamps from original data
+    # NOTE: We now use this, this requires further testing
     startTs = float(dataDict["ts"][0])
     stopTs = float(dataDict["ts"][-1])
     
+    # NOTE: Backup plan is to resample the data to 1Hz directly
     # Convert to one hz
-    data = np.interp(np.arange(startTs, stopTs, 1/samplingrate), dataDict["ts"], dataDict["data"]["s"])
-    dataDict["data"] = np.recarray(len(data), dtype=np.dtype([('s',np.float32)]))
-    dataDict["data"]["s"] = data
+    # data = np.interp(np.arange(startTs, stopTs, 1/samplingrate), dataDict["ts"], dataDict["data"]["s"])
+    # dataDict["data"] = np.recarray(len(data), dtype=np.dtype([('s',np.float32)]))
+    # dataDict["data"]["s"] = data
+    # del dataDict["ts"]
+
     dataDict["tz"] = tz.zone
     dataDict["duration"] = stopTs-startTs
-    dataDict["duration"] = len(data)/samplingrate
+    dataDict["duration"] = len(dataDict["data"])/samplingrate
     dataDict["samplingrate"] = samplingrate
-    del dataDict["ts"]
     return dataDict
 
 # Register data provider
@@ -116,20 +124,26 @@ def getData(request, startTs, stopTs):
             duration = 5.0
             stopTs = startTs + duration
 
+        if VERBOSE:
+            tz = redd.getTimeZone()
+            print("REDD zoom: {}->{}".format(
+                    datetime.fromtimestamp(startTs, tz),datetime.fromtimestamp(stopTs, tz)))
         dataDictCopy = dict((k,v) for k,v in dataDict.items() if k != "data")
         
         # TODO: make this work wit timestamps from original data
-        # indices = np.where((dataDict["ts"] > startTs) & (dataDict["ts"] < stopTs))[0]
-        # dataDictCopy["data"] = dataDict["data"][indices]
-        # dataDictCopy["ts"] = dataDict["ts"][indices]
-        # startTs = dataDictCopy["ts"][0]
-        # stopTs = dataDictCopy["ts"][-1]
+        # NOTE: We now use this, this requires further testing
+        indices = np.where((dataDict["ts"] >= startTs) & (dataDict["ts"] <= stopTs))[0]
+        dataDictCopy["data"] = dataDict["data"][indices]
+        dataDictCopy["ts"] = dataDict["ts"][indices]
+        startTs = dataDictCopy["ts"][0]
+        stopTs = dataDictCopy["ts"][-1]
 
-        startSample = int((startTs - dataDict["timestamp"])*dataDict["samplingrate"])
-        stopSample = int((stopTs - dataDict["timestamp"])*dataDict["samplingrate"])
+        # startSample = int((startTs - dataDict["timestamp"])*dataDict["samplingrate"])
+        # stopSample = int((stopTs - dataDict["timestamp"])*dataDict["samplingrate"])
+        # dataDictCopy["data"] = dataDict["data"][startSample:stopSample]
 
-        dataDictCopy["data"] = dataDict["data"][startSample:stopSample]
-
+        dataDictCopy["timestamp"] = startTs
+        dataDictCopy["duration"] = stopTs-startTs
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
 
     return JsonResponse(chartData)

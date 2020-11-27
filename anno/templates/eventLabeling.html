@@ -90,7 +90,7 @@
                     </div> 
                     <div class="flex-row mb-2">
                         <a target='_blank' href="http://github.com/voelkerb/FIRED_dataset_helper">More info</a>
-                        <a target='_blank' class="ml-3" href="http://buildsys.acm.org/2020/">Publication (TBP)</a>
+                        <a target='_blank' class="ml-3" href="https://doi.org/10.1145/3408308.3427623">Publication</a>
                     </div> 
                 </div>
                 <!-- REDD Dataset selection -->
@@ -1783,7 +1783,7 @@
                     for (var j = 0; j < numSeries2; j++) {
                         if (chart.series[j].options.id == id) {
                             chart.series[j].options.pointStart = startTs*1000;
-                            // chart.series[j].options.pointInterval = interval*1000;
+                            chart.series[j].options.pointInterval = interval*1000;
                             // chart.series[j].isDirty = true;
                             chart.series[j].setData(series);
                             found = true;

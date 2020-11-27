@@ -184,12 +184,14 @@ def responseForData(dataDict, measures, startTs, stopTs):
     duration = stopTs - startTs
     for m in measures:
         samplingrate = min(dataDict["samplingrate"], dataHp.srBasedOnDur(duration, m))
+        # data = dataDict["data"][m]
+        # timestamps = [(startTs+i)*1000 for i in range(len(data))]    
+        # samplingrate = 1
         data, timestamps = dataHp.resampleDict(dataDict, m, samplingrate, forceEvenRate=False)
         data = [[t, float(d)] for d,t in zip(data, timestamps)]
-        c = {"data": data, "id": m, "pointStart":startTs*1000, "pointInterval":(1/samplingrate)*1000}
-
+        #c = {"data": data, "id": m, "pointStart":startTs*1000, "pointInterval":(1/samplingrate)*1000}
         measureText, unit = getMeasureUnit(m)
-        chartData["series"].append({"data":data, "id":m, "startTs": startTs, "interval": 1/samplingrate})
+        chartData["series"].append({"data":data, "id":m, "startTs": startTs, "interval": (1/samplingrate)})
     return chartData
 
 def getAxisTitles(measures):
