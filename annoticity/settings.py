@@ -27,7 +27,7 @@ SECRET_KEY = 'm=#5tjrzun5$j##9_*svgybfk_oxdkdpsk3$5gmionzaug*vzz'
 DEBUG = True
 # DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "192.168.0.24", "earth.informatik.uni-freiburg.de"]
+ALLOWED_HOSTS = ["127.0.0.1", "earth.informatik.uni-freiburg.de"]
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Application definition
