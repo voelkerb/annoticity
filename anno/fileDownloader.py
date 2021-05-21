@@ -1,5 +1,4 @@
 
-import pysubs2
 from pysubs2 import SSAFile, SSAEvent, make_time
 
 from .websocket import wsManager
@@ -8,12 +7,10 @@ from . import data as dataHp
 
 from annoticity.settings import PROJECT_ROOT, MEDIA_ROOT, MEDIA_URL
 from decouple import config
-SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import os, sys
-sys.path.insert(0, SMART_ENERGY_TOOLS_PATH)
-import MKV.mkv as mkv
-from measurement.usefulFunctions import time_format_ymdhms as timeStr
+from .mkv.mkv import mkv as mkv
+from .usefulFunctions import time_format_ymdhms as timeStr
 
 from django.conf import settings
 from django.http import HttpResponse,StreamingHttpResponse, Http404

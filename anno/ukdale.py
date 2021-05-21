@@ -1,10 +1,7 @@
 from decouple import config
-SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys, os
-sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH))
-from datasets.UK_DALE import uk_daleLoader as ukdale
-
+from .datasets.UK_DALE import uk_daleLoader as ukdale
 import numpy as np 
 from datetime import datetime
 import pytz
@@ -15,7 +12,7 @@ from . import data as dataHp
 
 from django.http import JsonResponse
 
-from measurement.usefulFunctions import time_format_ymdhms
+from .usefulFunctions import time_format_ymdhms
 
 from .powerData import dataManager as dm
 

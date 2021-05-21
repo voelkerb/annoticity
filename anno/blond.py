@@ -5,11 +5,9 @@ from . import chart
 from . import data as dataHp
 from .powerData import dataManager as dm
 from decouple import config
-SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys, os
-sys.path.insert(0, os.path.join(SMART_ENERGY_TOOLS_PATH, "datasets", "BLOND"))
-import blondLoader as bl
+from .datasets.BLOND import blondLoader as bl
 
 from django.http import JsonResponse
 

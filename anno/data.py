@@ -5,11 +5,9 @@ import os
 
 from .powerData import dataManager as dm
 from decouple import config
-SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 
 import sys
-sys.path.insert(0, SMART_ENERGY_TOOLS_PATH)
-import MKV.mkv as mkv
+from .mkv.mkv import mkv as mkv
 import csv
 import pandas as pd
 
