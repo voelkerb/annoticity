@@ -1,9 +1,7 @@
 from decouple import config
-SMART_ENERGY_TOOLS_PATH = config('SMART_ENERGY_TOOLS_PATH')
 import sys, os
-sys.path.insert(0, SMART_ENERGY_TOOLS_PATH)
-from analyze.analyzeSignal import calcPowers
-from analyze.pereiraChangeOfMean import pereiraLikelihood, getChangePoints, LikelihoodPlot, cleanLikelihoods
+from .analyze.analyzeSignal import calcPowers
+from .analyze.pereiraChangeOfMean import pereiraLikelihood, getChangePoints, cleanLikelihoods
 
 from .websocket import wsManager
 from . import data as dataHp
@@ -164,13 +162,13 @@ def autoLabel(request):
     thres = max(thres, 0.1)
     pre = 1.0*sr
     if "pre" in parameter: pre = int(float(parameter["pre"])*sr)
-    pre = max(pre, 1)
+    pre = max(pre, 2)
     post = 1.0*sr
     if "post" in parameter: post = int(float(parameter["post"])*sr)
-    post = max(post, 1)
-    vote = 2.0*sr
+    post = max(post, 2)
+    voting = 2.0*sr
     if "voting" in parameter: voting = int(float(parameter["voting"])*sr)
-    vote = max(vote, 1)
+    voting = max(voting, 1)
     minDist = 1.0*sr
     if "minDist" in parameter: minDist = int(float(parameter["minDist"])*sr)
     minDist = max(minDist, 1)

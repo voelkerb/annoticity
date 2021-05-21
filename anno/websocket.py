@@ -2,9 +2,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 
-
-print("test")
-
 class SocketConsumer(WebsocketConsumer):
     def connect(self):
         id = None
