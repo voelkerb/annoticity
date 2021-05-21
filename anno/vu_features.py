@@ -1,0 +1,75 @@
+from vu_names import *
+
+# Features in the Dataset
+#:
+RAW_DATA = "Raw Data"
+#:
+ACTIVE_POWER_BEFORE_DOWN = ACTIVE_POWER_NAME + " Down"
+#:
+REACTIVE_POWER_BEFORE_DOWN = REACTIVE_POWER_NAME + " Down"
+#:
+STEADY_STATE_AVG_DATA = "Steady State Avg"
+#:
+MICRO_LOAD_SIGNATURE = "Micro Load Signature"
+#:
+FFT = "FFT"
+#:
+GOERTZEL = "Goertzel"
+#:
+FFT_HARMONICS = "FFT Harmonics"
+#:
+GOERTZEL_HARMONICS = "Goertzel Harmonics"
+#:
+AVG_VOLTAGE = "Avg " + VOLTAGE_NAME
+#:
+AVG_CURRENT = "Avg " + CURRENT_NAME
+#:
+MAX_CURRENT = "Max " + CURRENT_NAME
+#:
+RMS_CURRENT = "RMS " + CURRENT_NAME
+#:
+ACC_ENERGY = "Acc " + ENERGY_NAME
+#:
+AVG_ACTIVE_POWER = "Avg " + ACTIVE_POWER_NAME
+#:
+MAX_ACTIVE_POWER = "Max " + ACTIVE_POWER_NAME
+#:
+AVG_REACTIVE_POWER = "Avg " + REACTIVE_POWER_NAME
+#:
+MAX_REACTIVE_POWER = "Max " + REACTIVE_POWER_NAME
+#:
+HARMONIC_ENERGY_DISTRIBUTION = "HED"
+#:
+WAVEFORM_ANALYSIS = "Waveform Analysis"
+#:
+SPECTRAL_FLATNESS = "SPF"
+#:
+ODD_EVEN_HARMONIC_RATIO = "OER"
+#:
+TRISTIMULUS = "Tristimulus"
+#:
+FORM_FACTOR = "Form Factor"
+#:
+CREST_FACTOR = "Crest Factor"
+#:
+TOTAL_HARMONIC_DISTORTION = "THD"
+#:
+RESISTANCE = "Resistance"
+#:
+LOG_ATTACK_TIME = "LAT"
+#:
+TEMPORAL_CENTROID = "Temporal Centroid"
+#:
+SPECTRAL_CENTROID = "Spectral Centroid"
+#:
+PHASE_ANGLE = "Phase Angle"
+#:
+SIGNAL_SIGNAL_MEAN_RATIO = "SSMR"
+#:
+POS_NEG_HALF_CYCLE_RATIO = "PNR"
+#:
+MAX_MIN_RATIO = "MAMI"
+#:
+PEAK_MEAN_RATIO = "PMR"
+#:
+MEAN_VARIANCE_RATIO = "MVR"
