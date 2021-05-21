@@ -1,0 +1,6 @@
+[submodule "anno/datasets/FIRED"]
+	path = anno/datasets/FIRED
+	url = https://github.com/voelkerb/FIRED_dataset_helper
+[submodule "anno/mkv"]
+	path = anno/mkv
+	url = https://github.com/voelkerb/matroskaPlotter

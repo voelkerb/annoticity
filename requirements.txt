@@ -2,3 +2,8 @@ django-bootstrap-datepicker-plus
 django-bootstrap4
 channels
 python-decouple
+whitenoise
+django-sslserver
+av
+pysubs2
+tables
