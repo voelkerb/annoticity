@@ -23,6 +23,6 @@ Annoticity is hosted at the University of Freiburg at [https://earth.informatik.
 
 Please cite our publications if you compare to or use this system:
 
-* Benjamin Völker, Marc Pfeifer, Philipp M. Scholl, and Bernd Becker. 2020. A"Annoticity: A Smart Annotation Tool and Data Browser for Electricity Datasets." Proceedings of the 5th International Workshop on Non-Intrusive Load Monitoring. 2020. DOI:https://doi.org/10.1145/3427771.3427844
+* Benjamin Völker, Marc Pfeifer, Philipp M. Scholl, and Bernd Becker. 2020. "Annoticity: A Smart Annotation Tool and Data Browser for Electricity Datasets." Proceedings of the 5th International Workshop on Non-Intrusive Load Monitoring. 2020. DOI:https://doi.org/10.1145/3427771.3427844
 
 * Benjamin Völker, Marc Pfeifer, Philipp M. Scholl, and Bernd Becker. 2021. A Framework to Generate and Label Datasets for Non-Intrusive Load Monitoring. Energies 2021, 14, 75. DOI:https://doi.org/10.3390/en14010075
