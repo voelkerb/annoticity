@@ -86,7 +86,7 @@ def initChart(request, meter, day):
     response = chart.responseForInitChart(dataDict, measures=dataDict["measures"])
     response['timeZone'] = "Europe/Berlin"
     response["filename"] = os.path.basename(filePath)
-
+    
     return JsonResponse(response)
 
 def getData(request, startTs, stopTs):
@@ -101,7 +101,7 @@ def getData(request, startTs, stopTs):
         dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
         dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
         chartData = chart.responseForData(dataDict, dataDict["measures"], startTs, stopTs)
-    
+    print("Done!") 
     return JsonResponse(chartData)
 
 def getHighFreqData(request, startTsStr, stopTsStr):

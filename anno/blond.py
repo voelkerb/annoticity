@@ -96,6 +96,7 @@ def getData(request, startTs, stopTs):
     dataDict = dm.get(request.session.session_key)
 
     if dataDict is not None:
+        print("Getting blond data")
         duration = stopTs - startTs
         
         dataDictCopy = dict((k,v) for k,v in dataDict.items() if k != "data")
@@ -114,6 +115,7 @@ def getData(request, startTs, stopTs):
 
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
     
+    print("Done")
     return JsonResponse(chartData)
 
 
@@ -125,6 +127,7 @@ def getHighFreqData(request, startTsStr, stopTsStr):
     if dataInfo is not None:
         meter = dataInfo["args"][0]
         duration = stopTs - startTs
+        print("Getting high freq blond data")
 
         dataDict = bl.loadHighFreqRange(dataInfo["args"][0], dataInfo["args"][1], dataInfo["args"][2], startTs, stopTs)
         
@@ -137,4 +140,5 @@ def getHighFreqData(request, startTsStr, stopTsStr):
         
         dataDict["unix_timestamp"] = dataDict["timestamp"]
         chartData = chart.responseForNewData(dataDict, dataDict["measures"], startTs, stopTs)
+    print("Done")
     return JsonResponse(chartData)

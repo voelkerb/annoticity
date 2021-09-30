@@ -109,6 +109,7 @@ def getData(request, startTs, stopTs):
     dataDict = dm.get(request.session.session_key)
     
     if dataDict is not None: 
+        print("Getting ukdale data")
         duration = stopTs - startTs
         # We only have 1Hz data remember?
         if duration < 5.0: 
@@ -130,5 +131,6 @@ def getData(request, startTs, stopTs):
         dataDictCopy["duration"] = stopTs-startTs
         
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
+    print("Done!") 
         
     return JsonResponse(chartData)

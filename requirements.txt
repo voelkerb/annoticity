@@ -7,3 +7,8 @@ django-sslserver
 av
 pysubs2
 tables
+keyboard
+pandas
+scipy
+h5py
+pyyaml

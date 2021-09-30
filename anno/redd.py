@@ -16,7 +16,7 @@ from .usefulFunctions import time_format_ymdhms
 
 from .powerData import dataManager as dm
 
-redd.BASE_PATH = config('REDD_BASE_PATH')
+redd.BASE_PATH = config('REDD_BASE_PATH', "unknown")
 
 VERBOSE = True
 
@@ -143,5 +143,6 @@ def getData(request, startTs, stopTs):
         dataDictCopy["timestamp"] = startTs
         dataDictCopy["duration"] = stopTs-startTs
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
+    print("Done!") 
 
     return JsonResponse(chartData)

@@ -100,6 +100,7 @@ def getData(request, startTs, stopTs):
     dataDict = dm.get(request.session.session_key)
 
     if dataDict is not None:
+        print("Getting eco data")
         duration = stopTs - startTs
         
         dataDictCopy = dict((k,v) for k,v in dataDict.items() if k != "data")
@@ -118,4 +119,5 @@ def getData(request, startTs, stopTs):
 
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
   
+    print("Done")
     return JsonResponse(chartData)

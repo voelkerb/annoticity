@@ -5,9 +5,8 @@ import pytz
 
 def get(title, measures):
     chart = {
-        # 'colors': ["rgba(235, 162, 59, 1)", "#c1a374"],
-        'chart': {'type': 'area', 'zoomType': 'xy', 'panning': {'enabled': True, 'type':'x', 'key':'alt'}, 'panKey':'alt', 'zoomKey': 'shift', 'resetZoomEnabled':False, 'animation': False, 'spacingTop': 5},
-        'boost': { 'useGPUTranslations': True, 'enabled' : False },
+        'chart': {'type': 'line', 'zoomType': 'xy', 'panning': {'enabled': True, 'type':'x', 'key':'alt'}, 'panKey':'alt', 'zoomKey': 'shift', 'resetZoomEnabled':False, 'animation': False, 'spacingTop': 5},
+        # 'boost': { 'useGPUTranslations': True, 'enabled' : False, 'seriesThreshold': 1},
         'navigator' : {
             'adaptToUpdatedData': False,
             'dateTimeLabelFormats': {
@@ -20,7 +19,7 @@ def get(title, measures):
         'plotOptions': {
             'series': {
                 'allowPointSelect': True,
-                'boost': { 'useGPUTranslations': True, 'enabled' : False },
+                # 'boost': { 'useGPUTranslations': True, 'enabled' : False },
                 'fillOpacity': 0.4,
                 'lineWidth': 1.0,
                 'turboThreshold': 100,
@@ -165,7 +164,7 @@ def responseForNewData(dataDict, measures, startTs, stopTs):
             'color': '#0066FF', # default color
             'dataGrouping': { 'enabled': False },
             'showInNavigator': True,
-            'tooltip': { 'valueSuffix': " " + unit }, 
+            'tooltip': { 'valueSuffix': " " + unit },
         }
         color = getColor(m)
         if color is not None: series['color'] = color
@@ -175,6 +174,7 @@ def responseForNewData(dataDict, measures, startTs, stopTs):
         series["data"] = data
         series["id"] = m
         chartData['series'].append(series)
+
     return chartData
 
     
@@ -192,6 +192,8 @@ def responseForData(dataDict, measures, startTs, stopTs):
         #c = {"data": data, "id": m, "pointStart":startTs*1000, "pointInterval":(1/samplingrate)*1000}
         measureText, unit = getMeasureUnit(m)
         chartData["series"].append({"data":data, "id":m, "startTs": startTs, "interval": (1/samplingrate)})
+        # chartData["series"].append({"data":data, "id":m})
+    
     return chartData
 
 def getAxisTitles(measures):
@@ -199,7 +201,7 @@ def getAxisTitles(measures):
     for measure in measures:
         if measure.lower().split("_l")[0] in measureTexts:
             if measureTexts[measure.lower().split("_l")[0]]["axis"] not in texts:
-                print(measure.lower().split("_l")[0])
+                # print(measure.lower().split("_l")[0])
                 texts.append(measureTexts[measure.lower().split("_l")[0]]["axis"])
     if len(texts) > 0: return ", ".join(texts)
     else: return "Unknown"

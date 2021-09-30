@@ -12,8 +12,9 @@
     <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
-    <!-- We need highchart stockchart -->
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <!-- We need highchart stockchart --> 
+    <!-- <script src="https://code.highcharts.com/stock/9.2.0/highstock.js"></script> -->
+    <script src="https://code.highcharts.com/stock/9.1.2/highstock.js"></script>
     <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
 
@@ -1379,6 +1380,7 @@
             return visibleMeasures;
         }
         // __________________________________________ CHART OPTIONS _____________________________________
+        // TODO: Still required?
         Highcharts.setOptions({
             boost: { useGPUTranslations: true, enabled : false },
             plotOptions: { 
@@ -1509,6 +1511,7 @@
         });
 
         function getNewChart() {
+            console.log("getNewChart");
             if (unsavedCheck() == false) return;
 
             let selection = getSelectionOfDataset(selDataset);
@@ -1519,6 +1522,7 @@
             }
             var day = document.getElementById(datasetTimeInputs[selDataset]).value;
             url = url.replace("/__&", "/") + "&day=" +  day.replaceAll("-", "_").replaceAll("/", "_");
+            console.log(url);
             $.ajax({
                 url: url,
                 dataType: 'json',
@@ -1754,6 +1758,7 @@
                 console.log("newRange " + stopTs + "->" + startTs);
                 lastExtremes[0] = startTs;
                 lastExtremes[1] = stopTs;
+                // 
                 newSelection(startTs, stopTs);
                 // lastUpdate = now;
 
@@ -1764,38 +1769,52 @@
                 }
                 // }
             }
+            console.log("afterSetExtremes finished");
         }
 
         // __________________________________ NEW CHART DATA _____________________________________
         function newChartData(data) {
             console.log("ajax success newChartData");
 
+            var startTime = performance.now();
             if ('series' in data) {
                 var numSeries = data['series'].length;
                 var numSeries2 = chart.series.length;
                 var found = false
                 for (var i = 0; i < numSeries; i++) {
                     series = data['series'][i]['data'];
-                    startTs = data['series'][i]['startTs'];
-                    interval = data['series'][i]['interval'];
+                    // startTs = data['series'][i]['startTs'];
+                    // interval = data['series'][i]['interval'];
                     id = data['series'][i]['id'];
                     var found = false;
+                    console.log(`3 took ${performance.now() - startTime} milliseconds`)
                     for (var j = 0; j < numSeries2; j++) {
                         if (chart.series[j].options.id == id) {
+                            startTime = performance.now();
                             chart.series[j].options.pointStart = startTs*1000;
                             chart.series[j].options.pointInterval = interval*1000;
                             // chart.series[j].isDirty = true;
-                            chart.series[j].setData(series);
+                            console.log(`Points: ` + series.length)
+                            // chart.series[j].setData(series, false, false, false);
+                            chart.series[j].setData(series, false, false, false);
+                            // chart.redraw(false);
+                            console.log("Series update of " + id  + "took"  + `${performance.now() - startTime} milliseconds`)
                             found = true;
                             break;
                         }
                     }
+                    console.log(`1 took ${performance.now() - startTime} milliseconds`)
                     if (!found) {
+                        console.log("series " + id + " not found");
                         chart.addSeries(data['series'][i], true);
                     }
                 }
             } 
+            startTime = performance.now();
+            chart.redraw();
+            console.log(`Redraw took ${performance.now() - startTime} milliseconds`)
             chart.hideLoading();
+            console.log("Chart redrawn");
         }
       
 
@@ -2144,6 +2163,7 @@
                     // }
                     chart.activePlotLine = null;
                 }
+                console.log("finish mouse up");
                 // chart.update({chart: {zoomType: 'xy'}})
             }
         );
