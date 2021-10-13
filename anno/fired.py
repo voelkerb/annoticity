@@ -45,7 +45,8 @@ def getTimes(request):
 
 def loadData(meter, day, samplingrate=50):
     startDate = datetime.strptime(day, "%m_%d_%Y")
-    startTs = startDate.timestamp()
+    # TODO: how to handle dropout at midnight
+    startTs = startDate.timestamp() + 60 
     stopTs = startTs + 60*60*24
 
     # Load once in best resolution and downsample later on
@@ -68,7 +69,8 @@ dataHp.dataProvider["fired"] = loadData
 
 def initChart(request, meter, day):
     startDate = datetime.strptime(day, "%m_%d_%Y")
-    startTs = startDate.timestamp()
+    # TODO: how to handle dropout at midnight
+    startTs = startDate.timestamp() + 60
     stopTs = startTs + 60*60*24
 
     filePath = hp.getMeterFiles(meter, 50, startTs=startTs, stopTs=stopTs)
