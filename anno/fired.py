@@ -50,7 +50,7 @@ def loadData(meter, day, samplingrate=50):
     stopTs = startTs + 60*60*24
 
     # Load once in best resolution and downsample later on
-    dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+    dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs, smartmeterMergePhases=True)
     appliances = hp.getApplianceList(meter, startTs=startTs, stopTs=stopTs)
     devInfo = hp.getDeviceInfo()
     strings = []
@@ -100,7 +100,7 @@ def getData(request, startTs, stopTs):
         duration = stopTs - startTs
 
         samplingrate = min(50, dataHp.srBasedOnDur(duration, "p"))
-        dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+        dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs, smartmeterMergePhases=Truert)
         dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
         chartData = chart.responseForData(dataDict, dataDict["measures"], startTs, stopTs)
     print("Done!") 
@@ -117,7 +117,7 @@ def getHighFreqData(request, startTsStr, stopTsStr):
         duration = stopTs - startTs
 
         samplingrate = min(4000, dataHp.srBasedOnDur(duration, "i"))
-        dataDict = hp.getMeterVI(meter, samplingrate, startTs=startTs, stopTs=stopTs)
+        dataDict = hp.getMeterVI(meter, samplingrate, startTs=startTs, stopTs=stopTs, smartmeterMergePhases=True)
         dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
         chartData = chart.responseForNewData(dataDict, dataDict["measures"], startTs, stopTs)
     return JsonResponse(chartData)
