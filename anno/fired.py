@@ -13,7 +13,7 @@ from django.http import JsonResponse
 
 
 hp.FIRED_BASE_FOLDER = config('FIRED_BASE_PATH')
-
+hp.RSYNC_ALLOWED = True
 
 def info():
     mapping = hp.getDeviceMapping()
