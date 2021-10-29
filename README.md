@@ -19,6 +19,23 @@ Even though the tool is optimized to label electricity data, it can be applied t
 ## Hosting
 Annoticity is hosted at the University of Freiburg at [https://earth.informatik.uni-freiburg.de/annoticity](https://earth.informatik.uni-freiburg.de/annoticity).
 
+## Host your own?
+```bash
+git clone --recurse-submodules git@github.com:voelkerb/annoticity.git
+pip3 install -r requirements.txt
+```
+If you want to include the currently supported datasets, you need to download REDD, UK_Dale and ECO, the others will be accessed automatically.
+To setup the location for these datasets, add an `.env` file to the root of the django project with the following entries:
+```
+REDD_BASE_PATH=<path to>/REDD
+FIRED_BASE_PATH=<path to>/FIRED
+BLOND_BASE_PATH=<path to>/BLOND
+UKDALE_BASE_PATH=<path to>/UKDALE
+ECO_BASE_PATH=<path to>/ECO
+```
+Finally run `python3 manage.py runserver` and use your browser to go to `127.0.0.1:8000`.
+
+
 ## Reference
 
 Please cite our publications if you compare to or use this system:
