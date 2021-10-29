@@ -100,7 +100,7 @@ def getData(request, startTs, stopTs):
         duration = stopTs - startTs
 
         samplingrate = min(50, dataHp.srBasedOnDur(duration, "p"))
-        dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs, smartmeterMergePhases=Truert)
+        dataDict = hp.getMeterPower(meter, samplingrate, startTs=startTs, stopTs=stopTs, smartmeterMergePhases=True)
         dataDict["unix_timestamp"] = hp.UTCfromLocalTs(dataDict["timestamp"])
         chartData = chart.responseForData(dataDict, dataDict["measures"], startTs, stopTs)
     print("Done!") 
