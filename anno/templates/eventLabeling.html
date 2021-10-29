@@ -1783,8 +1783,8 @@
                 var found = false
                 for (var i = 0; i < numSeries; i++) {
                     series = data['series'][i]['data'];
-                    // startTs = data['series'][i]['startTs'];
-                    // interval = data['series'][i]['interval'];
+                    startTs = data['series'][i]['startTs'];
+                    interval = data['series'][i]['interval'];
                     id = data['series'][i]['id'];
                     var found = false;
                     console.log(`3 took ${performance.now() - startTime} milliseconds`)
