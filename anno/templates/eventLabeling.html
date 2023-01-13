@@ -321,38 +321,44 @@
                 <div class="card-body">
                     <div class="d-flex flex-row  align-items-end">
                     
-                        <div class="col" width="width: 420px;">
+                        <div class="col" width="width: 520px;">
 
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Pre-Event Window Length: </span>
-                                <input class="slider mr-3" id="preEventWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span id="preEventWindowLengthSlider_value" style="width: 60px;">0</span>
+                                <input class="slider mr-3" id="preEventWindowLengthSlider" style="width: 300px;" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span id="preEventWindowLengthSlider_value" style="width: 160px;">0</span>
 
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Post-Event Window Length: </span>
-                                <input class="slider mr-3" id="postEventWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span id="postEventWindowLengthSlider_value" style="width: 60px;">0</span>
+                                <input class="slider mr-3" id="postEventWindowLengthSlider" style="width: 300px;" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span id="postEventWindowLengthSlider_value" style="width: 160px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Voting Window Length: </span>
-                                <input class="slider mr-3" id="votingWindowLengthSlider" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span id="votingWindowLengthSlider_value" style="width: 60px;">0</span>
+                                <input class="slider mr-3" id="votingWindowLengthSlider" style="width: 300px;" type="range" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span id="votingWindowLengthSlider_value" style="width: 160px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Threshold: </span>
-                                <input class="slider mr-3" id="thresMinSlider" type="range" value="5" min="1" max="30" step="1">
-                                <span id="thresMinSlider_value" style="width: 60px;">0</span>
+                                <input class="slider mr-3" id="thresMinSlider" style="width: 300px;" type="range" value="5" min="0.1" max="30" step="0.1">
+                                <span id="thresMinSlider_value" style="width: 160px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Threshold Linear: </span>
-                                <input class="slider mr-3" id="thresLinearCoeffSlider" type="range" value="0.005" min="0.001" max="0.01" step="0.001">
-                                <span id="thresLinearCoeffSlider_value" style="width: 60px;">0</span>
+                                <input class="slider mr-3" id="thresLinearCoeffSlider" style="width: 300px;" type="range" value="0.005" min="0.001" max="0.01" step="0.001">
+                                <span id="thresLinearCoeffSlider_value" style="width: 160px;">0</span>
                             </div>
                             <div class="row align-items-center ml-0">
                                 <span style="width: 220px;">Samplingrate: </span>
-                                <input class="slider mr-3" id="samplingrateSlider" type="range" value="0" min="0" max="8" step="1" oninput="updateSRslider(value)">
-                                <span id="samplingrateSlider_value" style="width: 60px;">0</span>
+                                <input class="slider mr-3" id="samplingrateSlider" style="width: 300px;" type="range" value="0" min="0" max="8" step="1" oninput="updateSRslider(value)">
+                                <span id="samplingrateSlider_value" style="width: 160px;">0</span>
+                            </div>
+
+                            <div class="row align-items-center ml-0">
+                                <span style="width: 220px;">On Channel: </span>
+                                <select class="form-control content-width custom-control-inline" id="autoLabelChannel">
+                            </select>
                             </div>
                         </div>
 
@@ -1307,7 +1313,7 @@
                 alert("Please first load the data.")
                 return;
             }
-            formData.append("timestamp", chart.xAxis[0].min/1000   );
+            formData.append("timestamp", chart.xAxis[0].min/1000);
             $.ajax({
                 url: 'data/uploadLabel/',
                 type: 'POST',
@@ -1613,12 +1619,18 @@
             // Set the datas time zone
             // NOTE: need to be set first
             var zone = data["timeZone"];
+            console.log(data["timeZoneOffset"]);
+            // Standard timezone offset
+            Highcharts.setOptions({
+                global : {
+                    timezoneOffset : 0,
+                    useUTC : true
+                },
+            });
             if ('timeZoneOffset' in data) {
                 Highcharts.setOptions({
                     global : {
-                        useUTC : true,
                         timezoneOffset : -1*data["timeZoneOffset"],
-                        // useUTC : true
                     },
                 });
             }
@@ -1688,6 +1700,31 @@
                 enableMouseTracking: false,
                 showInLegend: false
             }, true);
+
+            resetOnChannelSelect();
+            
+        }
+
+        function resetOnChannelSelect() {
+            if (chart == null) return;
+            
+            console.log("resetOnChannelSelect");
+            var sel = document.getElementById('autoLabelChannel');
+            removeOptionsFromSelect(sel);
+            measures = []
+            for(i=0; i < chart.series.length; i++) {
+                if (!chart.series[i].options.id.includes("navigator") && chart.series[i].options.name != "fake") {
+                    measures.push(chart.series[i].options.name);
+                }
+            }
+            console.log(measures);
+            for (i=0; i < measures.length; i++) {
+                var compVal = measures[i];
+                addOptionToSelect(sel, compVal, value=compVal);
+            }
+            // Resizing
+            sel.onchange = null;
+            sel.dispatchEvent(new Event('change'));
         }
 
 
@@ -1858,6 +1895,7 @@
             let srSliderVal = document.getElementById("samplingrateSlider").value;
             var srVal = -1;
             if (srSliderVal in srSliderInfo) srVal = srSliderInfo[srSliderVal]["value"];
+            var channel = document.getElementById('autoLabelChannel').selectedIndex;
             var data = { 
                 "parameter": {
                     "pre": Number(sliderValues["preEventWindowLength"]["value"]),
@@ -1867,6 +1905,7 @@
                     "linearCoeff": Number(sliderValues["thresLinearCoeff"]["value"]),
                     "minDist": Number(sliderValues["eventRes"]["value"]),
                     "sr": srVal,
+                    "channel": Number(channel),
                 }, "filename": fileName, "type": dataType,
             }
             progressBar.setText("Processing...");

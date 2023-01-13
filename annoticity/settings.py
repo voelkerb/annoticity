@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '<GENERATE_YOUR_OWN_SECRET_KEY>'
+SECRET_KEY = '-)%v8+&ft9qs1gse6!h%3!lu6x7p)z3an+zzyh2=rjyl=s7gw1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -56,8 +56,9 @@ BOOTSTRAP4 = {
 X_FRAME_OPTIONS = 'ALLOWALL'
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', #add whitenoise
+    # 'whitenoise.middleware.WhiteNoiseMiddleware', #add whitenoise
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,7 +92,7 @@ TEMPLATES = [
 
 
 
-WSGI_APPLICATION = 'annoticity.wsgi.application'
+# WSGI_APPLICATION = 'annoticity.wsgi.application'
 
 
 # Database
@@ -146,3 +147,4 @@ STATIC_URL = '/static/'
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') ##specify static root
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

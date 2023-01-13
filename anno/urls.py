@@ -1,7 +1,7 @@
 """anno URL Configuration"""
 
 from django.urls import path
-from django.conf.urls import url, include, re_path
+from django.urls import include, re_path
 from . import views
 from . import labels
 from . import fired

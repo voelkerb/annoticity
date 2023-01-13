@@ -102,5 +102,6 @@ def getData(request, startTs, stopTs):
         dataDictCopy["timestamp"] = startTs
         dataDictCopy["duration"] = stopTs-startTs
         chartData = chart.responseForData(dataDictCopy, dataDictCopy["measures"], startTs, stopTs)
-
+    else:
+        print("Sorry cannot find data")
     return JsonResponse(chartData)

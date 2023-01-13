@@ -12,3 +12,4 @@ pandas
 scipy
 h5py
 pyyaml
+matplotlib

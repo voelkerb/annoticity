@@ -277,7 +277,7 @@ def __storeAvailability(avail):
 def initParser():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", type=str, default="/Users/voelkerb/NILM_Datasets/REDD",
+    parser.add_argument("--path", type=str, default="/Volumes/Data/NILM_Datasets/REDD",
                         help="Root path of the BLOND dataset.")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="Increase output verbosity")

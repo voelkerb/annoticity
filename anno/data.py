@@ -82,6 +82,18 @@ def srBasedOnDur(dur, measure):
         elif dur > 2: samplingrate = 2000
         elif dur > 1: samplingrate = 4000
         else: samplingrate = 50000
+    else:
+        if dur > 10*60*60: samplingrate = 1.0/60
+        elif dur > 4*60*60: samplingrate = 2.0/60
+        elif dur > 2*60*60: samplingrate = 0.3
+        elif dur > 1*60*60: samplingrate = 0.1
+        elif dur > 30*60: samplingrate = 1
+        elif dur > 10*60: samplingrate = 2
+        elif dur > 1*60: samplingrate = 10
+        elif dur > 10: samplingrate = 50
+        elif dur > 1: samplingrate = 100
+        elif dur > 0.1: samplingrate = 1000
+
     return samplingrate
 
 def getMeasure(availMeas, selection):

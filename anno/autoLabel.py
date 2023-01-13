@@ -121,28 +121,42 @@ def autoLabel(request):
         wsManager.sendStatus(sessionID, "Loading 50Hz power data...", percent=10)
     dataDict = dataHp.getSessionData(sessionID, sessionData)
 
-    usablePower = ["s", "s_l1", "p", "p_l1"]
+    channel = 0
+    if "channel" in parameter:
+        channel = parameter["channel"]
+    
+    if (channel > len(dataDict["measures"])-1):
+        response["msg"] += "Error: cannot select this specific channel index: {}".format(channel)
+        return JsonResponse(response)
+    channelName = dataDict["measures"][channel]
+    # usablePower = ["s", "s_l1", "p", "p_l1"]
 
-    usableKeys = list(set(usablePower) & set(dataDict["measures"]))
-    if len(usableKeys) < 1: 
-        if "v" in dataDict["measures"] and "i" in dataDict["measures"]:
-            pass
-            p,q,s = calcPowers(dataDict["data"]["v"], dataDict["data"]["i"], dataDict["samplingrate"])
-            power = s
-            response["msg"] = "Calculated apparent power using Current and Voltage"
-        else:
-            response["msg"] = "Could not find power, or voltage and current in data. Name it as \"p\",\"s\" or \"v\",\"i\".\n"
-            response["msg"] += "If you have electricity data of multiple supply legs, name it as \"<measure>_l1\", \"<measure>_l2\", ... accordingly."
-            return JsonResponse(response)
-    else:
-        power = list(dataDict["data"][sorted(usableKeys)[-1]])
+    # usableKeys = list(set(usablePower) & set(dataDict["measures"]))
+    # if len(usableKeys) < 1: 
+    #     if "v" in dataDict["measures"] and "i" in dataDict["measures"]:
+    #         pass
+    #         p,q,s = calcPowers(dataDict["data"]["v"], dataDict["data"]["i"], dataDict["samplingrate"])
+    #         power = s
+    #         response["msg"] = "Calculated apparent power using Current and Voltage"
+    #     else:
+    #         response["msg"] = "Could not find power, or voltage and current in data. Name it as \"p\",\"s\" or \"v\",\"i\".\n"
+    #         response["msg"] += "If you have electricity data of multiple supply legs, name it as \"<measure>_l1\", \"<measure>_l2\", ... accordingly.\n"
+    #         response["msg"] += "Will continue with {}\n".format(dataDict["measures"][0])
+    #         response["msg"] += "Resampled from {}Hz".format(dataDict["samplingrate"])
+    #         power = dataDict["measures"][0]
+    #         usableKeys = [power]
 
+    #         #return JsonResponse(response)
+    # else:
+    #     power = list(dataDict["data"][sorted(usableKeys)[-1]])
+    # channelName = sorted(usableKeys)[-1]
     sr = dataDict["samplingrate"]
 
+    power = list(dataDict["data"][channelName])
     # We only do this at a max samplingrate of 50 Hz
     if sr > 50:
-        wsManager.sendStatus(sessionID, text="Resampling to 50Hz...", percent=15)
-        power, timestamps = dataHp.resampleDict(dataDict, sorted(usableKeys)[-1], 50, forceEvenRate=True)
+        wsManager.sendStatus(sessionID, text="Resampling from {} to 50Hz...".format(sr), percent=15)
+        power, timestamps = dataHp.resampleDict(dataDict, channelName, 50, forceEvenRate=True)
         #power = dataHp.resample(power, sr, 50) 
         # print(power)
         sr = 50
@@ -152,7 +166,7 @@ def autoLabel(request):
     if newSr != None and newSr != -1 or "ts" in dataDict:
         if "ts" in dataDict and newSr is None: newSr = max(1/3.0, dataDict["samplingrate"])
         wsManager.sendStatus(sessionID, text="Resampling to "+ str(round(newSr, 2)) + "Hz...", percent=17)
-        power, timestamps = dataHp.resampleDict(dataDict, sorted(usableKeys)[-1], newSr, forceEvenRate=True)
+        power, timestamps = dataHp.resampleDict(dataDict, channelName, newSr, forceEvenRate=True)
         #power = dataHp.resample(power, sr, newSr) 
         sr = newSr
 
@@ -174,8 +188,11 @@ def autoLabel(request):
     minDist = max(minDist, 1)
     m = 0.005
     if "linearCoeff" in parameter: m = float(parameter["linearCoeff"])
-    print("sr: {}Hz, thres: {}W, pre: {}samples, post: {}:samples, voting: {}samples, minDist: {} samples, m:{}".format(sr, thres, pre, post, voting, minDist, m), flush=True)
+    print(channelName)
+    print("Channel:{}, sr: {}Hz, thres: {}W, pre: {}samples, post: {}:samples, voting: {}samples, minDist: {} samples, m:{}".format(str(channelName), sr, thres, pre, post, voting, minDist, m), flush=True)
     
+
+
     wsManager.sendStatus(sessionID, "Finding Events...", percent=20)
     changeIndices = findEvents(power, thres, pre, post, voting, minDist, m)
 

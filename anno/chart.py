@@ -61,7 +61,7 @@ def get(title, measures):
         },
         'series': []
     }
-    for m in measures:
+    for i,m in enumerate(measures):
         measureText, unit = getMeasureUnit(m)
         lt = getLineType(m)
         series = {
@@ -72,7 +72,7 @@ def get(title, measures):
             'showInNavigator': True,
             'tooltip': { 'valueSuffix': " " + unit }, 
         }
-        color = getColor(m)
+        color = getColor(m, index=i)
         if color is not None: series['color'] = color
         chart['series'].append(series)
     return chart
@@ -87,10 +87,13 @@ measureTexts = {"p":{"name":"Active Power", "axis":"Power", "unit":"W", "color":
                 "i_rms":{"name":"RMS Current", "axis":"Current", "unit":"A", "color": "#00A1FF", "lt":"line"},
                 }
 
-def getColor(measure):
+import matplotlib.pyplot as plt
+colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+def getColor(measure, index=0):
+    color = colors[index%len(colors)]
     if measure.lower().split("_l")[0] in measureTexts:
-        return measureTexts[measure.lower().split("_l")[0]]["color"]
-    return None
+        color = measureTexts[measure.lower().split("_l")[0]]["color"]
+    return color
 
 
 def responseForInitChart(dataDict, measures=None):
@@ -155,7 +158,7 @@ def responseForNewData(dataDict, measures, startTs, stopTs):
     chartData = {"series":[]}
 
     duration = stopTs - startTs
-    for m in measures:
+    for i,m in enumerate(measures):
 
         measureText, unit = getMeasureUnit(m)
         series = {
@@ -166,7 +169,7 @@ def responseForNewData(dataDict, measures, startTs, stopTs):
             'showInNavigator': True,
             'tooltip': { 'valueSuffix': " " + unit },
         }
-        color = getColor(m)
+        color = getColor(m,index=i)
         if color is not None: series['color'] = color
         samplingrate = min(dataDict["samplingrate"], dataHp.srBasedOnDur(duration, m))
         data, timestamps = dataHp.resampleDict(dataDict, m, samplingrate, forceEvenRate=False)
@@ -214,7 +217,7 @@ def getLineType(measure):
     return lt
 
 def getMeasureUnit(measure):
-    measureText = "Unknown"
+    measureText = measure
     unit = ""
     if measure.lower().split("_l")[0] in measureTexts:
         measureText = measureTexts[measure.lower().split("_l")[0]]["name"]
