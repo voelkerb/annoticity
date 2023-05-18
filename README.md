@@ -17,7 +17,7 @@ After either uploading a file or selecting a timespan and device of an available
 Even though the tool is optimized to label electricity data, it can be applied to other time series data as well.
 
 ## Hosting
-A demo of Annoticity is hosted at [http://voelkerb.com:8000](http://voelkerb.com:8000).
+A demo of Annoticity is hosted at [https://voelkerb.com:8000](https://voelkerb.com:8000).
 
 ## Host your own?
 ```bash
