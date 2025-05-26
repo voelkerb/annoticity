@@ -27,7 +27,7 @@ SECRET_KEY = 'SECRET_KEY_GOES_HERE'
 DEBUG = True
 # DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "earth.informatik.uni-freiburg.de", "192.168.0.13", "192.168.0.11", "voelkerb.com", "192.168.0.15"]
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1", "earth.informatik.uni-freiburg.de", "192.168.0.13", "192.168.0.11", "voelkerb.com", "192.168.0.15"]
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Application definition

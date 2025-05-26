@@ -1,0 +1,30 @@
+name: annoticity_base
+
+networks:
+  annoticity:
+    name: annoticity_net
+
+x-service_defaults: &service_defaults
+  restart: unless-stopped
+  networks:
+    - annoticity
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+services:
+
+  app:
+    << : *service_defaults
+    build:
+      context: ../..
+      dockerfile: ./infra/dockerfiles/Dockerfile.app
+    ports:
+      - 8000:8000
+    env_file:
+      - ../../.env
+    volumes:
+      - /Users/voelkerb/voelkerbcom:/usr/src/certs
+      - /Volumes/Data/NILM_datasets/:/usr/src/data
+
+volumes:
+  annoticity_ca:
