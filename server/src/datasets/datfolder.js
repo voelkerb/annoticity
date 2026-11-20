@@ -3,7 +3,7 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { config } from "../config.js";
-import { exists, httpError, once, writeAtomic } from "../cache.js";
+import { cachedFile, httpError, once } from "../cache.js";
 import { dayFormatter, defaultMeasures, sortMeasures, toGrid, typicalPeriod } from "./common.js";
 
 /**
@@ -136,10 +136,8 @@ export function datFolderProvider({ id, name, description, url, tz, base, env, m
     if (indexes.has(key)) return indexes.get(key);
     const dest = path.join(config.cacheDir, "index", id, crypto.createHash("sha1").update(key).digest("hex") + ".json");
     const days = await once("index:" + key, async () => {
-      if (await exists(dest)) return JSON.parse(await fsp.readFile(dest, "utf8"));
-      const d = await indexDays(file, tz);
-      await writeAtomic(dest, JSON.stringify(d));
-      return d;
+      const cacheFile = await cachedFile(dest, async () => Buffer.from(JSON.stringify(await indexDays(file, tz))));
+      return JSON.parse(await fsp.readFile(cacheFile, "utf8"));
     });
     indexes.set(key, days);
     return days;

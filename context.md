@@ -62,7 +62,7 @@ Each dataset is a provider in `server/src/datasets/` (registry in `index.js`). D
 - App page: https://voelkerb.github.io/apps/annoticity/ (repo `voelkerb/apps`, folder `annoticity/`). It has the icon, framed
   screenshots and features; "Download" links to the latest release.
 - Card on https://voelkerb.github.io/ (apps section) and on https://voelkerb.github.io/apps/.
-- Once the app is hosted, add an "Open web app" button to the app page and link it from the README.
+- The README links to the hosted app; the app page can also link to it.
 
 ## Run and verify
 
@@ -72,9 +72,15 @@ npm test && npm run check         # server + engine tests, svelte-check
 scripts/package-offline.sh v2.x.y # release/annoticity-v2.x.y-offline.zip
 ```
 
-## Next: deployment (planned for tonight)
+## Deployment
 
-Goal: a hosted version, e.g. on GitHub Pages. Open decisions:
+For a home server, see the public-hosting precautions in [README.md](README.md#hosting-on-a-home-server).
+`ANNOTICITY_PUBLIC=true` binds to loopback by default and limits requests, concurrent work and media uploads.
+The Docker image listens inside the container on port 8000; Compose publishes it only on host loopback, mounts
+the datasets read-only and uses ephemeral, one-minute cache files. All configured datasets are publicly readable.
+It still requires a properly configured HTTPS reverse proxy and host isolation.
+
+Other hosting options, e.g. GitHub Pages:
 
 1. **Frontend-only (GitHub Pages)**
    - "Your data" CSV works fully in the browser.

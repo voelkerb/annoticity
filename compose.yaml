@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      FIRED_PATH: /datasets/FIRED
+      BLOND_PATH: /datasets/BLOND
+      REDD_PATH: /datasets/REDD
+      UKDALE_PATH: /datasets/UKDALE
+      ECO_PATH: /datasets/ECO
+    volumes:
+      - "${DATASET_ROOT:-/Volumes/Data/NILM_Datasets}/FIRED:/datasets/FIRED:ro"
+      - "${DATASET_ROOT:-/Volumes/Data/NILM_Datasets}/BLOND:/datasets/BLOND:ro"
+      - "${DATASET_ROOT:-/Volumes/Data/NILM_Datasets}/REDD:/datasets/REDD:ro"
+      - "${DATASET_ROOT:-/Volumes/Data/NILM_Datasets}/UKDALE:/datasets/UKDALE:ro"
+      - "${DATASET_ROOT:-/Volumes/Data/NILM_Datasets}/ECO:/datasets/ECO:ro"
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,noexec,nosuid
+      - /home/node/.cache/annoticity:size=768m,uid=1000,gid=1000,noexec,nosuid
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2g
+    cpus: 2
+    pids_limit: 128
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

@@ -15,20 +15,20 @@ const CACHE_VERSION = "v2";
 export const providers = Object.fromEntries([fired, blond, redd, ukdale, eco].map((p) => [p.id, p]));
 
 export function provider(id) {
-  const p = providers[id];
-  if (!p) throw httpError(404, `Unknown dataset ${id}`);
-  return p;
+  if (!Object.hasOwn(providers, id)) throw httpError(404, `Unknown dataset ${id}`);
+  return providers[id];
 }
 
-export async function listDatasets() {
-  return Promise.all(Object.values(providers).map(async (p) => {
+export async function listDatasets(allowedIds = Object.keys(providers)) {
+  return Promise.all(allowedIds.map(async (id) => {
+    const p = provider(id);
     let status;
     try { status = await p.status(); } catch (e) { status = { available: false, reason: e.message }; }
     return { id: p.id, name: p.name, description: p.description, url: p.url, tz: p.tz, waveforms: !!p.waveform, ...status };
   }));
 }
 
-async function meterInfo(p, meter) {
+export async function meterInfo(p, meter) {
   const info = (await p.meters()).find((m) => m.id === meter);
   if (!info) throw httpError(404, `Unknown meter ${meter} in ${p.name}`);
   return info;

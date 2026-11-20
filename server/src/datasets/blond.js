@@ -18,10 +18,15 @@ const memo = new Map();
 const localDay = dayFormatter(tz);
 
 function memoize(key, ttlMs, fn) {
+  if (config.cacheTtlMs) ttlMs = Math.min(ttlMs, config.cacheTtlMs);
   const hit = memo.get(key);
   if (hit && Date.now() - hit.at < ttlMs) return hit.value;
-  const value = fn().catch((e) => { memo.delete(key); throw e; });
+  const value = fn().catch((e) => { if (memo.get(key)?.value === value) memo.delete(key); throw e; });
   memo.set(key, { at: Date.now(), value });
+  if (Number.isFinite(ttlMs)) {
+    const timer = setTimeout(() => { if (memo.get(key)?.value === value) memo.delete(key); }, ttlMs);
+    timer.unref();
+  }
   return value;
 }
 
@@ -29,13 +34,23 @@ const cachePath = (sub) => path.join(config.cacheDir, "BLOND", sub);
 const download = (sub) => cachedFile(cachePath(sub), () => ftp.download(sub));
 
 /** Every recorded day, mapped to the BLOND set that contains it. */
-const daySets = () => memoize("days", 86400e3, async () => {
+const remoteDaySets = () => memoize("remote-days", 86400e3, async () => {
   const map = new Map();
   for (const set of SETS) for (const d of await ftp.list(set + "/")) if (/^\d{4}-\d{2}-\d{2}$/.test(d)) map.set(d, set);
   return map;
 });
 
-const applianceLog = () => memoize("log", Infinity, async () => JSON.parse(await fs.readFile(await download("appliance_log.json"), "utf8")));
+const daySets = () => memoize("days", 86400e3, async () => {
+  if (!config.blond.path) return remoteDaySets();
+  const files = await fs.readdir(path.join(config.blond.path, "tmp"));
+  return new Map(files.map((name) => /^summary-(\d{4}-\d{2}-\d{2})-(?:clear|medal-\d+)\.hdf5$/.exec(name))
+    .filter(Boolean).map((m) => [m[1], null]));
+});
+
+const applianceLog = () => memoize("log", config.cacheTtlMs || Infinity, async () => {
+  const file = config.blond.path ? path.join(config.blond.path, "appliance_log.json") : await download("appliance_log.json");
+  return JSON.parse(await fs.readFile(file, "utf8"));
+});
 
 function parseMeter(id) {
   if (id === "clear") return { medal: "clear" };
@@ -86,7 +101,7 @@ async function days() {
 }
 
 async function setOf(day) {
-  const set = (await daySets()).get(day);
+  const set = (await remoteDaySets()).get(day);
   if (!set) throw httpError(404, `BLOND has no recording on ${day}`);
   return set;
 }
@@ -103,8 +118,15 @@ const attr = (obj, k) => { const v = obj.attrs[k]?.value; return typeof v === "b
 /** One day of 1 Hz summary data (BLOND's own power, current and voltage RMS values). */
 async function day(meter, d, info) {
   const { medal, socket } = parseMeter(meter);
-  const set = await setOf(d);
-  const file = await download(`${set}/${d}/${medal}/summary-${d}-${medal}.hdf5`);
+  const name = `summary-${d}-${medal}.hdf5`;
+  const local = config.blond.path && path.join(config.blond.path, "tmp", name);
+  let file, set;
+  try { if (local) await fs.access(local); else throw Object.assign(new Error("No local BLOND path"), { code: "ENOENT" }); file = local; }
+  catch (e) {
+    if (e.code !== "ENOENT") throw e;
+    set = await setOf(d);
+    file = await download(`${set}/${d}/${medal}/${name}`);
+  }
   const data = withH5(file, (f) => {
     const read = (name) => (f.keys().includes(name) ? Float32Array.from(f.get(name).value) : null);
     const leg = (k, suffix) => {
@@ -128,7 +150,7 @@ async function day(meter, d, info) {
   return {
     header: {
       title: socket ? today.join(", ") || info.label : info.label,
-      info: `${set} · ${socket ? `${info.group}, socket ${socket}` : "3-phase mains"}`,
+      info: `${set ?? "BLOND (local)"} · ${socket ? `${info.group}, socket ${socket}` : "3-phase mains"}`,
       tz,
       t0: data.t0,
       sampleRate: 1,
@@ -151,7 +173,7 @@ export function rawFileStart(name) {
 }
 
 async function rawFiles(medal, d) {
-  const set = (await daySets()).get(d);
+  const set = (await remoteDaySets()).get(d);
   if (!set) return [];
   return memoize(`raw:${medal}:${d}`, 86400e3, async () =>
     (await ftp.list(`${set}/${d}/${medal}/`))
@@ -173,9 +195,11 @@ function rawFile(entry) {
   const dest = cachePath(`raw/${entry.name}`);
   return once("raw:" + dest, async () => {
     const file = await cachedFile(dest, () => ftp.download(entry.sub));
-    const now = new Date();
-    await fs.utimes(file, now, now);
-    await pruneRaw(entry.name);
+    if (!config.cacheTtlMs) {
+      const now = new Date();
+      await fs.utimes(file, now, now);
+      await pruneRaw(entry.name);
+    }
     return file;
   });
 }

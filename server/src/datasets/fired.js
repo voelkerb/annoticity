@@ -1,4 +1,5 @@
 import path from "node:path";
+import fs from "node:fs/promises";
 import { config } from "../config.js";
 import { probe, decodeAudio, deinterleave } from "../ffmpeg.js";
 import { fileStamp, zonedDayStart } from "../tz.js";
@@ -15,13 +16,31 @@ async function remote(subPath) {
   return res;
 }
 
+async function localFile(subPath) {
+  if (!config.fired.path) return null;
+  const file = path.join(config.fired.path, subPath);
+  try { await fs.access(file); return file; } catch (e) { if (e.code === "ENOENT") return null; throw e; }
+}
+
 /** Download a remote file into the local cache (atomic, de-duplicated). */
-function ensureFile(subPath) {
+async function ensureFile(subPath) {
+  const local = await localFile(subPath);
+  if (local) return local;
   return cachedFile(path.join(config.cacheDir, "FIRED", subPath), async () => Buffer.from(await (await remote(subPath)).arrayBuffer()));
 }
 
 function remoteJson(name) {
-  if (!memo.has(name)) memo.set(name, remote(name).then((r) => r.json()).catch((e) => { memo.delete(name); throw e; }));
+  if (!memo.has(name)) {
+    const value = (async () => {
+      const local = await localFile(name);
+      return local ? JSON.parse(await fs.readFile(local, "utf8")) : (await remote(name)).json();
+    })().catch((e) => { if (memo.get(name) === value) memo.delete(name); throw e; });
+    memo.set(name, value);
+    if (config.cacheTtlMs) {
+      const timer = setTimeout(() => { if (memo.get(name) === value) memo.delete(name); }, config.cacheTtlMs);
+      timer.unref();
+    }
+  }
   return memo.get(name);
 }
 
@@ -46,9 +65,12 @@ async function days(meter) {
   const key = "days:" + meter;
   const hit = memo.get(key);
   if (hit && Date.now() - hit.at < 3600e3) return hit.days;
-  const html = await (await remote(`summary/50Hz/${meter}/`)).text();
-  const list = [...html.matchAll(new RegExp(`href="${meter}_(\\d{4})_(\\d{2})_(\\d{2})__00_00_00\\.mkv"`, "g"))]
+  const local = await localFile(`summary/50Hz/${meter}`);
+  const names = local ? await fs.readdir(local) : [...(await (await remote(`summary/50Hz/${meter}/`)).text()).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  const pattern = new RegExp(`^${meter}_(\\d{4})_(\\d{2})_(\\d{2})__00_00_00\\.mkv$`);
+  const list = names.map((name) => pattern.exec(name)).filter(Boolean)
     .map((m) => `${m[1]}-${m[2]}-${m[3]}`);
+  list.sort();
   memo.set(key, { at: Date.now(), days: list });
   return list;
 }
@@ -92,9 +114,14 @@ const hfCache = new Map();
 async function hfPart(meter, t) {
   const sub = `highFreq/${meter}/${meter}_${fileStamp(t, tz)}.mkv`;
   if (hfCache.has(sub)) {
-    const v = hfCache.get(sub);
-    hfCache.delete(sub); hfCache.set(sub, v);
-    return v;
+    const entry = hfCache.get(sub);
+    hfCache.delete(sub); hfCache.set(sub, entry);
+    if (config.cacheTtlMs) {
+      clearTimeout(entry.timer);
+      entry.timer = setTimeout(() => hfCache.delete(sub), config.cacheTtlMs);
+      entry.timer.unref();
+    }
+    return entry.value;
   }
   const part = await once("hf:" + sub, async () => {
     let file;
@@ -104,8 +131,17 @@ async function hfPart(meter, t) {
     for (const [id, arr] of Object.entries(d.data)) if (/^i(_|$)/.test(id)) for (let k = 0; k < arr.length; k++) arr[k] /= 1000;
     return { ...d, t0: d.t0 ?? t };
   });
-  hfCache.set(sub, part);
-  while (hfCache.size > 6) hfCache.delete(hfCache.keys().next().value);
+  const entry = { value: part };
+  if (config.cacheTtlMs) {
+    entry.timer = setTimeout(() => hfCache.delete(sub), config.cacheTtlMs);
+    entry.timer.unref();
+  }
+  hfCache.set(sub, entry);
+  while (hfCache.size > 6) {
+    const key = hfCache.keys().next().value;
+    clearTimeout(hfCache.get(key).timer);
+    hfCache.delete(key);
+  }
   return part;
 }
 

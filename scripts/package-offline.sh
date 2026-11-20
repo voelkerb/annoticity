@@ -45,6 +45,7 @@ Annoticity $version (offline bundle)
 Requirements
   - Node.js 20 or newer (https://nodejs.org)
   - ffmpeg/ffprobe on the PATH, only for FIRED data and MKV/WAV/FLAC uploads
+  - Python 3, PyTables and NumPy, only for UK-DALE ukdale.h5 files
 
 Start
   macOS:   double-click start.command (first time: right-click > Open)
@@ -53,9 +54,9 @@ Start
   Then open http://localhost:8787 (opened automatically).
 
 Works without internet: your own CSV/MKV files and local REDD, UK-DALE and ECO copies.
-Needs internet: FIRED (university server) and BLOND (TUM FTP server).
+FIRED and BLOND use local copies when configured and download missing data if needed.
 
-Local datasets: copy server/.env.example to server/.env and set REDD_PATH, UKDALE_PATH or ECO_PATH.
+Local datasets: copy server/.env.example to server/.env and set the dataset paths.
 Decoded days are cached in ~/.cache/annoticity (change with ANNOTICITY_CACHE).
 
 Source and docs: https://github.com/voelkerb/annoticity

@@ -1,0 +1,14 @@
+services:
+  app:
+    environment:
+      VIRTUAL_HOST: ${ANNOTICITY_DOMAIN:?Set ANNOTICITY_DOMAIN to your public hostname}
+      VIRTUAL_PORT: "8000"
+      LETSENCRYPT_HOST: ${ANNOTICITY_DOMAIN:?Set ANNOTICITY_DOMAIN to your public hostname}
+    networks:
+      - default
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: nextcloud_proxy-tier

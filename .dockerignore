@@ -1,0 +1,9 @@
+.git
+**/node_modules
+web/dist
+release
+.env
+**/.env
+.cache
+data
+media
