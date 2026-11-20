@@ -27,20 +27,20 @@
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --accent: #431947;
-  --accent-text: #431947;
+  --accent: #3e1b45;
+  --accent-text: #3e1b45;
   --accent-contrast: #ffffff;
   --bg: #fff8df;
   --panel: #fffdf4;
-  --panel-2: #f8efd9;
-  --border: #e7d9bb;
-  --text: #171b2a;
-  --muted: #667089;
+  --panel-2: #efe6ee;
+  --border: #ddcfde;
+  --text: #24102a;
+  --muted: #7a6680;
   --plot-bg: #ffffff;
   --tooltip-bg: #ffffff;
-  --chart-grid: #ece6d6;
-  --chart-axis: #667089;
-  --shadow: 0 8px 30px rgba(30, 40, 80, 0.14);
+  --chart-grid: #ece6ee;
+  --chart-axis: #7a6680;
+  --shadow: 0 8px 30px rgba(62, 27, 69, 0.14);
 }
 
 * { box-sizing: border-box; }
