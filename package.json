@@ -1,0 +1,17 @@
+{
+  "name": "annoticity",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Annotation tool and data browser for electricity datasets (Svelte + Node.js)",
+  "scripts": {
+    "setup": "npm install && npm --prefix server install && npm --prefix web install",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm --prefix server run dev\" \"npm --prefix web run dev\"",
+    "build": "npm --prefix web run build",
+    "start": "npm --prefix server start",
+    "test": "npm --prefix server test",
+    "check": "npm --prefix web run check"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}

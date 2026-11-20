@@ -21,3 +21,7 @@ media/*
 **/*.s#*
 
 .env
+# v2
+node_modules/
+web/dist/
+.cache/

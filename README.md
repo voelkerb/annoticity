@@ -1,45 +1,37 @@
-# Annoticity
+# Annoticity v2
 
-A smart labelling tool specially designed for electricity data.
+Browse and label electricity datasets. Version 2 is a rewrite with a **Svelte** frontend and a **Node.js** backend.
+The original Django version lives on the `annoticitiy_v1` branch.
 
+- **FIRED dataset**: pick a meter and a day; the server fetches and caches the recording from the university server.
+- **Your own data**: drop a CSV (header + time column + numeric columns) or a FIRED-style MKV file.
+- Wide, zoomable plot with min/max envelopes (short spikes stay visible), refetching more detail as you zoom; raw 2 kHz V/I at 30 s or less (FIRED).
+- Labels: click to add, drag, rename, snap to edge, undo/redo, import/export (CSV, SRT, ASS, JSON).
+- Auto-labeling: step detection with refined edges and state clustering.
 
-Annoticity is implemented as an interactive web application. Manual labeling and inspection is performed on the client side while data fetching and automatic labeling is performed on the server. The workflow is depicted in the following Figure:
+## Run
 
-<img src="/docu/figures/flow.jpg">
+Requires Node 20+ and `ffmpeg`/`ffprobe` on the server machine.
 
-The server backend is written in python using the _Django_ framework. The backend’s main purpose is to load the data and prepare it for visualization, perform the task of automatic labeling and provide file downloads. Data can be uploaded through the web application. Currently, Matroska multimedia containers (```mkv```) and ```CSV``` files are supported. The [REDD](http://redd.csail.mit.edu), [UK-DALE](https://data.ukedc.rl.ac.uk/browse/edc/efficiency/residential/EnergyConsumption/Domestic/UK-DALE-2017/ReadMe_DALE-2017.html), [BLOND](https://mediatum.ub.tum.de/1375836), [ECO](https://www.vs.inf.ethz.ch/res/show.html?what=eco-data) and the [FIRED](https://github.com/voelkerb/FIRED_dataset_helper) datasets can be directly selected (more will be added). The backend resamples the data to a reasonable sampling rate according to the current time-span selected by the user. If the dataset already contains labels they will be displayed to the user. Additionally, a file containing labels can be uploaded and modified. The supported formats are ```csv```, ```srt``` and ```ass```. An automatic labeling algorithm generates labels from the data by identifying events. These events are clustered, pre-labeled and sent to the client side for inspection and validation.
-The client side is implemented in _HTML_ and _JavaScript_ and provides the frontend to the user. 
-
-<img src="/docu/figures/gui.jpg">
-
-After either uploading a file or selecting a timespan and device of an available dataset, the user can visually inspect the data. Different measures (e.g. active and reactive power) can be selected, and data can be zoomed in which leads to a data download at a higher sampling rate. The user can add a label by clicking at the slope where an event occurs, remove the label by clicking on the vertical bar, or modify the label. Each label consists of a start time and a (possibly empty) text description. The frontend also allows to set the parameters of the automatic labeling algorithm. Labels are stored either as plain ```csv```, ```ass``` or ```srt``` files or embedded into a ```mkv``` file together with the original data.
-
-Even though the tool is optimized to label electricity data, it can be applied to other time series data as well.
-
-## Hosting
-A demo of Annoticity is hosted at [https://voelkerb.com:8000](https://voelkerb.com:8000).
-
-## Host your own?
 ```bash
-git clone --recurse-submodules git@github.com:voelkerb/annoticity.git
-pip3 install -r requirements.txt
+npm run setup   # installs root, server and web dependencies
+npm run dev     # API on :8787, UI on http://localhost:5173
 ```
-If you want to include the currently supported datasets, you need to download REDD, UK_Dale and ECO, the others will be accessed automatically.
-To setup the location for these datasets, add an `.env` file to the root of the django project with the following entries:
-```
-REDD_BASE_PATH=<path to>/REDD
-FIRED_BASE_PATH=<path to>/FIRED
-BLOND_BASE_PATH=<path to>/BLOND
-UKDALE_BASE_PATH=<path to>/UKDALE
-ECO_BASE_PATH=<path to>/ECO
-```
-Finally run `python3 manage.py runserver` and use your browser to go to `127.0.0.1:8000`.
 
+Production: `npm run build && npm start` serves the built UI and the API on http://localhost:8787.
 
-## Reference
+`npm test` runs the server tests, `npm run check` type-checks the frontend.
 
-Please cite our publications if you compare to or use this system:
+## Configuration (environment)
 
-* Benjamin Völker, Marc Pfeifer, Philipp M. Scholl, and Bernd Becker. 2020. "Annoticity: A Smart Annotation Tool and Data Browser for Electricity Datasets." Proceedings of the 5th International Workshop on Non-Intrusive Load Monitoring. 2020. DOI:https://doi.org/10.1145/3427771.3427844
+`PORT` (8787), `FIRED_URL`, `FIRED_USER`, `FIRED_PASSWORD`, `VITE_API_URL` (frontend, if the API is hosted elsewhere).
 
-* Benjamin Völker, Marc Pfeifer, Philipp M. Scholl, and Bernd Becker. 2021. A Framework to Generate and Label Datasets for Non-Intrusive Load Monitoring. Energies 2021, 14, 75. DOI:https://doi.org/10.3390/en14010075
+## API
+
+`GET /api/fired/meters` · `GET /api/fired/meters/:meter/days` · `POST /api/datasets/fired` · `POST /api/datasets/upload` ·
+`GET /api/datasets/:id/data` · `GET /api/datasets/:id/waveform` · `POST /api/datasets/:id/autolabel`
+
+## Notes
+
+REDD, UK-DALE, BLOND and ECO from v1 are not supported yet. A frontend-only build (e.g. GitHub Pages) would need the university server
+to send CORS headers or a small proxy, since it requires Basic auth.

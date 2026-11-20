@@ -1,0 +1,68 @@
+:root {
+  --font: ui-sans-serif, -apple-system, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radius: 10px;
+  --accent: #6366f1;
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+  --danger: #ef4444;
+  --ok: #22c55e;
+  color-scheme: dark;
+}
+
+:root, :root[data-theme='dark'] {
+  --bg: #0b0e14;
+  --panel: #131722;
+  --panel-2: #181d2a;
+  --border: #252b3b;
+  --text: #e6e9f2;
+  --muted: #8b93a8;
+  --chart-grid: #222838;
+  --chart-axis: #8b93a8;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f4f5f9;
+  --panel: #ffffff;
+  --panel-2: #f6f7fb;
+  --border: #e1e4ee;
+  --text: #171b2a;
+  --muted: #667089;
+  --chart-grid: #e8eaf2;
+  --chart-axis: #667089;
+  --shadow: 0 8px 30px rgba(30, 40, 80, 0.14);
+}
+
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; }
+body { font: 14px/1.45 var(--font); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel-2); transition: background 0.12s, border-color 0.12s;
+}
+.btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover:not(:disabled) { background: var(--panel-2); }
+.btn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+.btn.sm { padding: 3px 8px; font-size: 12px; }
+.btn { white-space: nowrap; }
+
+input[type='text'], input[type='number'], input[type='date'], select {
+  width: 100%; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2);
+}
+input:focus, select:focus { border-color: var(--accent); outline: none; }
+
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-size: 12px; }
+.kbd { font: 11px var(--mono); padding: 1px 5px; border-radius: 5px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted); }
+
+.uplot, .u-wrap { font-family: var(--font); }
+.u-legend { display: none; }
