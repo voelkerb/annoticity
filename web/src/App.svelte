@@ -143,7 +143,7 @@
   .busy { position: absolute; inset: 0; display: flex; gap: 12px; align-items: center; justify-content: center; background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(3px); z-index: 10; }
   .spinner { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .drawer { display: flex; flex-direction: column; background: var(--panel); border-top: 1px solid var(--border); height: 210px; }
+  .drawer { display: flex; flex-direction: column; background: var(--panel); border-top: 1px solid var(--border); height: clamp(210px, 30vh, 380px); }
   .drawer.closed { height: auto; }
   .drawer .tabs { display: flex; align-items: center; gap: 4px; padding: 6px 10px; }
   .drawer .tabs button:not(.btn) { padding: 6px 14px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); font-weight: 600; }
