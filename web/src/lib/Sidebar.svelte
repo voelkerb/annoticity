@@ -80,8 +80,8 @@
 
 <div class="source">
   <div class="tabs" role="tablist">
-    <button role="tab" aria-selected={tab === 'dataset'} class:active={tab === 'dataset'} onclick={() => (tab = 'dataset')}>Datasets</button>
-    <button role="tab" aria-selected={tab === 'upload'} class:active={tab === 'upload'} onclick={() => (tab = 'upload')}>Your data</button>
+    <button role="tab" aria-selected={tab === 'dataset'} class:active={tab === 'dataset'} onclick={() => (tab = 'dataset')}><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Datasets</button>
+    <button role="tab" aria-selected={tab === 'upload'} class:active={tab === 'upload'} onclick={() => (tab = 'upload')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Your data</button>
   </div>
 
   {#if tab === 'dataset'}
@@ -133,9 +133,16 @@
 
 <style>
   .source { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--border); }
-  .tabs { display: flex; gap: 4px; }
-  .tabs button { padding: 6px 12px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); font-weight: 600; }
-  .tabs button.active { background: var(--accent-soft); color: var(--text); }
+  /* Underlined tabs docked to the bar's bottom edge, separated from the controls they switch */
+  .tabs { display: flex; align-self: stretch; margin: -8px 4px -9px -6px; padding-right: 12px; border-right: 1px solid var(--border); }
+  .tabs button {
+    display: flex; align-items: center; gap: 7px; padding: 0 12px; border: 0; border-bottom: 2px solid transparent; border-radius: 0;
+    background: transparent; color: var(--muted); font-weight: 600; transition: color 0.12s, border-color 0.12s, background 0.12s;
+  }
+  .tabs button:hover { color: var(--text); background: color-mix(in srgb, var(--text) 4%, transparent); }
+  .tabs button.active { color: var(--text); border-bottom-color: var(--accent-text); }
+  .tabs button.active svg { stroke: var(--accent-text); }
+  .tabs svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .datasets { width: auto; min-width: 120px; font-weight: 600; }
   .meters { width: 360px; max-width: 100%; }
   .notice a { color: var(--accent); }
