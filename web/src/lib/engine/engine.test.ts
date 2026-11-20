@@ -64,3 +64,9 @@ test("parseTime detects units", () => {
   assert.equal(parseTime("1596405600000"), 1596405600);
   assert.equal(parseTime("03.08.2020 00:00:00"), 1596412800);
 });
+
+test("regularSeries fills gaps of regular data with the previous value", () => {
+  const data = Float32Array.of(NaN, 2, 3, NaN, NaN, 6);
+  const ds = new Dataset({ title: "t", t0: 0, sampleRate: 1, measures: ["p"], data: { p: data }, source: "upload" });
+  assert.deepEqual([...ds.regularSeries("p", 1).values], [2, 2, 3, 3, 3, 6]);
+});

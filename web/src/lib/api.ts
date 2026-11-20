@@ -6,10 +6,10 @@ export type { Measure } from './engine/measures'
 export type { SeriesData } from './engine/dataset'
 
 export interface DatasetInfo {
-  id: string; title: string; info: string; tz: string; source: 'fired' | 'upload'
+  id: string; title: string; info: string; tz: string; source: string
   start: number; end: number; sampleRate: number; samples: number; irregular: boolean
   measures: Measure[]; label: string
-  meter?: string; day?: string; defaultMeasures?: string[]; highFreq?: boolean
+  dataset?: string; meter?: string; day?: string; defaultMeasures?: string[]; highFreq?: boolean
 }
 
 export interface LoadResult {
@@ -17,7 +17,12 @@ export interface LoadResult {
   embeddedLabels: { format: 'srt'; text: string } | null
 }
 
-export interface Meter { id: string; smartmeter: boolean; phase: number; appliances: string[]; details: string[]; label: string }
+export interface DatasetSource {
+  id: string; name: string; description: string; url: string; tz: string
+  waveforms: boolean; available: boolean; reason?: string
+}
+
+export interface Meter { id: string; label: string; group?: string; details: string[]; aggregate: boolean; short: string; highFreq: boolean }
 
 export interface AutoLabelParams {
   measure: string; rate: number; thres: number; linearCoeff: number
@@ -66,19 +71,20 @@ async function download(res: Response, onProgress?: (p: number | null) => void):
   return out.buffer
 }
 
-function toDataset(buf: ArrayBuffer, source: 'fired' | 'upload') {
+function toDataset(buf: ArrayBuffer, source: string) {
   const { header, data } = decodeChannels(buf)
   const dataset = new Dataset({ ...header, data, source })
   return { dataset, warnings: header.warnings ?? [], embeddedLabels: header.embeddedLabels ?? null }
 }
 
 export const api = {
-  meters: () => get<Meter[]>('/api/fired/meters'),
-  days: (meter: string) => get<{ days: string[] }>(`/api/fired/meters/${meter}/days`).then((r) => r.days),
+  datasets: () => get<DatasetSource[]>('/api/datasets'),
+  meters: (ds: string) => get<Meter[]>(`/api/datasets/${ds}/meters`),
+  days: (ds: string, meter: string) => get<{ days: string[] }>(`/api/datasets/${ds}/meters/${encodeURIComponent(meter)}/days`).then((r) => r.days),
 
-  async loadFired(meter: string, day: string, onProgress?: (p: number | null) => void): Promise<LoadResult> {
-    const res = await fetch(`${BASE}/api/fired/meters/${encodeURIComponent(meter)}/days/${day}`).then(ok)
-    return toDataset(await download(res, onProgress), 'fired')
+  async loadDay(ds: string, meter: string, day: string, onProgress?: (p: number | null) => void): Promise<LoadResult> {
+    const res = await fetch(`${BASE}/api/datasets/${ds}/meters/${encodeURIComponent(meter)}/days/${day}`).then(ok)
+    return toDataset(await download(res, onProgress), ds)
   },
 
   async decode(file: File, onProgress?: (p: number | null) => void): Promise<LoadResult> {
@@ -88,8 +94,8 @@ export const api = {
     return toDataset(await download(res, onProgress), 'upload')
   },
 
-  async waveform(meter: string, start: number, stop: number, signal?: AbortSignal): Promise<Dataset> {
-    const res = await fetch(`${BASE}/api/fired/meters/${encodeURIComponent(meter)}/waveform?start=${start}&stop=${stop}`, { signal }).then(ok)
-    return toDataset(await res.arrayBuffer(), 'fired').dataset
+  async waveform(ds: string, meter: string, start: number, stop: number, signal?: AbortSignal): Promise<Dataset> {
+    const res = await fetch(`${BASE}/api/datasets/${ds}/meters/${encodeURIComponent(meter)}/waveform?start=${start}&stop=${stop}`, { signal }).then(ok)
+    return toDataset(await res.arrayBuffer(), ds).dataset
   },
 }

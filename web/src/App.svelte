@@ -90,7 +90,7 @@
       <div class="center empty">
         <div class="empty-logo">{@render lightning()}</div>
         <h2>Inspect and label electricity data</h2>
-        <p class="muted">Pick a meter and day of the FIRED dataset above, or upload your own CSV / MKV file.</p>
+        <p class="muted">Pick a dataset, meter and day above, or upload your own CSV / MKV file.</p>
       </div>
     {/if}
     {#if app.busy}

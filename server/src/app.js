@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
-import { listMeters, listDays, firedDayFile, highFreqWindow } from "./fired.js";
+import { listDatasets, provider, dayFile, waveform } from "./datasets/index.js";
 import { decodeMedia } from "./media.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -13,8 +13,8 @@ const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res)).catch(nex
 const BINARY = "application/octet-stream";
 
 /**
- * The server only does what a browser cannot: fetch FIRED files behind basic auth (no CORS)
- * and decode WavPack/Matroska with FFmpeg. Everything else (downsampling, auto labeling,
+ * The server only does what a browser cannot: fetch dataset files (FIRED over basic auth without
+ * CORS, BLOND over FTP, REDD/UK-DALE/ECO from local folders) and decode WavPack/Matroska/HDF5. Everything else (downsampling, auto labeling,
  * CSV parsing, labels) runs in the browser on the returned float32 channels.
  */
 export function createApp() {
@@ -29,19 +29,20 @@ export function createApp() {
 
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
-  app.get("/api/fired/meters", wrap(async (_req, res) => res.json(await listMeters())));
-  app.get("/api/fired/meters/:meter/days", wrap(async (req, res) => res.json({ days: await listDays(req.params.meter) })));
+  app.get("/api/datasets", wrap(async (_req, res) => res.json(await listDatasets())));
+  app.get("/api/datasets/:ds/meters", wrap(async (req, res) => res.json(await provider(req.params.ds).meters())));
+  app.get("/api/datasets/:ds/meters/:meter/days", wrap(async (req, res) => res.json({ days: await provider(req.params.ds).days(req.params.meter) })));
 
-  app.get("/api/fired/meters/:meter/days/:day", wrap(async (req, res) => {
-    const file = await firedDayFile(req.params.meter, req.params.day);
+  app.get("/api/datasets/:ds/meters/:meter/days/:day", wrap(async (req, res) => {
+    const file = await dayFile(req.params.ds, req.params.meter, req.params.day);
     res.type(BINARY).set("Cache-Control", "private, max-age=86400").sendFile(file, { dotfiles: "allow" });
   }));
 
-  app.get("/api/fired/meters/:meter/waveform", wrap(async (req, res) => {
+  app.get("/api/datasets/:ds/meters/:meter/waveform", wrap(async (req, res) => {
     const start = num(req.query.start, "start"), stop = num(req.query.stop, "stop");
     if (!(stop > start)) throw Object.assign(new Error("stop must be after start"), { status: 400 });
     if (stop - start > 60) throw Object.assign(new Error("Zoom in to at most 60 seconds to load raw waveforms"), { status: 400 });
-    res.type(BINARY).send(await highFreqWindow(req.params.meter, start, stop));
+    res.type(BINARY).send(await waveform(req.params.ds, req.params.meter, start, stop));
   }));
 
   app.post("/api/decode", upload.single("file"), wrap(async (req, res) => {

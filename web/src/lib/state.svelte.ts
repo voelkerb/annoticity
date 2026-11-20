@@ -1,4 +1,4 @@
-import { api, type AutoLabelParams, type AutoLabelResult, type DatasetInfo, type LoadResult, type Measure, type Meter, type SeriesData } from './api'
+import { api, type AutoLabelParams, type AutoLabelResult, type DatasetInfo, type DatasetSource, type LoadResult, type Measure, type SeriesData } from './api'
 import type { DetectedEvent, DetectedState } from './engine/autolabel'
 import { DEFAULTS } from './engine/autolabel'
 import { parseCsv } from './engine/csv'
@@ -15,7 +15,7 @@ const CSV = /\.(csv|tsv|txt)$/i
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
 class AppState {
-  meters = $state<Meter[]>([])
+  datasets = $state<DatasetSource[]>([])
   dataset = $state<DatasetInfo | null>(null)
   busy = $state<string | null>(null)
   toasts = $state<Toast[]>([])
@@ -100,13 +100,14 @@ class AppState {
 
   // ---- loading -------------------------------------------------------------
 
-  async loadMeters() {
-    try { this.meters = await api.meters() } catch (e) { this.notify(`Could not reach the FIRED index: ${(e as Error).message}`, 'error') }
+  async loadDatasets() {
+    try { this.datasets = await api.datasets() } catch (e) { this.notify(`Could not reach the server: ${(e as Error).message}`, 'error') }
   }
 
-  async loadFired(meter: string, day: string) {
-    const msg = `Loading ${meter} · ${day}`
-    await this.#load(msg, () => api.loadFired(meter, day, this.#progress(msg)))
+  async loadDay(ds: string, meter: string, day: string) {
+    const name = this.datasets.find((d) => d.id === ds)?.name ?? ds
+    const msg = `Loading ${name} ${meter} · ${day}`
+    await this.#load(msg, () => api.loadDay(ds, meter, day, this.#progress(msg)))
   }
 
   async loadFile(file: File) {
@@ -225,11 +226,15 @@ class AppState {
       return
     }
     const wave = this.#wave
-    if (wave && wave.meta.meter === this.dataset?.meter && start >= wave.start && stop <= wave.end + 1e-6) {
+    if (wave && wave.meta.key === this.#waveKey && start >= wave.start && stop <= wave.end + 1e-6) {
       this.series = { ...wave.query(start, stop, points), measures: wave.describe().measures }
       return
     }
     void this.#fetchWave(start, stop)
+  }
+
+  get #waveKey() {
+    return `${this.dataset?.dataset}:${this.dataset?.meter}`
   }
 
   async #fetchWave(start: number, stop: number) {
@@ -240,9 +245,9 @@ class AppState {
     const pad = Math.max(0, WAVE_FETCH_SECONDS - (stop - start)) / 2
     const from = Math.max(ds.start, start - pad), to = Math.min(ds.end, stop + pad)
     try {
-      const wave = await api.waveform(ds.meter!, from, to, ctl.signal)
+      const wave = await api.waveform(ds.dataset!, ds.meter!, from, to, ctl.signal)
       if (ctl.signal.aborted) return
-      wave.meta.meter = ds.meter
+      wave.meta.key = this.#waveKey
       this.#wave = wave
       this.refresh()
     } catch (e) {

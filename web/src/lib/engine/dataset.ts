@@ -11,7 +11,8 @@ export interface SeriesData {
 export interface DatasetInit {
   title: string; info?: string; tz?: string; t0?: number; sampleRate: number
   measures: string[]; data: Record<string, Float32Array>; ts?: Float64Array | null
-  source: 'fired' | 'upload'; meta?: Record<string, unknown>
+  /** Dataset id ("fired", "blond", ...) or "upload" */
+  source: string; meta?: Record<string, unknown>
 }
 
 /** Samples summarised per block; queries spanning many blocks read the summaries instead of raw samples. */
@@ -35,7 +36,7 @@ export class Dataset {
   measureIds: string[]
   data: Record<string, Float32Array>
   ts: Float64Array | null
-  source: 'fired' | 'upload'
+  source: string
   meta: Record<string, unknown>
   #blocks = new Map<string, Blocks>()
 
@@ -190,7 +191,16 @@ export class Dataset {
     const i0 = this.lowerBound(start)
     const i1 = Math.max(i0, this.lowerBound(stop))
     if (!this.ts && rate >= this.sampleRate) {
-      return { values: Float64Array.from(src.subarray(i0, i1)), rate: this.sampleRate, t0: this.timeAt(i0) }
+      const values = Float64Array.from(src.subarray(i0, i1))
+      // Gaps (NaN) hold the previous value so event detection sees a continuous signal
+      let last = NaN
+      for (let k = 0; k < values.length; k++) {
+        if (values[k] === values[k]) last = values[k]
+        else values[k] = last
+      }
+      const first = values.findIndex((v) => !Number.isNaN(v))
+      if (first > 0) values.fill(values[first], 0, first)
+      return { values, rate: this.sampleRate, t0: this.timeAt(i0) }
     }
     const tStart = this.timeAt(i0)
     const bins = Math.max(1, Math.floor((stop - tStart) * rate))
