@@ -27,8 +27,8 @@
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --accent: #fc6c26;
-  --accent-text: #fc6c26;
+  --accent: #431947;
+  --accent-text: #431947;
   --accent-contrast: #ffffff;
   --bg: #fff8df;
   --panel: #fffdf4;

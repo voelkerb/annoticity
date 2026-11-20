@@ -54,6 +54,8 @@ class AppState {
   }
 
   setTheme(t: 'dark' | 'light') {
+    // Apply before effects run so the chart reads the new theme's CSS variables when it rebuilds
+    document.documentElement.dataset.theme = t
     this.theme = t
     localStorage.setItem('annoticity:theme', t)
   }
