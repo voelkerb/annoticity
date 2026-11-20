@@ -3,6 +3,15 @@
 Browse and label electricity datasets. Version 2 is a rewrite with a **Svelte** frontend and a **Node.js** backend.
 The original Django version lives on the `annoticitiy_v1` branch.
 
+![Fridge cycles in FIRED, auto-labeled and renamed](docu/figures/v2-labels.png)
+
+**Download:** [v2.0.0 offline bundle](https://github.com/voelkerb/annoticity/releases/tag/v2.0.0) (needs Node 20+)
+· [v1.0.0 source](https://github.com/voelkerb/annoticity/releases/tag/v1.0.0)
+
+| Auto-labeling (light theme) | Raw voltage and current | BLOND mains, three phases |
+| --- | --- | --- |
+| ![Auto-labeling the FIRED smart meter](docu/figures/v2-autolabel.png) | ![Raw V/I of a TV switching on](docu/figures/v2-waveform.png) | ![BLOND CLEAR mains](docu/figures/v2-blond.png) |
+
 - **Datasets**: pick a dataset, a meter and a day. The server fetches or reads the recording and caches it decoded.
   - **FIRED**: 50 Hz summary data, raw 2 kHz V/I (university server).
   - **BLOND** (BLOND-50 and BLOND-250): 1 Hz summaries per socket and for the mains, raw V/I up to 12.5 kHz (TUM's public FTP server).

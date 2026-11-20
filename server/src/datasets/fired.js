@@ -100,6 +100,8 @@ async function hfPart(meter, t) {
     let file;
     try { file = await ensureFile(sub); } catch (e) { if (e.status === 404) return null; throw e; }
     const d = await decodeFile(file, ["v", "i"]);
+    // FIRED stores raw current in mA; the UI expects A
+    for (const [id, arr] of Object.entries(d.data)) if (/^i(_|$)/.test(id)) for (let k = 0; k < arr.length; k++) arr[k] /= 1000;
     return { ...d, t0: d.t0 ?? t };
   });
   hfCache.set(sub, part);

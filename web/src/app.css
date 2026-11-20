@@ -64,7 +64,7 @@ button { cursor: pointer; }
 .btn.sm { padding: 3px 8px; font-size: 12px; }
 .btn { white-space: nowrap; }
 
-input[type='text'], input[type='number'], input[type='date'], select {
+input[type='text'], input[type='search'], input[type='number'], input[type='date'], select {
   width: 100%; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2);
 }
 input:focus, select:focus { border-color: var(--accent); outline: none; }

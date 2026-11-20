@@ -50,6 +50,19 @@ Each dataset is a provider in `server/src/datasets/` (registry in `index.js`). D
 - Renaming a label offers to rename the other labels with the same text: earlier ones, later ones or all (as in v1).
   Names given to auto-label states (`S1`, …) are remembered per meter.
 - Dataset picker with tabs (Datasets / Your data) and grouped meters.
+- FIRED raw current is converted from mA to A on the server, matching BLOND.
+
+## Screenshots and marketing
+
+- README screenshots are in `docu/figures/v2-*.png`, taken with headless Chrome at 1440×900 (2×) against the dev server.
+  - Labels: FIRED Fridge (PM 09), 2020-08-03.
+  - Auto-label: FIRED smart meter, light theme.
+  - Waveform: FIRED TV (PM 23) switching on at 20:46.
+  - BLOND: CLEAR mains, 2016-10-04, light theme.
+- App page: https://voelkerb.github.io/apps/annoticity/ (repo `voelkerb/apps`, folder `annoticity/`). It has the icon, framed
+  screenshots and features; "Download" links to the latest release.
+- Card on https://voelkerb.github.io/ (apps section) and on https://voelkerb.github.io/apps/.
+- Once the app is hosted, add an "Open web app" button to the app page and link it from the README.
 
 ## Run and verify
 
