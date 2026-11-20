@@ -6,6 +6,11 @@ import type { Dataset } from './engine/dataset'
 import { fromText, newId, type Label } from './labels'
 
 export interface Toast { id: number; kind: 'info' | 'error' | 'success'; text: string }
+/** Offer to apply a rename to other labels that had the same text, split by time around the renamed one. */
+export interface RenameOffer { id: string; from: string; to: string; before: number; after: number }
+export type RenameScope = 'before' | 'after' | 'all'
+
+const AUTO_NAME = /^S\d+$/
 
 const PREFERRED = ['s', 's_l1', 'p', 'p_l1']
 const WAVE_MAX_SECONDS = 30
@@ -19,6 +24,8 @@ class AppState {
   dataset = $state<DatasetInfo | null>(null)
   busy = $state<string | null>(null)
   toasts = $state<Toast[]>([])
+  renameOffer = $state<RenameOffer | null>(null)
+  #offerTimer: ReturnType<typeof setTimeout> | undefined
 
   labels = $state<Label[]>([])
   selectedId = $state<string | null>(null)
@@ -49,8 +56,8 @@ class AppState {
       (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'),
   )
 
-  #undo: string[] = []
-  #redo: string[] = []
+  #undo = $state<string[]>([])
+  #redo = $state<string[]>([])
   #abort?: AbortController
   #frame = 0
   #data: Dataset | null = null
@@ -156,6 +163,7 @@ class AppState {
     this.auto.rate = Math.min(this.auto.rate, dataset.sampleRate)
     this.view = [dataset.start, dataset.end]
     this.yRange = {}
+    this.dismissRename()
     this.labels = this.#restore() ?? []
     if (!this.labels.length && embeddedLabels) {
       this.labels = fromText(embeddedLabels.text, 'srt', dataset.start).labels
@@ -293,6 +301,7 @@ class AppState {
     const prev = this.#undo.pop()
     if (prev === undefined) return
     this.#redo.push(JSON.stringify($state.snapshot(this.labels)))
+    this.dismissRename()
     this.labels = JSON.parse(prev)
     this.persist()
   }
@@ -301,6 +310,7 @@ class AppState {
     const next = this.#redo.pop()
     if (next === undefined) return
     this.#undo.push(JSON.stringify($state.snapshot(this.labels)))
+    this.dismissRename()
     this.labels = JSON.parse(next)
     this.persist()
   }
@@ -362,10 +372,56 @@ class AppState {
     const l = this.labels.find((x) => x.id === id)
     if (!l || l.text === text) return
     this.checkpoint()
+    const from = l.text
     l.text = text
     l.auto = false
     if (text) this.defaultText = text
     this.persist()
+    this.#offerRename(l, from)
+  }
+
+  #offerRename(l: Label, from: string) {
+    clearTimeout(this.#offerTimer)
+    const same = from ? this.labels.filter((x) => x.id !== l.id && x.text === from) : []
+    const before = same.filter((x) => x.start < l.start).length
+    this.renameOffer = same.length ? { id: l.id, from, to: l.text, before, after: same.length - before } : null
+    if (this.renameOffer) this.#offerTimer = setTimeout(() => (this.renameOffer = null), 15000)
+  }
+
+  dismissRename() {
+    clearTimeout(this.#offerTimer)
+    this.renameOffer = null
+  }
+
+  /** Rename the other labels that shared the old text: earlier ones, later ones or all of them. */
+  applyRename(scope: RenameScope) {
+    const o = this.renameOffer
+    const ref = o && this.labels.find((x) => x.id === o.id)
+    this.dismissRename()
+    if (!o || !ref) return
+    const hit = (x: Label) =>
+      x.id !== o.id && x.text === o.from && (scope === 'all' || (scope === 'before' ? x.start < ref.start : x.start >= ref.start))
+    const n = this.labels.filter(hit).length
+    if (!n) return
+    this.checkpoint()
+    for (const x of this.labels) if (hit(x)) { x.text = o.to; x.auto = false }
+    this.persist()
+    // Like v1: remember names given to auto-label states, so later runs (and other days) use them
+    if (scope === 'all' && AUTO_NAME.test(o.from)) this.#saveNameMap({ ...this.#nameMap(), [o.from]: o.to })
+    this.notify(`Renamed ${n + 1} labels to "${o.to || '(empty)'}"`, 'success')
+  }
+
+  get #nameMapKey() {
+    const d = this.dataset
+    return d ? `annoticity:v2:names:${d.source}:${d.meter ?? d.label}` : ''
+  }
+
+  #nameMap(): Record<string, string> {
+    try { return JSON.parse(localStorage.getItem(this.#nameMapKey) ?? '{}') } catch { return {} }
+  }
+
+  #saveNameMap(map: Record<string, string>) {
+    try { localStorage.setItem(this.#nameMapKey, JSON.stringify(map)) } catch { /* storage full or disabled */ }
   }
 
   clearLabels(onlyAuto = false) {
@@ -413,7 +469,8 @@ class AppState {
       this.checkpoint()
       const inScope = (t: number) => scope === 'all' || (t >= this.view[0] && t <= this.view[1])
       if (replace) this.labels = this.labels.filter((l) => !(l.auto && inScope(l.start)))
-      this.labels.push(...res.labels.map((l) => ({ id: newId(), start: l.start, text: l.text, auto: true })))
+      const names = this.#nameMap()
+      this.labels.push(...res.labels.map((l) => ({ id: newId(), start: l.start, text: names[l.text] ?? l.text, auto: true })))
       this.persist()
       if (res.warning) this.notify(res.warning)
       else this.notify(`Found ${res.labels.length} events in ${res.ms} ms`, 'success')
