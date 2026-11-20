@@ -8,7 +8,7 @@
     "dev": "concurrently -k -n api,web -c blue,magenta \"npm --prefix server run dev\" \"npm --prefix web run dev\"",
     "build": "npm --prefix web run build",
     "start": "npm --prefix server start",
-    "test": "npm --prefix server test",
+    "test": "npm --prefix server test && npm --prefix web test",
     "check": "npm --prefix web run check"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@
     "types": ["svelte", "vite/client"],
     "allowArbitraryExtensions": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
      * Disable checkJs if you'd like to use dynamic types in JS.
@@ -17,5 +18,6 @@
     "checkJs": true,
     "moduleDetection": "force"
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
+  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+  "exclude": ["src/**/*.test.ts"]
 }

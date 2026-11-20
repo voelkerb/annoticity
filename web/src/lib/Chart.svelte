@@ -11,9 +11,40 @@
   let tick = $state(0)
   let box = $state<{ x0: number; x1: number } | null>(null)
   let builtKey = ''
+  let axisKeys: string[] = []
+  let axisRange: Record<string, (self: uPlot) => [number, number]> = {}
+  let grips = $state<{ key: string; side: 'left' | 'right'; left: number; width: number; top: number; height: number }[]>([])
 
   const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   const nonNull = (a: (number | null)[]) => a as number[]
+
+  /**
+   * Fit a y axis to the visible part of its averaged series (min/max bands are ignored so a short
+   * spike does not flatten the plot). Power axes start at zero only when zero is close to the data;
+   * otherwise small signals such as a 2 W standby would be squashed against the top edge.
+   */
+  function fitY(self: uPlot, idx: number[], wave: boolean): [number, number] {
+    let lo = Infinity, hi = -Infinity
+    const x0 = self.scales.x.min ?? -Infinity, x1 = self.scales.x.max ?? Infinity
+    const xs = self.data[0]
+    for (const i of idx) {
+      const ys = self.data[i]
+      for (let j = 0; j < xs.length; j++) {
+        const y = ys[j]
+        if (y == null || xs[j] < x0 || xs[j] > x1) continue
+        if (y < lo) lo = y
+        if (y > hi) hi = y
+      }
+    }
+    if (!isFinite(lo)) return [0, 1]
+    const mag = Math.max(Math.abs(lo), Math.abs(hi))
+    const minSpan = Math.max(mag * 0.02, 1e-3)
+    if (hi - lo < minSpan) { const c = (hi + lo) / 2; lo = c - minSpan / 2; hi = c + minSpan / 2 }
+    const span = hi - lo
+    if (!wave && lo >= 0 && lo < span * 0.5) lo = 0
+    const pad = span * 0.08
+    return [!wave && lo >= 0 ? Math.max(0, lo - pad) : lo - pad, hi + pad]
+  }
 
   function build() {
     const s = app.series
@@ -37,31 +68,14 @@
     const font = `12px ${css('--font')}`
     const meas = ids.map((id, i) => info.find((m) => m.id === id) ?? { id, name: id, unit: '', axis: 'Value', color: '#a78bfa', kind: 'power' as const, i })
     const scales: Record<string, uPlot.Scale> = { x: { time: true, auto: false, min: app.view[0], max: app.view[1] } }
-    const axisKeys = [...new Set(meas.map((m) => m.axis))]
+    axisKeys = [...new Set(meas.map((m) => m.axis))]
+    axisRange = {}
     for (const k of axisKeys) {
       const wave = meas.find((m) => m.axis === k)?.kind === 'wave'
-      // Range from the averaged series only, so short spikes in the min/max band don't flatten the plot
       const idx = meas.map((m, i) => (m.axis === k ? i + 1 : -1)).filter((i) => i > 0)
       scales[k] = {
         auto: true,
-        range: (self, dMin, dMax) => {
-          let lo = Infinity, hi = -Infinity
-          const [x0, x1] = [self.scales.x.min ?? -Infinity, self.scales.x.max ?? Infinity]
-          const xs = self.data[0]
-          for (const i of idx) {
-            const ys = self.data[i]
-            for (let j = 0; j < xs.length; j++) {
-              const y = ys[j]
-              if (y == null || xs[j] < x0 || xs[j] > x1) continue
-              if (y < lo) lo = y
-              if (y > hi) hi = y
-            }
-          }
-          if (!isFinite(lo)) { lo = dMin; hi = dMax }
-          if (hi - lo < 1e-9) { hi = lo + 1 }
-          const pad = (hi - lo) * (wave ? 0.1 : 0.12)
-          return [wave || lo < 0 ? lo - pad : Math.min(0, lo), hi + pad]
-        },
+        range: (axisRange[k] = (self) => app.yRange[k] ?? fitY(self, idx, wave)),
       } as uPlot.Scale
     }
 
@@ -99,6 +113,7 @@
         draw: [(p) => {
           // u.over has its real size only after uPlot's first layout pass
           if (p.over.clientWidth > 0) app.plotWidth = p.over.clientWidth
+          placeGrips(p)
           tick++
         }],
         setCursor: [(p) => {
@@ -128,8 +143,62 @@
     over.addEventListener('dblclick', () => app.resetView())
   }
 
+  function placeGrips(p: uPlot) {
+    const h = host.getBoundingClientRect(), o = p.over.getBoundingClientRect()
+    const top = o.top - h.top, left = o.left - h.left, height = o.height
+    const next = axisKeys.slice(0, 2).map((key, i) => i === 0
+      ? { key, side: 'left' as const, left: 0, width: left, top, height }
+      : { key, side: 'right' as const, left: left + o.width, width: h.width - left - o.width, top, height })
+    if (JSON.stringify(next) !== JSON.stringify(grips)) grips = next
+  }
+
+  const yAt = (e: { clientY: number }) => e.clientY - u!.over.getBoundingClientRect().top
+
+  /** Zoom the y axis `key` around the value under the pointer. */
+  function zoomY(key: string, e: WheelEvent) {
+    const sc = u!.scales[key]
+    if (sc.min == null || sc.max == null) return
+    const f = Math.exp(Math.max(-60, Math.min(60, e.deltaY)) * 0.0022)
+    const v = u!.posToVal(yAt(e), key)
+    app.setY(key, [v - (v - sc.min) * f, v + (sc.max - v) * f])
+  }
+
+  function gripWheel(key: string) {
+    return (el: HTMLElement) => {
+      const fn = (e: WheelEvent) => { e.preventDefault(); if (u) zoomY(key, e) }
+      el.addEventListener('wheel', fn, { passive: false })
+      return () => el.removeEventListener('wheel', fn)
+    }
+  }
+
+  /** Drag on a y axis pans it vertically. */
+  function panY(e: PointerEvent, key: string) {
+    if (e.button !== 0 || !u) return
+    const sc = u.scales[key]
+    if (sc.min == null || sc.max == null) return
+    const el = e.currentTarget as HTMLElement
+    el.setPointerCapture(e.pointerId)
+    const startY = e.clientY, min0 = sc.min, max0 = sc.max, h = u.over.clientHeight
+    const move = (ev: PointerEvent) => {
+      const d = ((ev.clientY - startY) / h) * (max0 - min0)
+      if (d) app.setY(key, [min0 + d, max0 + d])
+    }
+    const up = () => {
+      el.removeEventListener('pointermove', move)
+      el.removeEventListener('pointerup', up)
+      el.removeEventListener('pointercancel', up)
+    }
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerup', up)
+    el.addEventListener('pointercancel', up)
+  }
+
   function onWheel(e: WheelEvent) {
     e.preventDefault()
+    if (e.altKey) {
+      for (const k of axisKeys) zoomY(k, e)
+      return
+    }
     const [min, max] = app.view
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       const d = (e.deltaX / u!.over.clientWidth) * (max - min)
@@ -223,6 +292,17 @@
   })
 
   $effect(() => {
+    void app.yRange
+    // uPlot only consults `range` while auto-ranging, so apply the manual range or a fresh fit explicitly
+    if (u) untrack(() => {
+      for (const k of axisKeys) {
+        const [min, max] = axisRange[k](u!)
+        u!.setScale(k, { min, max })
+      }
+    })
+  })
+
+  $effect(() => {
     const ro = new ResizeObserver(() => {
       if (!u) return
       u.setSize({ width: host.clientWidth, height: host.clientHeight })
@@ -254,6 +334,20 @@
 </script>
 
 <div class="host" bind:this={host}></div>
+
+{#each grips as g (g.key)}
+  <div
+    class="ygrip {g.side}" style="left:{g.left}px;top:{g.top}px;width:{g.width}px;height:{g.height}px"
+    title="{g.key} axis: scroll to zoom, drag to pan, double-click to fit"
+    {@attach gripWheel(g.key)}
+    onpointerdown={(e) => panY(e, g.key)}
+    ondblclick={() => app.resetY(g.key)}
+    role="presentation"
+  ></div>
+{/each}
+{#if app.yManual}
+  <button class="yreset" style="left:{(grips[0]?.width ?? 0) + 8}px" onclick={() => app.resetY()} title="Fit the y axis to the visible data again">Auto Y</button>
+{/if}
 
 <div class="overlay" bind:this={overlay}>
   {#each placed as { l, x, x2, row, color } (l.id)}
@@ -296,6 +390,13 @@
 
 <style>
   .host { position: absolute; inset: 0; }
+  .ygrip { position: absolute; z-index: 6; cursor: ns-resize; border-radius: 6px; transition: background 0.15s; }
+  .ygrip:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .yreset {
+    position: absolute; z-index: 7; top: 20px; padding: 3px 10px; font-size: 12px; font-weight: 600; border-radius: 999px;
+    background: var(--tooltip-bg); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); cursor: pointer;
+  }
+  .yreset:hover { border-color: var(--accent); }
   /* Layering: ranges < marker lines < flags, so flags are never crossed by any line */
   .overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; isolation: isolate; }
   .line { position: absolute; z-index: 2; top: 0; bottom: 0; width: 9px; margin-left: -4px; pointer-events: auto; cursor: ew-resize; }

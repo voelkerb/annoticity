@@ -75,7 +75,7 @@
       ondragleave={() => (dragging = false)}
       ondrop={(e) => { e.preventDefault(); dragging = false; onFiles(e.dataTransfer?.files) }}
     >
-      <input type="file" accept=".csv,.tsv,.txt,.mkv,.mka" hidden onchange={(e) => onFiles(e.currentTarget.files)} />
+      <input type="file" accept=".csv,.tsv,.txt,.mkv,.mka,.wv,.wav,.flac" hidden onchange={(e) => onFiles(e.currentTarget.files)} />
       <strong>Drop a file</strong> <span class="muted">or click to browse</span>
     </label>
     <span class="muted small">CSV with a header and a time column (timestamp, ts, time, date) plus numeric columns, or FIRED-style MKV.</span>

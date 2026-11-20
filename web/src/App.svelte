@@ -50,7 +50,8 @@
   const shortcuts: [string, string][] = [
     ['A', 'Toggle label mode, then click the chart'], ['Del', 'Delete selected label'], ['Double-click chip', 'Rename label'],
     ['Drag label', 'Move label'], ['Wheel', 'Zoom around cursor'], ['Drag', 'Pan'], ['Shift + drag', 'Zoom to selection'],
-    ['0 / double-click', 'Fit full range'], ['← →', 'Pan'], ['+ −', 'Zoom'], ['[ ]', 'Previous / next label'], ['Ctrl/⌘ Z', 'Undo (Shift for redo)'],
+    ['Wheel / drag on y axis', 'Zoom / pan y'], ['Alt + wheel', 'Zoom y'],
+    ['0 / double-click', 'Fit full range and y'], ['← →', 'Pan'], ['+ −', 'Zoom'], ['[ ]', 'Previous / next label'], ['Ctrl/⌘ Z', 'Undo (Shift for redo)'],
   ]
 </script>
 

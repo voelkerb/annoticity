@@ -18,17 +18,23 @@ export const DEFAULTS = {
   maxEvents: 2000,
 };
 
-export function medianFilter(x, k) {
+type Num = ArrayLike<number>
+
+export type DetectOptions = Partial<typeof DEFAULTS>
+export interface DetectedEvent { index: number; before: number; after: number; delta: number; fromState: number; toState: number; score: number }
+export interface DetectedState { id: number; mean: number; segments: number; seconds: number }
+
+export function medianFilter(x: Num, k: number): Float64Array {
   if (k < 3 || x.length < k) return Float64Array.from(x);
   const half = k >> 1;
   const out = new Float64Array(x.length);
-  const win = [];
-  const insert = (v) => {
+  const win: number[] = [];
+  const insert = (v: number) => {
     let lo = 0, hi = win.length;
     while (lo < hi) { const m = (lo + hi) >> 1; if (win[m] < v) lo = m + 1; else hi = m; }
     win.splice(lo, 0, v);
   };
-  const remove = (v) => {
+  const remove = (v: number) => {
     let lo = 0, hi = win.length;
     while (lo < hi) { const m = (lo + hi) >> 1; if (win[m] < v) lo = m + 1; else hi = m; }
     win.splice(lo, 1);
@@ -42,13 +48,13 @@ export function medianFilter(x, k) {
   return out;
 }
 
-function median(values) {
+function median(values: Num) {
   const a = Float64Array.from(values).sort();
   return a.length ? a[a.length >> 1] : 0;
 }
 
 /** Evenly subsample to keep per-segment medians cheap. */
-function sample(y, a, b, max = 4000) {
+function sample(y: Float64Array, a: number, b: number, max = 4000) {
   const len = b - a;
   if (len <= max) return y.subarray(a, b);
   const out = new Float64Array(max);
@@ -56,12 +62,8 @@ function sample(y, a, b, max = 4000) {
   return out;
 }
 
-/**
- * @param {ArrayLike<number>} x evenly sampled signal
- * @param {number} sr sample rate in Hz
- * @returns {{events: object[], states: object[]}} event indices refer to samples of `x`
- */
-export function detectEvents(x, sr, options = {}) {
+/** Detect events in the evenly sampled `x` (rate `sr` Hz); event indices refer to samples of `x`. */
+export function detectEvents(x: Num, sr: number, options: DetectOptions = {}): { events: DetectedEvent[]; states: DetectedState[] } {
   const p = { ...DEFAULTS, ...options };
   const n = x.length;
   const pre = Math.max(2, Math.round(p.pre * sr));
@@ -79,8 +81,8 @@ export function detectEvents(x, sr, options = {}) {
     S1[i + 1] = S1[i] + v;
     S2[i + 1] = S2[i] + v * v;
   }
-  const mean = (a, b) => (S1[b] - S1[a]) / (b - a) + offset;
-  const variance = (a, b) => {
+  const mean = (a: number, b: number) => (S1[b] - S1[a]) / (b - a) + offset;
+  const variance = (a: number, b: number) => {
     const len = b - a, m = (S1[b] - S1[a]) / len;
     return Math.max(0, (S2[b] - S2[a]) / len - m * m);
   };
@@ -99,7 +101,7 @@ export function detectEvents(x, sr, options = {}) {
   }
 
   // One candidate (the strongest) per run of gated samples
-  let candidates = [];
+  const candidates: number[] = [];
   for (let i = 0; i < n; ) {
     if (!gate[i]) { i++; continue; }
     let best = i, j = i;
@@ -109,14 +111,14 @@ export function detectEvents(x, sr, options = {}) {
   }
   // Non-maximum suppression with minimum distance
   candidates.sort((a, b) => score[b] - score[a]);
-  const accepted = [];
+  const accepted: number[] = [];
   for (const c of candidates) {
     if (accepted.every((a) => Math.abs(a - c) >= minDist)) accepted.push(c);
   }
   accepted.sort((a, b) => a - b);
 
   // Refine each edge: split point with the lowest two-segment squared error
-  const sse = (a, b) => (b > a ? S2[b] - S2[a] - ((S1[b] - S1[a]) ** 2) / (b - a) : 0);
+  const sse = (a: number, b: number) => (b > a ? S2[b] - S2[a] - ((S1[b] - S1[a]) ** 2) / (b - a) : 0);
   const refined = accepted.map((c, k) => {
     const lo = Math.max(k ? accepted[k - 1] + 1 : 1, c - pre), hi = Math.min(k + 1 < accepted.length ? accepted[k + 1] - 1 : n - 1, c + post);
     const a = Math.max(0, c - 2 * pre), b = Math.min(n, c + 2 * post);
@@ -131,7 +133,7 @@ export function detectEvents(x, sr, options = {}) {
 
   // Segments between events and their robust steady-state level
   const bounds = [0, ...unique, n];
-  let levels = [];
+  const levels: number[] = [];
   for (let s = 0; s < bounds.length - 1; s++) {
     const a = bounds[s], b = bounds[s + 1];
     const margin = Math.min(minDist, Math.floor((b - a) / 4));
@@ -140,8 +142,8 @@ export function detectEvents(x, sr, options = {}) {
 
   // Leader clustering on sorted levels, tolerance grows with the level
   const order = levels.map((_, i) => i).sort((a, b) => levels[a] - levels[b]);
-  const stateOf = new Array(levels.length);
-  const clusters = [];
+  const stateOf = new Array<number>(levels.length);
+  const clusters: { sum: number; members: number[] }[] = [];
   for (const i of order) {
     const last = clusters[clusters.length - 1];
     const tol = p.thres + p.linearCoeff * Math.abs(levels[i]);
@@ -153,7 +155,7 @@ export function detectEvents(x, sr, options = {}) {
   }
 
   // An event between two segments of the same state is no real change
-  const events = [];
+  const events: DetectedEvent[] = [];
   for (let k = 0; k < unique.length; k++) {
     if (stateOf[k] === stateOf[k + 1]) continue;
     events.push({

@@ -1,10 +1,17 @@
 import { api, type AutoLabelParams, type AutoLabelResult, type DatasetInfo, type LoadResult, type Measure, type Meter, type SeriesData } from './api'
+import type { DetectedEvent, DetectedState } from './engine/autolabel'
+import { DEFAULTS } from './engine/autolabel'
+import { parseCsv } from './engine/csv'
+import type { Dataset } from './engine/dataset'
 import { fromText, newId, type Label } from './labels'
 
 export interface Toast { id: number; kind: 'info' | 'error' | 'success'; text: string }
 
 const PREFERRED = ['s', 's_l1', 'p', 'p_l1']
 const WAVE_MAX_SECONDS = 30
+/** Raw waveform windows are fetched a bit wider than the view so small pans and zooms stay local. */
+const WAVE_FETCH_SECONDS = 40
+const CSV = /\.(csv|tsv|txt)$/i
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
 class AppState {
@@ -23,6 +30,8 @@ class AppState {
 
   enabled = $state<string[]>([])
   view = $state<[number, number]>([0, 1])
+  /** Manually zoomed/panned y ranges per axis; axes without an entry fit the visible data. */
+  yRange = $state.raw<Record<string, [number, number]>>({})
   series = $state.raw<SeriesData | null>(null)
   fetching = $state(false)
   waveform = $state(false)
@@ -43,7 +52,10 @@ class AppState {
   #undo: string[] = []
   #redo: string[] = []
   #abort?: AbortController
-  #timer?: ReturnType<typeof setTimeout>
+  #frame = 0
+  #data: Dataset | null = null
+  #wave: Dataset | null = null
+  #worker?: Worker
   #toastId = 0
 
   constructor() {
@@ -93,11 +105,23 @@ class AppState {
   }
 
   async loadFired(meter: string, day: string) {
-    await this.#load(`Loading ${meter} · ${day} (first load downloads the file)`, () => api.loadFired(meter, day))
+    const msg = `Loading ${meter} · ${day}`
+    await this.#load(msg, () => api.loadFired(meter, day, this.#progress(msg)))
   }
 
   async loadFile(file: File) {
-    await this.#load(`Uploading ${file.name}`, () => api.upload(file))
+    if (CSV.test(file.name)) {
+      await this.#load(`Reading ${file.name}`, async () => ({ dataset: parseCsv(await file.text(), file.name), warnings: [], embeddedLabels: null }))
+    } else {
+      const msg = `Decoding ${file.name}`
+      await this.#load(msg, () => api.decode(file, this.#progress(msg)))
+    }
+  }
+
+  #progress(message: string) {
+    return (p: number | null) => {
+      if (this.busy) this.busy = p == null ? message : `${message} · ${Math.round(p * 100)} %`
+    }
   }
 
   async #load(message: string, fn: () => Promise<LoadResult>) {
@@ -112,7 +136,10 @@ class AppState {
     }
   }
 
-  #adopt({ dataset, warnings, embeddedLabels }: LoadResult) {
+  #adopt({ dataset: data, warnings, embeddedLabels }: LoadResult) {
+    const dataset = data.describe() as DatasetInfo
+    this.#data = data
+    this.#wave = null
     this.dataset = dataset
     this.#abort?.abort()
     this.series = null
@@ -127,6 +154,7 @@ class AppState {
     this.auto.measure = preferred[0]
     this.auto.rate = Math.min(this.auto.rate, dataset.sampleRate)
     this.view = [dataset.start, dataset.end]
+    this.yRange = {}
     this.labels = this.#restore() ?? []
     if (!this.labels.length && embeddedLabels) {
       this.labels = fromText(embeddedLabels.text, 'srt', dataset.start).labels
@@ -148,12 +176,26 @@ class AppState {
     if (max - min !== span) lo = (min + max) / 2 - span / 2
     lo = clamp(lo, ds.start, ds.end - span)
     this.view = [lo, lo + span]
-    clearTimeout(this.#timer)
-    this.#timer = setTimeout(() => this.refresh(), immediate ? 0 : 140)
+    if (immediate) this.refresh()
+    else if (!this.#frame) this.#frame = requestAnimationFrame(() => this.refresh())
   }
 
   resetView() {
+    this.resetY()
     if (this.dataset) this.setView(this.dataset.start, this.dataset.end, true)
+  }
+
+  setY(axis: string, range: [number, number]) {
+    this.yRange = { ...this.yRange, [axis]: range }
+  }
+
+  resetY(axis?: string) {
+    if (!Object.keys(this.yRange).length) return
+    if (axis) { const { [axis]: _, ...rest } = this.yRange; this.yRange = rest } else this.yRange = {}
+  }
+
+  get yManual() {
+    return Object.keys(this.yRange).length > 0
   }
 
   toggleMeasure(id: string) {
@@ -164,32 +206,50 @@ class AppState {
 
   setWaveform(on: boolean) {
     this.waveform = on
+    this.yRange = {}
     this.refresh()
   }
 
-  async refresh() {
-    const ds = this.dataset
-    if (!ds) return
+  /** Recompute the plotted series. Downsampling runs locally; only raw waveforms may need a fetch. */
+  refresh() {
+    cancelAnimationFrame(this.#frame)
+    this.#frame = 0
+    const data = this.#data
+    if (!data) return
+    const [start, stop] = this.view
+    const points = Math.round(clamp(this.plotWidth * 1.5, 400, 4000))
+    if (!this.showingWaveform) {
+      this.#abort?.abort()
+      this.fetching = false
+      this.series = data.query(start, stop, points, this.enabled)
+      return
+    }
+    const wave = this.#wave
+    if (wave && wave.meta.meter === this.dataset?.meter && start >= wave.start && stop <= wave.end + 1e-6) {
+      this.series = { ...wave.query(start, stop, points), measures: wave.describe().measures }
+      return
+    }
+    void this.#fetchWave(start, stop)
+  }
+
+  async #fetchWave(start: number, stop: number) {
+    const ds = this.dataset!
     this.#abort?.abort()
     const ctl = (this.#abort = new AbortController())
     this.fetching = true
-    const [start, stop] = this.view
-    const points = Math.round(clamp(this.plotWidth * 1.5, 400, 4000))
+    const pad = Math.max(0, WAVE_FETCH_SECONDS - (stop - start)) / 2
+    const from = Math.max(ds.start, start - pad), to = Math.min(ds.end, stop + pad)
     try {
-      const data = this.showingWaveform
-        ? await api.waveform(ds.id, start, stop, points, ctl.signal)
-        : await api.data(ds.id, start, stop, points, this.enabled, ctl.signal)
+      const wave = await api.waveform(ds.meter!, from, to, ctl.signal)
       if (ctl.signal.aborted) return
-      this.series = data
+      wave.meta.meter = ds.meter
+      this.#wave = wave
+      this.refresh()
     } catch (e) {
       if ((e as Error).name === 'AbortError') return
-      if (this.showingWaveform) {
-        this.waveform = false
-        this.notify((e as Error).message, 'error')
-        this.refresh()
-        return
-      }
+      this.waveform = false
       this.notify((e as Error).message, 'error')
+      this.refresh()
     } finally {
       if (this.#abort === ctl) this.fetching = false
     }
@@ -343,7 +403,7 @@ class AppState {
     const { scope, replace, ...params } = $state.snapshot(this.auto)
     if (scope === 'view') { params.start = this.view[0]; params.stop = this.view[1] }
     try {
-      const res = await api.autolabel(ds.id, params)
+      const res = await this.#detect(params)
       this.autoResult = res
       this.checkpoint()
       const inScope = (t: number) => scope === 'all' || (t >= this.view[0] && t <= this.view[1])
@@ -356,6 +416,35 @@ class AppState {
       this.notify((e as Error).message, 'error')
     } finally {
       this.autoRunning = false
+    }
+  }
+
+  /** Resample on the main thread (one pass over the data), detect events in a worker so the UI stays responsive. */
+  async #detect(params: AutoLabelParams): Promise<AutoLabelResult> {
+    const data = this.#data!
+    const measure = data.data[params.measure] ? params.measure : data.measureIds[0]
+    const t = performance.now()
+    const rate = Math.min(data.sampleRate, Math.max(0.01, Number(params.rate) || 1))
+    const series = data.regularSeries(measure, rate, params.start ?? data.start, params.stop ?? data.end)
+    const options = Object.fromEntries(Object.keys(DEFAULTS).flatMap((k) => {
+      const v = (params as unknown as Record<string, unknown>)[k]
+      return typeof v === 'number' && Number.isFinite(v) ? [[k, v]] : []
+    }))
+    this.#worker ??= new Worker(new URL('./engine/autolabel.worker.ts', import.meta.url), { type: 'module' })
+    const worker = this.#worker
+    const { events, states } = await new Promise<{ events: DetectedEvent[]; states: DetectedState[] }>((resolve, reject) => {
+      worker.onmessage = (e) => (e.data.error ? reject(new Error(e.data.error)) : resolve(e.data))
+      worker.onerror = (e) => reject(new Error(e.message || 'Auto labeling failed'))
+      worker.postMessage({ id: 0, values: series.values, rate: series.rate, options }, [series.values.buffer])
+    })
+    const max = DEFAULTS.maxEvents
+    return {
+      labels: events.slice(0, max).map((e) => ({ start: series.t0 + e.index / series.rate, text: `S${e.toState}`, delta: Math.round(e.delta * 10) / 10 })),
+      states: states.map((s) => ({ ...s, mean: Math.round(s.mean * 10) / 10, seconds: Math.round(s.seconds) })),
+      rate: series.rate,
+      measure,
+      ms: Math.round(performance.now() - t),
+      warning: events.length > max ? `Found ${events.length} events, showing the first ${max}. Increase the threshold.` : events.length === 0 ? 'No changes found. Try a lower threshold.' : null,
     }
   }
 }
