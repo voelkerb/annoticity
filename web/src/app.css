@@ -18,6 +18,8 @@
   --border: #252b3b;
   --text: #e6e9f2;
   --muted: #8b93a8;
+  --plot-bg: var(--bg);
+  --tooltip-bg: #1c2230;
   --chart-grid: #222838;
   --chart-axis: #8b93a8;
   --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
@@ -26,14 +28,17 @@
 :root[data-theme='light'] {
   color-scheme: light;
   --accent: #fc6c26;
-  --accent-text: #a83b08;
+  --accent-text: #fc6c26;
+  --accent-contrast: #ffffff;
   --bg: #fff8df;
   --panel: #fffdf4;
   --panel-2: #f8efd9;
   --border: #e7d9bb;
   --text: #171b2a;
   --muted: #667089;
-  --chart-grid: #e7d9bb;
+  --plot-bg: #ffffff;
+  --tooltip-bg: #ffffff;
+  --chart-grid: #ece6d6;
   --chart-axis: #667089;
   --shadow: 0 8px 30px rgba(30, 40, 80, 0.14);
 }
@@ -63,6 +68,11 @@ input[type='text'], input[type='number'], input[type='date'], select {
   width: 100%; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2);
 }
 input:focus, select:focus { border-color: var(--accent); outline: none; }
+select {
+  appearance: none; -webkit-appearance: none; padding-right: 32px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b93a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 11px center;
+}
 
 .muted { color: var(--muted); }
 .mono { font-family: var(--mono); font-size: 12px; }

@@ -315,8 +315,8 @@
   .chip input { all: unset; min-width: 3ch; }
   .box { position: absolute; top: 0; bottom: 0; background: var(--accent-soft); border: 1px solid var(--accent); }
   .readout {
-    position: absolute; right: 12px; bottom: 34px; padding: 6px 10px; border-radius: 8px; background: color-mix(in srgb, var(--panel) 88%, transparent);
-    border: 1px solid var(--border); backdrop-filter: blur(6px); white-space: nowrap; line-height: 1.5;
+    position: absolute; z-index: 20; right: 12px; bottom: 34px; padding: 6px 10px; border-radius: 8px; background: var(--tooltip-bg);
+    border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); white-space: nowrap; line-height: 1.5;
   }
   .readout i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 </style>

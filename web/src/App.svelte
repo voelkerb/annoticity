@@ -7,9 +7,18 @@
   import Toolbar from './lib/Toolbar.svelte'
   import { formatTime } from './lib/labels'
   import { app } from './lib/state.svelte'
+  import { fade } from 'svelte/transition'
 
   let panel = $state<'labels' | 'auto'>('labels')
   let help = $state(false)
+  let hintVisible = $state(false)
+
+  $effect(() => {
+    if (!app.addMode) { hintVisible = false; return }
+    hintVisible = true
+    const timer = setTimeout(() => (hintVisible = false), 6000)
+    return () => clearTimeout(timer)
+  })
   let open = $state(true)
 
   $effect(() => { document.documentElement.dataset.theme = app.theme })
@@ -75,7 +84,7 @@
     {#if app.dataset}
       <Chart />
       {#if !app.series}<div class="center muted">Loading data…</div>{/if}
-      {#if app.addMode}<div class="hint">Label mode: click on the chart to add a label · <span class="kbd">Esc</span> to stop</div>{/if}
+      {#if app.addMode && hintVisible}<div class="hint" transition:fade={{ duration: 200 }}>Label mode: click on the chart to add a label · <span class="kbd">Esc</span> to stop</div>{/if}
     {:else}
       <div class="center empty">
         <div class="empty-logo">{@render lightning()}</div>
@@ -125,7 +134,7 @@
   .ds .muted { font-size: 12px; }
   .spacer { flex: 1; }
   a.btn { text-decoration: none; }
-  .plot { position: relative; min-height: 0; }
+  .plot { position: relative; min-height: 0; background: var(--plot-bg); }
   .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
   .empty h2 { margin: 4px 0; }
   .empty p { max-width: 380px; margin: 0 auto; }
