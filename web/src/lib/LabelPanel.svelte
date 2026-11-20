@@ -88,7 +88,8 @@
 <style>
   section { display: flex; flex-direction: column; min-height: 0; flex: 1; }
   header { display: flex; align-items: center; gap: 6px; padding: 4px 12px 8px; }
-  header select { width: auto; }
+  /* Same box as the small buttons next to it */
+  header select { width: auto; font-size: 12px; line-height: inherit; padding: 3px 28px 3px 8px; background-position: right 9px center; }
   .spacer { flex: 1; }
   .quick { padding: 0 12px 8px; display: flex; gap: 8px; }
   .quick input { max-width: 260px; }
