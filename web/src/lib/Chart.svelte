@@ -96,7 +96,11 @@
       ],
       hooks: {
         setScale: [(_u, k) => { if (k === 'x') tick++ }],
-        draw: [() => tick++],
+        draw: [(p) => {
+          // u.over has its real size only after uPlot's first layout pass
+          if (p.over.clientWidth > 0) app.plotWidth = p.over.clientWidth
+          tick++
+        }],
         setCursor: [(p) => {
           const left = p.cursor.left ?? -1
           if (left < 0) { app.cursor = null; return }
@@ -110,7 +114,6 @@
     u = new uPlot(opts, data, host)
     u.over.appendChild(overlay)
     bind(u.over)
-    app.plotWidth = u.over.clientWidth
     tick++
   }
 
@@ -139,6 +142,8 @@
 
   function onDown(e: PointerEvent) {
     if (e.button !== 0 || !u) return
+    // Label markers handle their own drag; Svelte delegates their handlers to the root, so this native listener fires first
+    if ((e.target as HTMLElement).closest('.line, .chip, .edge')) return
     const over = u.over
     over.setPointerCapture(e.pointerId)
     const startX = xAt(e)
@@ -165,8 +170,11 @@
       if (select && box && box.x1 - box.x0 > 6) app.setView(u!.posToVal(box.x0, 'x'), u!.posToVal(box.x1, 'x'), true)
       box = null
       if (!moved && ev.type === 'pointerup') {
-        if (app.addMode) app.addLabel(tAt(ev))
-        else app.selectedId = null
+        if (app.addMode) {
+          const near = app.labelNear(tAt(ev))
+          if (near) app.selectedId = near.id
+          else app.addLabel(tAt(ev))
+        } else app.selectedId = null
       }
     }
     over.addEventListener('pointermove', move)
@@ -186,7 +194,8 @@
     const move = (ev: PointerEvent) => {
       if (!moved && Math.abs(ev.clientX - startX) < 3) return
       if (!moved) { app.checkpoint(); moved = true }
-      label[edge] = tAt(ev)
+      const t = tAt(ev)
+      label[edge] = app.snap && !ev.altKey ? app.snapTime(t, 10, id) : t
     }
     const up = () => {
       el.removeEventListener('pointermove', move)
@@ -217,7 +226,6 @@
     const ro = new ResizeObserver(() => {
       if (!u) return
       u.setSize({ width: host.clientWidth, height: host.clientHeight })
-      app.plotWidth = u.over.clientWidth
     })
     ro.observe(host)
     return () => { ro.disconnect(); u?.destroy(); u = undefined }

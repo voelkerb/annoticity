@@ -238,18 +238,35 @@ class AppState {
     this.persist()
   }
 
-  /** Time of the steepest slope near t so clicks land exactly on an edge. */
-  snapTime(t: number, tolerancePx = 10): number {
+  pxToTime(px: number) {
+    return (px / (this.plotWidth > 0 ? this.plotWidth : 1000)) * this.span
+  }
+
+  /** Existing label within `px` screen pixels of `t` (to avoid near-duplicate labels from misclicks). */
+  labelNear(t: number, px = 8, exceptId?: string): Label | undefined {
+    const tol = this.pxToTime(px)
+    let best: Label | undefined, bestD = Infinity
+    for (const l of this.labels) {
+      if (l.id === exceptId) continue
+      const d = Math.abs(l.start - t)
+      if (d <= tol && d < bestD) { best = l; bestD = d }
+    }
+    return best
+  }
+
+  /** Steepest edge near `t` so clicks land exactly on an edge, skipping edges that already carry another label. */
+  snapTime(t: number, tolerancePx = 10, exceptId?: string): number {
     const s = this.series
     if (!s || s.t.length < 3) return t
     const id = this.enabled.find((m) => s.series[m]) ?? Object.keys(s.series)[0]
     const avg = s.series[id]?.avg
     if (!avg) return t
-    const tol = (tolerancePx / this.plotWidth) * this.span
+    const tol = this.pxToTime(tolerancePx)
     let best = -1, bestDiff = 0
     for (let i = 1; i < s.t.length - 1; i++) {
       if (s.t[i] < t - tol) continue
       if (s.t[i] > t + tol) break
+      if (this.labelNear(s.t[i], 6, exceptId)) continue
       const a = avg[i - 1], b = avg[i + 1]
       if (a == null || b == null) continue
       const d = Math.abs(b - a)

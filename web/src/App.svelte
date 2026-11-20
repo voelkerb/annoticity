@@ -15,8 +15,7 @@
   $effect(() => { document.documentElement.dataset.theme = app.theme })
 
   function onKey(e: KeyboardEvent) {
-    const el = e.target as HTMLElement
-    if (el.closest('input, select, textarea')) return
+    if (e.target instanceof Element && e.target.closest('input, select, textarea')) return
     const mod = e.metaKey || e.ctrlKey
     if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? app.redo() : app.undo(); return }
     if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); app.redo(); return }
@@ -48,9 +47,15 @@
 
 <svelte:window onkeydown={onKey} />
 
+{#snippet lightning()}
+  <svg class="logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M13.5 1 4 13h7l-1 10 10-13h-7z" />
+  </svg>
+{/snippet}
+
 <div class="shell">
   <header>
-    <div class="brand"><span class="logo">◔</span> Annoticity <span class="tag">v2</span></div>
+    <div class="brand">{@render lightning()} Annoticity <span class="tag">v2</span></div>
     {#if app.dataset}
       <div class="ds">
         <b>{app.dataset.title}</b>
@@ -64,7 +69,7 @@
   </header>
 
   <Sidebar />
-  <Toolbar />
+  <div><Toolbar /></div>
 
   <main class="plot">
     {#if app.dataset}
@@ -73,7 +78,7 @@
       {#if app.addMode}<div class="hint">Label mode: click on the chart to add a label · <span class="kbd">Esc</span> to stop</div>{/if}
     {:else}
       <div class="center empty">
-        <div class="logo big">◔</div>
+        <div class="empty-logo">{@render lightning()}</div>
         <h2>Inspect and label electricity data</h2>
         <p class="muted">Pick a meter and day of the FIRED dataset above, or upload your own CSV / MKV file.</p>
       </div>
@@ -83,6 +88,7 @@
     {/if}
   </main>
 
+  {#if app.dataset}
   <section class="drawer" class:closed={!open}>
     <div class="tabs" role="tablist">
       <button role="tab" aria-selected={open && panel === 'labels'} class:active={open && panel === 'labels'} onclick={() => { panel = 'labels'; open = true }}>Labels <span class="count">{app.labels.length}</span></button>
@@ -94,6 +100,7 @@
       <div class="body">{#if panel === 'labels'}<LabelPanel />{:else}<AutoLabelPanel />{/if}</div>
     {/if}
   </section>
+  {/if}
 </div>
 
 {#if help}
@@ -111,9 +118,9 @@
   .shell { display: grid; grid-template-rows: 52px auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); height: 100%; }
   header { display: flex; align-items: center; gap: 14px; padding: 0 14px; border-bottom: 1px solid var(--border); background: var(--panel); }
   .brand { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-  .logo { color: var(--accent); font-size: 20px; }
-  .logo.big { font-size: 56px; }
-  .tag { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+  .logo { color: var(--accent); width: 20px; height: 20px; flex: none; }
+  .empty-logo .logo { width: 56px; height: 56px; }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-text); }
   .ds { display: grid; line-height: 1.2; font-size: 13px; }
   .ds .muted { font-size: 12px; }
   .spacer { flex: 1; }
@@ -122,7 +129,7 @@
   .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
   .empty h2 { margin: 4px 0; }
   .empty p { max-width: 380px; margin: 0 auto; }
-  .hint { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 12px; pointer-events: none; z-index: 5; }
+  .hint { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 999px; background: var(--accent); color: var(--accent-contrast); font-size: 12px; pointer-events: none; z-index: 5; }
   .busy { position: absolute; inset: 0; display: flex; gap: 12px; align-items: center; justify-content: center; background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(3px); z-index: 10; }
   .spinner { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }

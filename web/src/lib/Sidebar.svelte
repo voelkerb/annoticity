@@ -54,7 +54,7 @@
   </div>
 
   {#if tab === 'fired'}
-    <select class="meters" value={meter ?? ''} onchange={(e) => pick(e.currentTarget.value)} aria-label="Meter">
+    <select class="meters" value={meter ?? ''} onchange={(e) => { pick(e.currentTarget.value); e.currentTarget.blur() }} aria-label="Meter">
       <option value="" disabled>{app.meters.length ? 'Choose a meter…' : 'Loading meters…'}</option>
       {#each meters as m (m.id)}
         <option value={m.id}>{m.label}{m.smartmeter ? ' (all phases)' : ''} · {m.id.replace('powermeter', 'PM ').replace('smartmeter', 'SM ')}</option>
