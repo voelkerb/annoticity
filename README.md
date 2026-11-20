@@ -46,6 +46,9 @@ Production: `npm run build && npm start` serves the built UI and the API on http
 
 `npm test` runs the server and engine tests, `npm run check` type-checks the frontend.
 
+Offline bundle: `scripts/package-offline.sh v2.x.y` writes `release/annoticity-v2.x.y-offline.zip` (built UI and server
+with dependencies; needs only Node 20+, plus ffmpeg for FIRED/MKV). Ready-made bundles are attached to the GitHub releases.
+
 ## Configuration (environment)
 
 Set these in `server/.env` or the root `.env` (see `server/.env.example`):
