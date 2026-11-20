@@ -296,20 +296,22 @@
 
 <style>
   .host { position: absolute; inset: 0; }
-  .overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-  .line { position: absolute; top: 0; bottom: 0; width: 9px; margin-left: -4px; pointer-events: auto; cursor: ew-resize; }
+  /* Layering: ranges < marker lines < flags, so flags are never crossed by any line */
+  .overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; isolation: isolate; }
+  .line { position: absolute; z-index: 2; top: 0; bottom: 0; width: 9px; margin-left: -4px; pointer-events: auto; cursor: ew-resize; }
   .line::after { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 1.5px; background: var(--c); opacity: 0.75; }
+  .line.sel { z-index: 3; }
   .line.sel::after { width: 2.5px; left: 3px; opacity: 1; box-shadow: 0 0 8px var(--c); }
   .line:hover::after { opacity: 1; }
-  .range { position: absolute; top: 0; bottom: 0; background: var(--c); opacity: 0.13; }
-  .edge { position: absolute; top: 0; bottom: 0; width: 7px; margin-left: -3px; cursor: ew-resize; pointer-events: auto; }
+  .range { position: absolute; z-index: 1; top: 0; bottom: 0; background: var(--c); opacity: 0.13; }
+  .edge { position: absolute; z-index: 2; top: 0; bottom: 0; width: 7px; margin-left: -3px; cursor: ew-resize; pointer-events: auto; }
   .edge::after { content: ''; position: absolute; left: 3px; top: 0; bottom: 0; width: 1px; background: var(--c); }
   .chip {
-    position: absolute; transform: translateX(-4px); padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap;
+    position: absolute; z-index: 10; transform: translateX(-4px); padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap;
     background: color-mix(in srgb, var(--c) 22%, var(--panel)); border: 1px solid var(--c); color: var(--text); pointer-events: auto; cursor: grab;
   }
   .chip.auto { border-style: dashed; }
-  .chip.sel { background: var(--c); color: #0b0e14; }
+  .chip.sel { z-index: 11; background: var(--c); color: #0b0e14; }
   .chip input { all: unset; min-width: 3ch; }
   .box { position: absolute; top: 0; bottom: 0; background: var(--accent-soft); border: 1px solid var(--accent); }
   .readout {
