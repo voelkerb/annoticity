@@ -175,6 +175,7 @@ export default {
   name: "FIRED",
   description: "Appliance-level and aggregate power of a German apartment, raw waveforms at 2–8 kHz",
   url: "https://github.com/voelkerb/FIRED_dataset_helper",
+  paperUrl: "https://doi.org/10.1145/3408308.3427623",
   tz,
   status: async () => ({ available: true }),
   meters,

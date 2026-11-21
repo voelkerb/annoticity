@@ -77,7 +77,7 @@ function mergeGrids(grids, period) {
  * Datasets distributed as folders of "house_N/channel_M.dat" text files plus a labels.dat
  * (REDD low_freq, UK-DALE). Days are indexed once per file and cached on disk.
  */
-export function datFolderProvider({ id, name, description, url, tz, base, env, measureOf, extraMeters = () => [] }) {
+export function datFolderProvider({ id, name, description, url, paperUrl, tz, base, env, measureOf, extraMeters = () => [] }) {
   const indexes = new Map();
 
   async function housesDir() {
@@ -159,7 +159,7 @@ export function datFolderProvider({ id, name, description, url, tz, base, env, m
   }
 
   return {
-    id, name, description, url, tz, status,
+    id, name, description, url, paperUrl, tz, status,
     meters: async () => (await scan()).map(({ sources: _s, ...m }) => m),
     async days(meterId) {
       const m = await find(meterId);

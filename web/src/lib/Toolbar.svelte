@@ -4,7 +4,7 @@
 
 {#if app.dataset}
   <div class="bar">
-    <div class="group" role="group" aria-label="Measures">
+    <div class="group measures" role="group" aria-label="Measures">
       {#each app.dataset.measures as m (m.id)}
         <button
           class="chip" class:off={!app.enabled.includes(m.id) || app.showingWaveform}
@@ -24,17 +24,19 @@
     <div class="spacer"></div>
     {#if app.fetching}<span class="muted spin" title="Loading data">●</span>{/if}
 
-    <div class="group">
+    <div class="group label">
       <button class="btn sm" class:on={app.addMode} onclick={() => (app.addMode = !app.addMode)} title="Click on the chart to add labels (A)">
         ＋ Label <span class="kbd">A</span>
       </button>
+    </div>
+    <div class="group snap">
       <button class="btn sm" class:on={app.snap} onclick={() => (app.snap = !app.snap)} title="Snap new labels to the steepest edge nearby">Snap to edge</button>
     </div>
-    <div class="group">
+    <div class="group undo">
       <button class="btn sm ghost" onclick={() => app.undo()} disabled={!app.canUndo} title="Undo (Ctrl/⌘ Z)">↶</button>
       <button class="btn sm ghost" onclick={() => app.redo()} disabled={!app.canRedo} title="Redo (Ctrl/⌘ Shift Z)">↷</button>
     </div>
-    <div class="group">
+    <div class="group zoom">
       <button class="btn sm ghost" onclick={() => app.setView(app.view[0] + app.span * 0.25, app.view[1] - app.span * 0.25, true)} title="Zoom in (+)">＋</button>
       <button class="btn sm ghost" onclick={() => app.setView(app.view[0] - app.span * 0.5, app.view[1] + app.span * 0.5, true)} title="Zoom out (−)">－</button>
       <button class="btn sm" onclick={() => app.resetView()} title="Show full range (0 or double-click)">Fit</button>
@@ -54,4 +56,17 @@
   .chip.off { opacity: 0.45; border-color: var(--border); background: transparent; }
   .spin { animation: pulse 0.9s infinite alternate; font-size: 10px; }
   @keyframes pulse { to { opacity: 0.2; } }
+  @media (max-width: 600px) {
+    .bar { flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 6px 10px; }
+    .group { flex: none; flex-wrap: nowrap; }
+    .spacer { display: none; }
+    .chip { white-space: nowrap; }
+    .kbd { display: none; }
+    .bar :global(.btn) { min-height: 32px; }
+    .label { order: 0; }
+    .zoom { order: 1; }
+    .measures { order: 2; }
+    .snap { order: 3; }
+    .undo { order: 4; }
+  }
 </style>

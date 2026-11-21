@@ -80,3 +80,7 @@ select {
 
 .uplot, .u-wrap { font-family: var(--font); }
 .u-legend { display: none; }
+
+@media (max-width: 600px) {
+  input[type='text'], input[type='search'], input[type='number'], input[type='date'], select { font-size: 16px; }
+}

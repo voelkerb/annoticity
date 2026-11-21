@@ -10,6 +10,7 @@ const dat = datFolderProvider({
   name: "UK-DALE",
   description: "UK Domestic Appliance-Level Electricity · 5 UK houses, 6 s appliance and 1 s mains data",
   url: "https://data.ukedc.rl.ac.uk/browse/edc/efficiency/residential/EnergyConsumption/Domestic/UK-DALE-2017/ReadMe_DALE-2017.html",
+  paperUrl: "https://doi.org/10.1038/sdata.2015.7",
   tz: config.ukdale.tz,
   base: config.ukdale.path,
   env: "UKDALE_PATH",

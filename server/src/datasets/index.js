@@ -24,7 +24,7 @@ export async function listDatasets(allowedIds = Object.keys(providers)) {
     const p = provider(id);
     let status;
     try { status = await p.status(); } catch (e) { status = { available: false, reason: e.message }; }
-    return { id: p.id, name: p.name, description: p.description, url: p.url, tz: p.tz, waveforms: !!p.waveform, ...status };
+    return { id: p.id, name: p.name, description: p.description, url: p.url, paperUrl: p.paperUrl, tz: p.tz, waveforms: !!p.waveform, ...status };
   }));
 }
 

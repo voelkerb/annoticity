@@ -18,7 +18,7 @@ export interface LoadResult {
 }
 
 export interface DatasetSource {
-  id: string; name: string; description: string; url: string; tz: string
+  id: string; name: string; description: string; url: string; paperUrl: string; tz: string
   waveforms: boolean; available: boolean; reason?: string
 }
 

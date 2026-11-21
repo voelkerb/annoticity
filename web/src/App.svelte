@@ -19,7 +19,7 @@
     const timer = setTimeout(() => (hintVisible = false), 6000)
     return () => clearTimeout(timer)
   })
-  let open = $state(true)
+  let open = $state(!window.matchMedia('(max-width: 600px)').matches)
 
   $effect(() => { document.documentElement.dataset.theme = app.theme })
 
@@ -65,17 +65,21 @@
 
 <div class="shell">
   <header>
-    <div class="brand">{@render lightning()} Annoticity <span class="tag">v2</span></div>
+    <div class="brand">{@render lightning()} Annoticity <span class="tag">v2.1</span></div>
     {#if app.dataset}
       <div class="ds">
         <b>{app.dataset.title}</b>
         <span class="muted">{app.dataset.info ? app.dataset.info + ' · ' : ''}{formatTime(app.dataset.start, app.dataset.tz, false).slice(0, 10)} · {app.dataset.sampleRate < 1 ? app.dataset.sampleRate.toPrecision(2) : Math.round(app.dataset.sampleRate)} Hz · {app.dataset.samples.toLocaleString()} samples · {app.dataset.tz}</span>
       </div>
+      <details class="mobile-ds">
+        <summary aria-label="Recording details">i</summary>
+        <div><b>{app.dataset.title}</b><br />{app.dataset.info ? app.dataset.info + ' · ' : ''}{formatTime(app.dataset.start, app.dataset.tz, false).slice(0, 10)} · {app.dataset.sampleRate < 1 ? app.dataset.sampleRate.toPrecision(2) : Math.round(app.dataset.sampleRate)} Hz · {app.dataset.samples.toLocaleString()} samples · {app.dataset.tz}</div>
+      </details>
     {/if}
     <div class="spacer"></div>
-    <button class="btn ghost sm" onclick={() => (help = true)} title="Keyboard shortcuts (?)">Shortcuts <span class="kbd">?</span></button>
+    <button class="btn ghost sm desktop-link" onclick={() => (help = true)} title="Keyboard shortcuts (?)">Shortcuts <span class="kbd">?</span></button>
     <button class="btn ghost sm" onclick={() => app.setTheme(app.theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">{app.theme === 'dark' ? '☀' : '☾'}</button>
-    <a class="btn ghost sm" href="https://github.com/voelkerb/annoticity" target="_blank" rel="noreferrer">GitHub</a>
+    <a class="btn ghost sm desktop-link" href="https://github.com/voelkerb/annoticity" target="_blank" rel="noreferrer">GitHub</a>
   </header>
 
   <Sidebar />
@@ -111,6 +115,7 @@
     {/if}
   </section>
   {/if}
+  <footer>Benjamin Völker · <a href="https://doi.org/10.1145/3427771.3427844" target="_blank" rel="noreferrer">Annoticity paper</a></footer>
 </div>
 
 {#if help}
@@ -125,14 +130,15 @@
 <Toasts />
 
 <style>
-  .shell { display: grid; grid-template-rows: 52px auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); height: 100%; }
+  .shell { display: grid; grid-template-rows: 52px auto auto minmax(0, 1fr) auto auto; grid-template-columns: minmax(0, 1fr); height: 100%; height: 100dvh; }
   header { display: flex; align-items: center; gap: 14px; padding: 0 14px; border-bottom: 1px solid var(--border); background: var(--panel); }
   .brand { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
   .logo { color: var(--accent); width: 20px; height: 20px; flex: none; }
   .empty-logo .logo { width: 56px; height: 56px; }
   .tag { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-text); }
-  .ds { display: grid; line-height: 1.2; font-size: 13px; }
+  .ds { display: grid; line-height: 1.2; font-size: 13px; min-width: 0; }
   .ds .muted { font-size: 12px; }
+  .mobile-ds { display: none; position: relative; }
   .spacer { flex: 1; }
   a.btn { text-decoration: none; }
   .plot { position: relative; min-height: 0; background: var(--plot-bg); }
@@ -150,9 +156,29 @@
   .drawer .tabs button.active { background: var(--accent-soft); color: var(--text); }
   .count { margin-left: 4px; padding: 0 7px; border-radius: 999px; background: var(--accent-soft); font-size: 12px; }
   .body { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: auto; }
+  footer { padding: 2px 10px; text-align: center; font-size: 10px; color: var(--muted); background: var(--panel); border-top: 1px solid var(--border); }
+  footer a { color: inherit; }
   .modal { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.5); z-index: 60; }
   .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; box-shadow: var(--shadow); min-width: 380px; }
   .card h3 { margin: 0 0 10px; }
   dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
   dd { margin: 0; color: var(--muted); }
+  @media (max-width: 600px) {
+    .shell { grid-template-rows: 44px auto auto minmax(160px, 1fr) auto auto; overflow-y: auto; }
+    header { gap: 8px; padding: 0 10px; }
+    .brand { white-space: nowrap; font-size: 15px; }
+    .tag, .desktop-link, .ds { display: none; }
+    .mobile-ds { display: block; }
+    .mobile-ds summary { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 50%; color: var(--muted); font-weight: 700; cursor: pointer; list-style: none; }
+    .mobile-ds summary::-webkit-details-marker { display: none; }
+    .mobile-ds div { position: absolute; z-index: 40; top: 32px; left: 0; width: min(280px, calc(100vw - 120px)); padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--tooltip-bg); box-shadow: var(--shadow); font-size: 12px; }
+    .empty { padding: 14px; }
+    .empty h2 { font-size: 18px; }
+    .hint { width: max-content; max-width: 90%; text-align: center; }
+    .drawer { height: min(42vh, 330px); min-height: 0; }
+    .drawer.closed { height: auto; }
+    .drawer .tabs { padding: 4px 8px; }
+    .drawer .tabs button:not(.btn) { padding: 7px 10px; }
+    .card { min-width: 0; width: calc(100vw - 32px); max-height: 90vh; overflow: auto; }
+  }
 </style>

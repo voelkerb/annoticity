@@ -91,6 +91,17 @@
         <option value={d.id}>{d.name}{d.available ? '' : ' · not set up'}</option>
       {/each}
     </select>
+    {#if current}
+      <details class="dataset-info">
+        <summary aria-label="About {current.name}" title="About {current.name}">i</summary>
+        <div class="info-card">
+          <strong>{current.name}</strong>
+          <p>{current.description}</p>
+          <a href={current.paperUrl} target="_blank" rel="noreferrer">Dataset paper ↗</a>
+          <a href={current.url} target="_blank" rel="noreferrer">Dataset website ↗</a>
+        </div>
+      </details>
+    {/if}
     {#if current && !current.available}
       <span class="muted small notice">{current.reason}. <a href={current.url} target="_blank" rel="noreferrer">Get {current.name}</a></span>
     {:else if current}
@@ -112,7 +123,7 @@
           <input type="date" bind:value={day} min={days[0]} max={days.at(-1)} onchange={onDay} />
           <button class="btn sm" onclick={() => go(1)} disabled={days.indexOf(day) >= days.length - 1} aria-label="Next day">▶</button>
         </div>
-        <span class="muted small">{days.length} days · {days[0]} → {days.at(-1)}</span>
+        <span class="muted small day-range">{days.length} days · {days[0]} → {days.at(-1)}</span>
       {:else if !meter && meters.length}
         <span class="muted small desc">{current.description}</span>
       {/if}
@@ -155,4 +166,25 @@
     border: 1.5px dashed var(--border); border-radius: var(--radius); background: var(--panel-2); transition: all 0.12s;
   }
   .drop:hover, .drop.dragging { border-color: var(--accent); background: var(--accent-soft); }
+  .dataset-info { position: relative; }
+  .dataset-info summary { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 50%; color: var(--muted); font-weight: 700; cursor: pointer; list-style: none; }
+  .dataset-info summary::-webkit-details-marker { display: none; }
+  .info-card { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: min(300px, calc(100vw - 32px)); padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--tooltip-bg); box-shadow: var(--shadow); }
+  .info-card p { margin: 6px 0; color: var(--muted); }
+  .info-card a { display: block; color: var(--accent-text); padding: 3px 0; }
+  @media (max-width: 600px) {
+    .source { position: relative; gap: 6px 8px; padding: 6px 10px; }
+    .tabs { flex-basis: 100%; height: 34px; margin: -6px 0 0; padding: 0; border-right: 0; }
+    .tabs button { padding: 0 10px; }
+    .datasets { flex: 1 1 120px; min-width: 0; }
+    .dataset-info { position: static; }
+    .info-card { top: calc(100% + 4px); left: 10px; right: 10px; width: auto; }
+    .meters { flex: 1 1 190px; width: 100%; min-width: 0; }
+    .row { width: 100%; }
+    .row input { flex: 1; min-width: 0; }
+    .notice { flex-basis: 100%; }
+    .desc, .day-range { display: none; }
+    .drop { flex: 1; }
+    .drop + span { display: none; }
+  }
 </style>

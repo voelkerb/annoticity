@@ -1,4 +1,4 @@
-# Annoticity v2
+# Annoticity v2.1
 
 Browse and label electricity datasets. Version 2 is a rewrite with a **Svelte** frontend and a **Node.js** backend.
 The original Django version lives on the `annoticitiy_v1` branch.
@@ -6,7 +6,7 @@ The original Django version lives on the `annoticitiy_v1` branch.
 ![Fridge cycles in FIRED, auto-labeled and renamed](docu/figures/v2-labels.png)
 
 **[Open Annoticity online](https://annoticity.voelkerb.com/)** ·
-[v2.0.0 offline bundle](https://github.com/voelkerb/annoticity/releases/tag/v2.0.0) (needs Node 20+)
+[v2.1.0 offline bundle](https://github.com/voelkerb/annoticity/releases/tag/v2.1.0) (needs Node 20+)
 · [v1.0.0 source](https://github.com/voelkerb/annoticity/releases/tag/v1.0.0)
 
 | Auto-labeling (light theme) | Raw voltage and current | BLOND mains, three phases |
@@ -14,6 +14,7 @@ The original Django version lives on the `annoticitiy_v1` branch.
 | ![Auto-labeling the FIRED smart meter](docu/figures/v2-autolabel.png) | ![Raw V/I of a TV switching on](docu/figures/v2-waveform.png) | ![BLOND CLEAR mains](docu/figures/v2-blond.png) |
 
 - **Datasets**: pick a dataset, a meter and a day. The server fetches or reads the recording and caches it decoded.
+  The information button beside the dataset selector links to its paper and dataset website.
   - **FIRED**: 50 Hz summary data, raw 2 kHz V/I (university server).
   - **BLOND** (BLOND-50 and BLOND-250): 1 Hz summaries per socket and for the mains, raw V/I up to 12.5 kHz (TUM's public FTP server).
   - **REDD**, **UK-DALE**, **ECO**: read from a local copy (see Configuration).
@@ -23,6 +24,7 @@ The original Django version lives on the `annoticitiy_v1` branch.
 - Y axis fits the visible data; scroll or drag on the axis (or Alt + scroll on the plot) to zoom and pan it, "Auto Y" or double-click to fit again.
 - Labels: click to add, drag, rename, snap to edge, undo/redo, import/export (CSV, SRT, ASS, JSON).
 - Auto-labeling: step detection with refined edges and state clustering, running in a Web Worker.
+- On phones, drag the chart to pan, use the toolbar to zoom, and open the Labels or Auto-label panel when needed.
 
 ## Architecture
 

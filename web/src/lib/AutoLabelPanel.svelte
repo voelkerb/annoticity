@@ -85,4 +85,13 @@
   table { width: 100%; margin-top: 6px; border-collapse: collapse; font-size: 12px; }
   th { text-align: left; color: var(--muted); font-weight: 500; }
   td, th { padding: 2px 4px; }
+  @media (max-width: 600px) {
+    section { padding: 6px 10px 12px; }
+    .intro { font-size: 12px; }
+    .row, .grid { width: 100%; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .actions { width: 100%; flex-wrap: wrap; gap: 8px; }
+    .check { white-space: normal; }
+    .result { min-width: 0; width: 100%; }
+  }
 </style>

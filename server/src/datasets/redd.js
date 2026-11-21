@@ -8,6 +8,7 @@ export default datFolderProvider({
   name: "REDD",
   description: "Reference Energy Disaggregation Data Set · 6 US houses, mains legs and circuits (low_freq)",
   url: "http://redd.csail.mit.edu",
+  paperUrl: "https://web.archive.org/web/20211209135531/http://redd.csail.mit.edu/kolter-kddsust11.pdf",
   tz: config.redd.tz,
   base: config.redd.path,
   env: "REDD_PATH",

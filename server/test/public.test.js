@@ -21,6 +21,10 @@ test("public mode exposes datasets and hides server errors", async () => {
     await withServer({ publicMode: true }, async (url) => {
       const datasets = await (await fetch(`${url}/api/datasets`)).json();
       assert.deepEqual(datasets.map((d) => d.id), ["fired", "blond", "redd", "ukdale", "eco"]);
+      for (const dataset of datasets) {
+        assert.equal(dataset.paperUrl, providers[dataset.id].paperUrl);
+        assert.equal(new URL(dataset.paperUrl).protocol, "https:");
+      }
       assert.equal((await fetch(`${url}/api/decode`, { method: "POST" })).status, 400);
       const response = await fetch(`${url}/api/datasets/fired/meters`);
       assert.equal(response.status, 500);

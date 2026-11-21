@@ -269,6 +269,7 @@
     const up = () => {
       el.removeEventListener('pointermove', move)
       el.removeEventListener('pointerup', up)
+      el.removeEventListener('pointercancel', up)
       if (moved) {
         if (label.end !== undefined && label.end < label.start) [label.start, label.end] = [label.end, label.start]
         label.auto = false
@@ -277,6 +278,7 @@
     }
     el.addEventListener('pointermove', move)
     el.addEventListener('pointerup', up)
+    el.addEventListener('pointercancel', up)
   }
 
   // ---- reactive wiring -----------------------------------------------------
@@ -420,4 +422,11 @@
     border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); white-space: nowrap; line-height: 1.5;
   }
   .readout i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .host :global(.u-over), .ygrip, .line, .edge, .chip { touch-action: none; }
+  @media (pointer: coarse) {
+    .line, .edge { width: 24px; margin-left: -12px; }
+    .line::after, .edge::after { left: 11px; }
+    .line.sel::after { left: 10px; }
+    .readout { font-size: 10px; right: 4px; bottom: 20px; }
+  }
 </style>

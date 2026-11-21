@@ -269,6 +269,7 @@ export default {
   name: "BLOND",
   description: "Building-Level Office eNvironment Dataset · office in Germany, 3-phase mains and 90 sockets",
   url: "https://mediatum.ub.tum.de/1375836",
+  paperUrl: "https://doi.org/10.1038/sdata.2018.48",
   tz,
   status: async () => ({ available: true }),
   meters,

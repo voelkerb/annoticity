@@ -95,6 +95,7 @@ export default {
   name: "ECO",
   description: "Electricity Consumption & Occupancy · 6 Swiss households, 1 Hz smart meter and plugs",
   url: "https://www.vs.inf.ethz.ch/res/show.html?what=eco-data",
+  paperUrl: "https://doi.org/10.1145/2674061.2674064",
   tz,
   async status() {
     if (!base) return { available: false, reason: "Set ECO_PATH in server/.env to the local ECO folder" };

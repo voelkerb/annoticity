@@ -189,4 +189,15 @@
   .time { border: 0; background: transparent; padding: 2px 4px; border-left: 3px solid var(--c); border-radius: 3px; }
   .time:hover { background: var(--panel-2); }
   .auto { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  @media (max-width: 600px) {
+    header { flex-wrap: wrap; padding: 4px 10px 8px; }
+    .preset { flex: 1 1 100%; }
+    .combo { flex: 1; width: auto; min-width: 0; }
+    .combo input, .filter, header select { font-size: 16px; }
+    .filter { flex: 1 1 100%; }
+    .spacer { display: none; }
+    ul { grid-template-columns: minmax(0, 1fr); }
+    li { min-width: 0; }
+    li input { min-width: 0; }
+  }
 </style>
